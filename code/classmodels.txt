@@ -1,0 +1,6 @@
+AdaBoostClassifier | ensemble; seed
+RandomForestClassifier | ensemble; seed
+KNeighborsClassifier | neighbors; ::
+LogisticRegression | linear_model; seed
+SVC | svm; seed
+LinearSVC | svm; seed
