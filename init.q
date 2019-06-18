@@ -1,1 +1,1 @@
-/ This is to be added in the future
+.aml.loadfile`:code/distrib.q
