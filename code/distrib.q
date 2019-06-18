@@ -1,6 +1,6 @@
 \l p.q
 \l ml/ml.q
-.ml.loadfile`:xval/init.q
+.ml.loadfile`:init.q
 
 // examples data
 n:10000
