@@ -26,7 +26,7 @@ i.lencheck:{[x;tgt;typ;p]
    typ in`tseries`normal;
     if[count[y]<>count x;
        '`$"Must have the same number of targets as values in table"];
-   '`$"Value for typ must be a supported symbol or ::"];
+   '`$"Input for typ must be a supported symbol or ::"];
    '`$"Input for typ must be a supported symbol or ::"]}
 
 i.null_encode:{[x;y]

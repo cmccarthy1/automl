@@ -3,15 +3,7 @@
 / x = tabular data 
 // p = parameter upgrade as relevant dictionary or ::
 freshcreate:{[x;p]
- dict:`aggcols`cols2use`params!(first cols x;1_cols x;.ml.fresh.params);
- $[p~(::);
-   dict;
-   99h=type p;
-   $[min key[p]in key[dict];
-     dict[key p]:value p;
-     '`$"You can only pass appropriate keys to fresh"];
-   '`$"You must pass identity or dictionary with appropriate key/value pairs to function"];
- x:"f"$i.null_encode[value .ml.fresh.createfeatures[x]. value dict;med];
+ x:"f"$i.null_encode[value .ml.fresh.createfeatures[x]. value 3#p;med];
  x:.ml.infreplace x;
  x:"f"$0^.ml.dropconstant x}
  
