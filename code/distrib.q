@@ -16,12 +16,11 @@ score_func:.ml.xval.fitscore
 // default seed 
 seed:42
 
-
 // table of models
 /* x = symbol, either `class or `reg
 models:{
  if[not x in key i.files;'`$"text file not found"];
- vd:value d:{key(!).("S=;")0:x}each(!).("S*";"|")0:hsym`$path,"/code/mdl_def/",i.files x;  / add path?
+ vd:value d:{key(!).("S=;")0:x}each(!).("S*";"|")0:hsym`$path,"/code/mdl_def/",i.files x; 
  m:update lib:vd[;0],seed:vd[;1],valid:count[d]#1b from([]model:key d);
  m,'([]minit:{.p.import[` sv`sklearn,x`lib]hsym x`model}each m)}
 
