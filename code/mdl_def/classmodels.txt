@@ -1,6 +1,9 @@
-AdaBoostClassifier | ensemble; seed
-RandomForestClassifier | ensemble; seed
-KNeighborsClassifier | neighbors; ::
-LogisticRegression | linear_model; seed
-SVC | svm; seed
-LinearSVC | svm; seed
+AdaBoostClassifier         | ensemble       ; seed ; multi
+RandomForestClassifier     | ensemble       ; seed ; multi
+GradientBoostingClassifier | ensemble       ; seed ; multi
+LogisticRegression         | linear_model   ; seed ; binary
+GaussianNB                 | naive_bayes    ;  ::  ; binary
+KNeighborsClassifier       | neighbors      ;  ::  ; multi
+MLPClassifier              | neural_network ; seed ; multi
+SVC                        | svm            ; seed ; binary
+LinearSVC                  | svm            ; seed ; binary
