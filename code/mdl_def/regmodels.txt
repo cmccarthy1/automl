@@ -1,6 +1,7 @@
-AdaBoostRegressor | ensemble; seed
-RandomForestRegressor | ensemble; seed
-KNeighborsRegressor | neighbors; ::
-GradientBoostingRegressor | ensemble; seed
-Lasso | linear_model; seed
-LinearRegression | linear_model; ::
+AdaBoostRegressor         | ensemble       ; seed ; reg
+RandomForestRegressor     | ensemble       ; seed ; reg
+GradientBoostingRegressor | ensemble       ; seed ; reg
+KNeighborsRegressor       | neighbors      ;  ::  ; reg
+MLPRegressor              | neural_network ; seed ; reg
+Lasso                     | linear_model   ; seed ; reg
+LinearRegression          | linear_model   ;  ::  ; reg
