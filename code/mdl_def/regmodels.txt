@@ -1,7 +1,8 @@
-AdaBoostRegressor         | ensemble       ; seed ; reg
-RandomForestRegressor     | ensemble       ; seed ; reg
-GradientBoostingRegressor | ensemble       ; seed ; reg
-KNeighborsRegressor       | neighbors      ;  ::  ; reg
-MLPRegressor              | neural_network ; seed ; reg
-Lasso                     | linear_model   ; seed ; reg
-LinearRegression          | linear_model   ;  ::  ; reg
+AdaBoostRegressor         | sklearn   ;   ensemble       ; seed ; reg
+RandomForestRegressor     | sklearn   ;   ensemble       ; seed ; reg
+GradientBoostingRegressor | sklearn   ;   ensemble       ; seed ; reg
+KNeighborsRegressor       | sklearn   ;   neighbors      ;  ::  ; reg
+MLPRegressor              | sklearn   ;   neural_network ;  ::  ; reg
+Lasso                     | sklearn   ;   linear_model   ; seed ; reg
+LinearRegression          | sklearn   ;   linear_model   ;  ::  ; reg
+RegKeras                  | keras     ;   regfitscore    ; seed ; reg
