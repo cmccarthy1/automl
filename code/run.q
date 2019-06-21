@@ -17,8 +17,7 @@ runexample:{[tb;tgt;typ;mdls;p]
  -1"Feature creation completed, starting initial model selection allow time on large datasets\n";
  -1"Total feature created = ",string[count 1_cols tb],"\n";
  rmdls:runmodels[flip value flip tb;tgt;mdls;dict];
- -1"\nA ranking of the best models has now been completed";
- -1" continuing to the next step\n";
+ -1"\nA ranking of the best models has now been completed continuing to the next step\n";
  rmdls
  }
 
@@ -29,7 +28,7 @@ i.updparam:{[x;p;typ]
   {d:`aggcols`cols2use`params`xv`prf`scf`seed!
      (first cols x;1_cols x;
       .ml.fresh.params;.ml.xval.kfshuff[5;1];
-      .ml.fitpredict;`class`regr!(.ml.accuracy;.ml.mse);42);
+      .ml.fitpredict;`class`regr!(`.ml.accuracy;`.ml.mse);42);
    $[y~(::);d;
      99h=type y;
      $[min key[y]in key[d];
