@@ -11,7 +11,7 @@ binfitscore:{
  m[`:add]dns[1;`activation pykw"sigmoid"];
  m[`:compile][`loss pykw"binary_crossentropy";`optimizer pykw"rmsprop"];
  m[`:fit][npa x[0]0;x[0]1;`batch_size pykw 32;`verbose pykw 0];
- m[`:evaluate][npa x[1]0;x[1]1;`batch_size pykw 32]`}
+ m[`:predict][npa x[1]0]}
 
 multifitscore:{
  npa:.p.import[`numpy]`:array;
@@ -25,7 +25,7 @@ multifitscore:{
  m[`:add]dns[count distinct x[0]1;`activation pykw"relu"];
  m[`:compile][`loss pykw"categorical_crossentropy";`optimizer pykw"rmsprop"];
  m[`:fit][npa x[0]0;l`ytrn;`batch_size pykw 32;`verbose pykw 0];
- m[`:evaluate][npa x[1]0;l`ytst;`batch_size pykw 32]`}
+ m[`:predict][npa x[1]0]}
 
 regfitscore:{
  npa:.p.import[`numpy]`:array;
@@ -38,4 +38,4 @@ regfitscore:{
  m[`:add]dns[1;`activation pykw"relu"];
  m[`:compile][`optimizer pykw"rmsprop";`loss pykw"mse"];
  m[`:fit][npa x[0]0;x[0]1;`batch_size pykw 32;`verbose pykw 0];
- m[`:evaluate][npa x[1]0;x[1]1;`batch_size pykw 32]`}
+ m[`:predict][npa x[1]0]}

@@ -9,12 +9,10 @@ yr:asc n?100f / regression
 yc:n?0 1      / binary classification
 ym:n?5        / multi classification
 xval_func:.ml.xval.kfshuff[5;1]
-score_func:.ml.xval.fitscore
+score_func:.aml.i.fitpredict
+
 
 \d .aml
-
-// default seed 
-seed:42
 
 // table of models
 /* x = symbol, either `class or `reg
@@ -33,14 +31,16 @@ models:{
 /* y  = target
 /* m  = models from `.aml.models`
 /* f  = scoring function
-runmodels:{[xv;x;y;m;f]
- system"S ",string seed;		
- s:{if[`seed~x;:seed]}each m`seed;
- desc m[`model]!avg each i.runmodel[xv;x;y;;f;]'[m`minit;s]}
+runmodels:{[xv;x;y;m;f;s]
+ system"S ",string s;		
+ s:{if[`seed~x;:y]}[;s]each m`seed;
+ r:i.runmodel[xv;x;y;;f;]'[m`minit;s];
+ desc m[`model]!avg each
+  {{x[y 0;y 1]}[x]each y}[$[min[m`typ]in`binary`multi;.ml.accuracy;.ml.r2score]]each r;
 
 i.files:`class`reg!("classmodels.txt";"regmodels.txt")
 
-i.fitpredict:{[p;a;d].[.[a[p]`:fit;d 0]`:predict;d 1]`}                     / default score metric
+i.fitpredict:{[p;a;d]($[105h~type a;@[.[a[p]`:fit;d 0]`:predict;d[1]0];a[d;p]]`;d[1]1)}
 
 i.gsseed:{[xv;x;y;a;f;s]
  $[s~(::);xv[x;y;a;f[::]];
@@ -51,4 +51,4 @@ i.runmodel:{[xv;x;y;a;f;s]
  if[(-7h~type s)&105h~type a;s:enlist[`random_state]!enlist s];
  raze i.gsseed[xv;x;y;a;f;s]}
 
-if[0>system"s";.ml.mproc.init[abs system"s"]enlist".ml.loadfile`:init.q"];  / allow multiprocess
+if[0>system"s";.ml.mproc.init[abs system"s"]enlist".ml.loadfile`:init.q"];   / allow multiprocess
