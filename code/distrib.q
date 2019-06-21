@@ -9,8 +9,6 @@ yr:asc n?100f / regression
 yc:n?0 1      / binary classification
 ym:n?5        / multi classification
 xval_func:.ml.xval.kfshuff[5;1]
-score_func:.aml.i.fitpredict
-
 
 \d .aml
 
@@ -36,11 +34,14 @@ runmodels:{[xv;x;y;m;f;s]
  s:{if[`seed~x;:y]}[;s]each m`seed;
  r:i.runmodel[xv;x;y;;f;]'[m`minit;s];
  desc m[`model]!avg each
-  {{x[y 0;y 1]}[x]each y}[$[min[m`typ]in`binary`multi;.ml.accuracy;.ml.r2score]]each r;
+  {{x[y 0;y 1]}[x]each y}[$[min m[`typ]in`binary`multi;.ml.accuracy;.ml.mse]]each r}
 
 i.files:`class`reg!("classmodels.txt";"regmodels.txt")
 
-i.fitpredict:{[p;a;d]($[105h~type a;@[.[a[p]`:fit;d 0]`:predict;d[1]0];a[d;p]]`;d[1]1)}
+i.fitpredict:{[p;a;d]
+ t:$[105h~type a;@[.[a[p]`:fit;d 0]`:predict;d[1]0];a[d;p]]`;
+ if[2=count distinct d[0]1;t:.5<raze t];
+ (t;d[1]1)}
 
 i.gsseed:{[xv;x;y;a;f;s]
  $[s~(::);xv[x;y;a;f[::]];
