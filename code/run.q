@@ -12,15 +12,18 @@ runexample:{[tb;tgt;typ;mdls;p]
  dict:i.updparam[tb;p;typ];
  system "S ",string s:dict`seed;
  tb:preproc[tb;tgt;typ;dict];
+ -1"\nPreprocessing of data completed, starting feature creation\n";
  tb:freshcreate[tb;dict];
- runmodels[flip value flip tb;tgt;mdls;dict]
+ -1"Feature creation completed, starting initial model selection allow time on large datasets\n";
+ -1"Total feature created = ",string[count 1_cols tb],"\n";
+ rmdls:runmodels[flip value flip tb;tgt;mdls;dict];
+ -1"\nA ranking of the best models has now been completed";
+ -1" continuing to the next step\n";
+ rmdls
  }
 
 
 / Utils
-
-// This function is multilined to fit on 1/2 screen(change prior to release?)
-
 i.updparam:{[x;p;typ]
  dict:$[typ=`fresh;
   {d:`aggcols`cols2use`params`xv`prf`scf`seed!
