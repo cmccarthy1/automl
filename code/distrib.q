@@ -18,17 +18,17 @@ models:{
 
 
 // run multiple models
-/* xv = cross validation function
-/* x  = features
-/* y  = target
-/* m  = models from `.aml.models`
-/* f  = scoring function
-runmodels:{[xv;x;y;m;f;d;s]
- system"S ",string s;		
+/* x = features
+/* y = target
+/* m = models from `.aml.models`
+/* d = dictionary of populated parameters (defined earlier in the workflow)
+// test fn
+runmodels:{[x;y;m;d]
+ system"S ",string s:d`seed;
  s:{if[`seed~x;:y]}[;s]each m`seed;
- r:i.runmodel[xv;x;y;;f;]'[m`minit;s];
+ r:i.runmodel[d`xv;x;y;;d`prf;]'[m`minit;s];
  desc m[`model]!avg each
-  {{x[y 0;y 1]}[x]each y}[$[min m[`typ]in key[d];d`class;d`regr]]each r}
+  {{x[y 0;y 1]}[x]each y}[$[min m[`typ]in key[d`scf];d[`scf]`class;d[`scf]`regr]]each r}
 
 
 if[0>system"s";.ml.mproc.init[abs system"s"]enlist".ml.loadfile`:init.q"]
