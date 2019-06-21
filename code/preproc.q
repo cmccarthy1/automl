@@ -2,7 +2,9 @@
 // to the automated machine learning platform such that the user does not need to
 // deal with the preprocessing side only input the appropriate table and target.
 
+
 \d .aml
+
 
 /* tb  = tabular data
 /* tgt = target data
@@ -18,8 +20,8 @@ preproc:{[tb;tgt;typ;p]
    (flip p[`cols2drop]#flip tb),'.ml.infreplace[t];
    .ml.infreplace[t]]}
 
-/ Utils
 
+/ Utils
 i.lencheck:{[x;tgt;typ;p]
  if[typ~(::);typ:`normal];
  $[-11h=type typ;
@@ -31,12 +33,10 @@ i.lencheck:{[x;tgt;typ;p]
        '`$"Must have the same number of targets as values in table"];
    '`$"Input for typ must be a supported symbol or ::"];
    '`$"Input for typ must be a supported symbol or ::"]}
-
 i.null_encode:{[x;y]
         vals:l k:where 0<sum each l:null each flip x;
         nms:`$string[k],\:"_null";
         $[0=count k;x;flip y[x]^flip[x],nms!vals]}
-
 i.symencode:{
  sc:.ml.i.fndcols[x;"s"];				/ sc = symbol columns
  if[0=count sc;r:x];

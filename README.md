@@ -6,5 +6,7 @@ Requirements:
 -  EmbedPy
 -  Machine learning toolkit: https://github.com/kxsystems/ml
 -  Scikit-Learn
+-  Keras
+-  Numpy
 
 *  Further requirements to be added as developments continue
