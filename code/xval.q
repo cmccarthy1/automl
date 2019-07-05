@@ -17,4 +17,4 @@ gsseed:{[xv;x;y;a;f;s]
 
 
 // This should be removed before any release
-\l data/sampledata.q
+.aml.loadfile`:code/data/sampledata.q

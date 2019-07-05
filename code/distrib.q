@@ -35,12 +35,3 @@ runmodels:{[x;y;m;d]
 
 
 if[0>system"s";.ml.mproc.init[abs system"s"]enlist".ml.loadfile`:init.q"]
-
-
-/ Utils
-i.files:`class`reg`score!("classmodels.txt";"regmodels.txt";"scoring.txt")
-i.runmodel:{[xv;x;y;a;f;s]
- s:$[type[s]in(101h;-7h);s;@[{"i"$x};s;'`$"type not convertable"]];
- if[(-7h~type s)&105h~type a;s:enlist[`random_state]!enlist s];
- raze .ml.gsseed[xv;x;y;a;f;s]}
-i.txtparse:{{key(!).("S=;")0:x}each(!).("S*";"|")0:hsym`$path,y,i.files x}
