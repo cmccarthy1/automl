@@ -11,7 +11,7 @@
 /* typ = type of feature extraction being performed
 /* p   = is a set of parameters as a dictionary or :: ('default set')
 preproc:{[tb;tgt;typ;p]
- if[`fresh=typ;p[`cols2drop]_flip tb];
+ if[`fresh=typ;p[`cols2drop]_flip tb]; / t: ?
  i.lencheck[tb;tgt;typ;p];
  t:i.symencode[tb;10];
  t:.ml.dropconstant[t];

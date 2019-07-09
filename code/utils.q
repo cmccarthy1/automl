@@ -37,8 +37,8 @@ i.updparam:{[x;p;typ]
  dict:$[typ=`fresh;
   {d:`aggcols`cols2use`params`xv`prf`scf`seed!
      (first cols x;1_cols x;
-      .ml.fresh.params;.ml.xval.kfshuff[5;1];
-      .ml.fitpredict;`class`regr!(`.ml.accuracy;`.ml.mse);42);
+      .ml.fresh.params;`kfsplit;
+      .ml.xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);42);
    $[y~(::);d;
      99h=type y;
      $[min key[y]in key[d];
@@ -54,11 +54,6 @@ i.updparam:{[x;p;typ]
 
 
 / distrib.q utilities
-
 i.files:`class`reg`score!("classmodels.txt";"regmodels.txt";"scoring.txt")
-i.runmodel:{[xv;x;y;a;f;s]
- s:$[type[s]in(101h;-7h);s;@[{"i"$x};s;'`$"type not convertable"]];
- if[(-7h~type s)&105h~type a;s:enlist[`random_state]!enlist s];
- raze .ml.gsseed[xv;x;y;a;f;s]}
+i.mdlfunc:{$[`keras~x;get` sv``aml,y;{[x;y;z].p.import[x]y}[` sv x,y;hsym z]]}
 i.txtparse:{{key(!).("S=;")0:x}each(!).("S*";"|")0:hsym`$path,y,i.files x}
-

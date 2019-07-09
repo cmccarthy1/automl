@@ -1,19 +1,16 @@
 \d .ml
 
 
-xval.i.apply:{[idx;k;n;x;y;a;f]
- {[a;f;b;d]f[$[b;a[];a]]d[]}[$[b;xval.i.pickledump a;a];f;b:105h~type a]peach idx[k;n;x;y]}
+/ grid search w/ random seed where applicable
+gs.seed:{[x;y;d;m]
+ b:m[`lib]~`sklearn;
+ s:$[a:m[`seed]~`seed;$[b;enlist[`random_state]!enlist d`seed;d`seed];::];
+ $[a&b;first value get[` sv`.ml.gs,d`xv][3;1;x;y;d[`prf]m`minit;s;0];
+   get[` sv`.ml.xv,d`xv][3;1;x;y;d[`prf][m`minit;s]]]}
 
-
-fitpredict:{[p;a;d]
- t:$[105h~type a;@[.[a[p]`:fit;d 0]`:predict;d[1]0];a[d;p]]`;
- if[2=count distinct d[0]1;t:.5<raze t];
- (t;d[1]1)}
-
-
-gsseed:{[xv;x;y;a;f;s]
- $[s~(::);xv[x;y;a;f[::]];
-   105h~type a;value .ml.xval.gridsearch[xv;x;y;a;f;s];xv[x;y;a;f[s]]]}
+ 
+/ returns (ypred;ytrue) for each k
+xv.fitpredict:{[f;p;d]($[-7h~type p;f[d;p];@[.[f[][p]`:fit;d 0]`:predict;d[1]0]`];d[1]1)}
 
 
 // This should be removed before any release
