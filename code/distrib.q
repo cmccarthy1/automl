@@ -1,9 +1,9 @@
 \l ml/ml.q
 .ml.loadfile`:init.q
 
+
 \d .aml
 
-i.mdlfunc:{$[`keras~x;get` sv``aml,y;{[x;y;z].p.import[x]y}[` sv x,y;hsym z]]}
 
 // table of models
 /* x = symbol, either `class or `reg
@@ -14,26 +14,21 @@ models:{
  m:flip`model`lib`fnc`seed`typ!flip key[d],'value d;
  if[x=`class;
   m:$[2<count distinct y;delete from m where typ=`binary;delete from m where model=`MultiKeras]];
- m:delete from m where lib=`keras;  / remove once fixed for new xval
  update minit:.aml.i.mdlfunc .'flip(lib;fnc;model)from m}
 
+
 // run multiple models
-/* x = features
+/* x = matrix of features
 /* y = target
 /* m = models from `.aml.models`
 /* d = dictionary of populated parameters (defined earlier in the workflow)
-// test fn
 runmodels:{[x;y;m;d]
  system"S ",string s:d`seed;
- s:{if[`seed~x;:y]}[;s]each m`seed;
-
- r:i.runmodel[d`xv;x;y;;d`prf;]'[m`minit;s];
-
- sco:i.txtparse[`score;"/code/mdl_def/"];			/ sco = score ordering tab
- typdef:min m[`typ]in key[d`scf];				/ class or reg to be applied
- fn:$[typdef;d[`scf]`class;d[`scf]`regr];		    	/ scoring function
- (get string sco[fn]0)m[`model]!avg each
-  {{x[y 0;y 1]}[x]each y}[$[min m[`typ]in key[d`scf];d[`scf]`class;d[`scf]`regr]]each r}
+ if[11h~type y;y:![dy;til count dy:distinct y]y];
+ r:.ml.gs.seed[x;y;d]'[m];
+ fn:$[`reg in distinct m`typ;d[`scf]`reg;d[`scf]`class];  / scoring function to apply to results
+ sco:i.txtparse[`score;"/code/mdl_def/"];	          / sco = score ordering tab
+ get[string first sco fn]m[`model]!{first avg x}each get[fn].''r}
 
 
 if[0>system"s";.ml.mproc.init[abs system"s"]enlist".ml.loadfile`:init.q"]
