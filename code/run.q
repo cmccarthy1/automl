@@ -5,7 +5,7 @@
 /* tb   = input table
 /* tgt  = target vector 
 /* typ  = type of feature extraction being completed
-/* mdls = table of models (.aml.models`class/.aml.models`reg)
+/* mdls = table of models (.aml.models[`class;tgt]/.aml.models[`reg;tgt])
 /* p    = parameters (::) ~ default other changes user dependent
 
 runexample:{[tb;tgt;typ;mdls;p]

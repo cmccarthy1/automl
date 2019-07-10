@@ -33,12 +33,22 @@ i.symencode:{
 
 / run.q utilities
 
+// in default dictionary the following parameters are set but can be changed through modification of p
+// FRESH:
+/* aggcols  (FRESH columns to base aggregations on -> first column)
+/* cols2use (Columns that we apply functions to    -> 1_cols table)
+/* params   (functions to apply to data            -> all functions)
+/* xv       (type of cross validation              -> kfsplit)
+/* prf      (prediction function                   -> fitpredict)
+/* scf      (scoring functions for class/regress   -> accuracy/mean square error)
+/* k        (number of folds for cross validation  -> 5)
+/* seed     (seed to be used to fix all runs fair  -> 42)
 i.updparam:{[x;p;typ]
  dict:$[typ=`fresh;
-  {d:`aggcols`cols2use`params`xv`prf`scf`seed!
+  {d:`aggcols`cols2use`params`xv`prf`scf`k`seed!
      (first cols x;1_cols x;
       .ml.fresh.params;`kfsplit;
-      .ml.xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);42);
+      .ml.xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);5;42);
    $[y~(::);d;
      99h=type y;
      $[min key[y]in key[d];
