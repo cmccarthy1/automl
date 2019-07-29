@@ -11,11 +11,12 @@
 runexample:{[tb;tgt;typ;mdls;p]
  dict:i.updparam[tb;p;typ];
  system "S ",string s:dict`seed;
+ tb:i.autotype[tb;typ;dict];
  tb:preproc[tb;tgt;typ;dict];
  -1"\nData preprocessing completed, starting feature creation\n";
  tb:freshcreate[tb;dict];
  -1"Feature creation completed, starting initial model selection - allow time for large datasets\n";
  -1"Total features created = ",string[count 1_cols tb],"\n";
  r:runmodels[flip value flip tb;tgt;mdls;dict];
- -1"\nA ranking of the best models has now been completed, continuing to the next step\n";
+ -1"A ranking of the best models has now been completed, continuing to the next step\n";
  r}
