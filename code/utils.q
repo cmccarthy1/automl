@@ -14,7 +14,7 @@ i.lencheck:{[x;tgt;typ;p]
     if[count[tgt]<>count distinct $[1=count p`aggcols;x[p`aggcols];(,'/)x p`aggcols];
        '`$"Target count must equal count of unique agg values for fresh"];
    typ in`tseries`normal;
-    if[count[y]<>count x;
+    if[count[tgt]<>count x;
        '`$"Must have the same number of targets as values in table"];
    '`$"Input for typ must be a supported symbol or ::"];
    '`$"Input for typ must be a supported symbol or ::"]}
