@@ -73,11 +73,10 @@ i.updparam:{[x;p;typ]
    '`$"This will need to be added once the time-series recipe is in place";
   '`$"Incorrect input type"]}
 i.updmodels:{[mdls;tgt]
- if[100000<count tgt;
-    -1"\nLimiting the models being applied due to number targets>100,000";
+ $[100000<count tgt;
+   [-1"\nLimiting the models being applied due to number targets>100,000";
     -1"No longer running neural nets or svms\n";
-    r:select from mdls where (lib<>`keras),not fnc in `neural_network`svm];
- r}
+    select from mdls where(lib<>`keras),not fnc in`neural_network`svm];mdls]}
 
 
 / distrib.q utilities

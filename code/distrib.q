@@ -12,9 +12,9 @@ models:{
  if[not x in key i.files;'`$"text file not found"];
  d:i.txtparse[x;"/code/mdl_def/"];
  m:flip`model`lib`fnc`seed`typ!flip key[d],'value d;
- if[x=`class;
-  m:$[2<count distinct y;delete from m where typ=`binary;delete from m where model=`MultiKeras]];
- update minit:.aml.i.mdlfunc .'flip(lib;fnc;model)from m}
+ if[x=`class;m:$[2<count distinct y;delete from m where typ=`binary;delete from m where model=`MultiKeras]];
+ m:update minit:.aml.i.mdlfunc .'flip(lib;fnc;model)from m;
+ i.updmodels[m;y]}
 
 
 // run multiple models

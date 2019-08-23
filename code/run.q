@@ -10,7 +10,6 @@
 
 runexample:{[tb;tgt;typ;mdls;p]
  dict:i.updparam[tb;p;typ];
- mdls:i.updmodels[mdls;tgt];
  system "S ",string s:dict`seed;
  tb:i.autotype[tb;typ;dict];
  tb:preproc[tb;tgt;typ;dict];
