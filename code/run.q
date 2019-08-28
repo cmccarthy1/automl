@@ -17,6 +17,6 @@ runexample:{[tb;tgt;typ;mdls;p]
  tb:freshcreate[tb;dict];
  -1"Feature creation completed, starting initial model selection - allow time for large datasets\n";
  -1"Total features created = ",string[count 1_cols tb],"\n";
- r:runmodels[flip value flip tb;tgt;mdls;dict];
- -1"A ranking of the best models has now been completed, continuing to the next step\n";
- r}
+ runmodels[tb;tgt;mdls;dict];
+ -1"Model selection has been completed, continuing to the next step\n";
+ }

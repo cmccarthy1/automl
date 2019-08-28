@@ -3,6 +3,7 @@
 
 
 \d .aml
+plt:.p.import`matplotlib.pyplot;
 
 
 / preproc.q utilities
@@ -83,9 +84,36 @@ i.updmodels:{[mdls;tgt]
 i.files:`class`reg`score!("classmodels.txt";"regmodels.txt";"scoring.txt")
 i.mdlfunc:{$[`keras~x;get` sv``aml,y;{[x;y;z].p.import[x]y}[` sv x,y;hsym z]]}
 i.txtparse:{{key(!).("S=;")0:x}each(!).("S*";"|")0:hsym`$path,y,i.files x}
+i.predshuff:{[m;x;y;f;c]
+ x:.ml.shuffle[x;c];
+ p:m[`:predict][x]`;
+ f[p;y]}
+i.impact:{asc y!s%max s:$[z~desc;1-;]$[any 0>x;.ml.minmaxscaler;]x}
+i.impactplot:{[r;m]
+ plt[`:figure][`figsize pykw 20 20];
+ sub:plt[`:subplots][];
+ fig:sub[@;0];ax:sub[@;1];
+ ax[`:barh][n:til 20;20#value r;`align pykw`center];
+ ax[`:set_yticks][n];
+ ax[`:set_yticklabels]20#key r;
+ ax[`:set_title]"Feature Impact: ",string m;
+ ax[`:set_ylabel]"Columns";
+ ax[`:set_xlabel]"Relative feature impact";
+ plt[`:savefig][sv["_";string(m;.z.Z)],".png";`bbox_inches pykw"tight"];}
+
 
 / utils.q utilities
 / x = entire column list
 / y = sublist of columns we use
 / z = type of feature creation we are doing
 i.err_col:{[x;y;z]if[count[x]<>count y;-1 "\n Removed the following columns due to type restrictions for ",string z;0N!x where not x in y]}
+
+/ credibility score
+i.credibility2:{[x;c;tgt]
+ if[(::)~c;c:.ml.i.fndcols[x;"s"]];
+ avgtot:avg tgt;
+ counts:{(count each group x)x}each x c,:();
+ avggroup:{(key[k]!avg each y@value k:group x)x}[;tgt]each x c,:();
+ scores:{z*(x-y)}[avgtot]'[avggroup;counts];
+ names:(`$string[c],\:"_credibility_estimate");
+ x^flip names!scores}
