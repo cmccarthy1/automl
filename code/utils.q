@@ -84,22 +84,18 @@ i.updmodels:{[mdls;tgt]
 i.files:`class`reg`score!("classmodels.txt";"regmodels.txt";"scoring.txt")
 i.mdlfunc:{$[`keras~x;get` sv``aml,y;{[x;y;z].p.import[x]y}[` sv x,y;hsym z]]}
 i.txtparse:{{key(!).("S=;")0:x}each(!).("S*";"|")0:hsym`$path,y,i.files x}
+
+// calculate impact of each feature and save plot of top 20
+i.featureimpact:{[b;m;x;y;c;f;o]
+ r:i.predshuff[m;x;y;f]each til count c;
+ im:i.impact[r;c;o];
+ i.impactplot[im;b];
+ -1"\nFeature impact calculated - see current directory for results\n";}
 i.predshuff:{[m;x;y;f;c]
  x:.ml.shuffle[x;c];
  p:m[`:predict][x]`;
  f[p;y]}
 i.impact:{asc y!s%max s:$[z~desc;1-;]$[any 0>x;.ml.minmaxscaler;]x}
-i.impactplot:{[r;m]
- plt[`:figure][`figsize pykw 20 20];
- sub:plt[`:subplots][];
- fig:sub[@;0];ax:sub[@;1];
- ax[`:barh][n:til 20;20#value r;`align pykw`center];
- ax[`:set_yticks][n];
- ax[`:set_yticklabels]20#key r;
- ax[`:set_title]"Feature Impact: ",string m;
- ax[`:set_ylabel]"Columns";
- ax[`:set_xlabel]"Relative feature impact";
- plt[`:savefig][sv["_";string(m;.z.Z)],".png";`bbox_inches pykw"tight"];}
 
 
 / utils.q utilities
@@ -117,3 +113,16 @@ i.credibility2:{[x;c;tgt]
  scores:{z*(x-y)}[avgtot]'[avggroup;counts];
  names:(`$string[c],\:"_credibility_estimate");
  x^flip names!scores}
+
+/* y = true target vector
+/* p = predicted probability vector
+i.cumulative_gain_curve:{[y;p]
+ if[2<>count distinct y;'`$"y must be binary"];
+ i.gaincurve[y]'[flip p;c:asc distinct y]}
+
+/ cumulative gains curve
+i.gaincurve:{[y;p;pc]
+ gain:sums y:(pc=y)idesc p; 
+ gain:0.,gain%sum y;
+ pcnt:0.,(1+til n)%n:count y;
+ `pc`gain`pcnt!(pc;gain;pcnt)}

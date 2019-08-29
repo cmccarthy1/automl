@@ -1,12 +1,9 @@
 \l ml/ml.q
-
-/ new ml funcs used below
 .ml.loadfile`:init.q
 .ml.mattab :{flip value flip x}
 .ml.shuffle:{idx:neg[n]?n:count x;$[98h~type x;x:@[x;y;@;idx];x[;y]:x[;y]idx];:x}
 
 \d .aml
-
 
 // table of models
 /* x = symbol, either `class or `reg
@@ -18,7 +15,6 @@ models:{
  if[x=`class;m:$[2<count distinct y;delete from m where typ=`binary;delete from m where model=`MultiKeras]];
  m:update minit:.aml.i.mdlfunc .'flip(lib;fnc;model)from m;
  i.updmodels[m;y]}
-
 
 // run multiple models
 /* x = table of features
@@ -38,13 +34,6 @@ runmodels:{[x;y;m;d]
  bm:(first exec minit from m where model=bs)[][];    
  bm[`:fit][tt`xtrain;tt`ytrain];
  show s2:fn[;ytst:tt`ytest]bm[`:predict][xtst:tt`xtest]`;
- featureimpact[bs;bm;xtst;ytst;c;f;o];}
-
-// calculate impact of each feature and save plot of top 20
-featureimpact:{[b;m;x;y;c;f;o]
- r:i.predshuff[m;x;y;f]each til count c;
- im:i.impact[r;c;o];
- i.impactplot[im;b];
- -1"\nFeature impact calculated - see current directory for results\n";}
+ i.featureimpact[bs;bm;xtst;ytst;c;f;o];}
 
 if[0>system"s";.ml.mproc.init[abs system"s"]enlist".ml.loadfile`:init.q"]
