@@ -1,4 +1,4 @@
-l ml/ml.q
+\l ml/ml.q
 .ml.loadfile`:init.q
 
 \d .aml
