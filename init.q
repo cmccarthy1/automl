@@ -6,4 +6,5 @@
 .aml.loadfile`:code/preproc/feat_extract.q
 .aml.loadfile`:code/postproc/utils.q
 .aml.loadfile`:code/postproc/plots.q
+.aml.loadfile`:code/timeseries/extract.q
 .aml.loadfile`:code/run.q
