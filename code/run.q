@@ -3,7 +3,7 @@
 // This is a prototype of the pipeline for the automated machine learning pipeline
 
 /* tb   = input table
-/* tgt  = target vector 
+/* tgt  = target vector
 /* typ  = type of feature extraction being completed
 /* mdls = table of models (.aml.models[`class;tgt]/.aml.models[`reg;tgt])
 /* p    = parameters (::) ~ default other changes user dependent
