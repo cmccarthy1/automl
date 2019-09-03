@@ -54,13 +54,22 @@ ts.feat.truncsvd:{[x;c;d]
  svd:.p.import[`sklearn.decomposition;`:TruncatedSVD;`n_components pykw 1];
  flip flip[x],(`$(raze each string c),\:"_trsvd")!{x[`:fit_transform][flip y]`}[svd]each x c}
 
+
+\d .ml
 ts.params:update pnum:{count 1_get[ts.feat x]1}each f,pnames:count[i]#(),pvals:count[i]#()from([]f:1_key ts.feat)
 ts.params:1!`pnum xasc update valid:pnum=count each pnames from ts.params
-ts.loadparams:{
- pp:{(raze value@)each(!).("S=;")0:x}each(!).("S*";"|")0:x;
- ts.params[([]f:key pp);`pvals]:value each value pp:inter[key pp;exec f from ts.params]#pp;
- ts.params[([]f:key pp);`pnames]:key each value pp;
- ts.params:update valid:pnum=count each pnames from ts.params where f in key pp;}
+
+\d .
+.ml.hp:hsym`$.aml.path,"/code/timeseries/hyperparam.txt"
+
+\d .ml
+pp:{(raze value@)each(!).("S=;")0:x}each(!).("S*";"|")0:hp;
+l:flip distinct asc each ll where 2=count each distinct each ll:(cross/)(lags;lags)
+pp:{[sl;ml;p]$[any b:string[k:key p]like"l*";:@[p;k where b;:;$[1i~sum b;enlist sl;ml]];p]}[lags;l]each pp
+ts.params[([]f:key pp);`pvals]:value each value pp:inter[key pp;exec f from ts.params]#pp;
+ts.params[([]f:key pp);`pnames]:key each value pp;
+ts.params:update valid:pnum=count each pnames from ts.params where f in key pp
+
 
 / utils
 i.combinedlag:{[x;c;l1;l2;f]
@@ -70,7 +79,3 @@ i.combinedlag:{[x;c;l1;l2;f]
  v:{[d;f;l1;l2]i.lagdict[f]. xprev'[;d]each(l1;l2)}[x c;f]'[l1;l2];
  max[l1,l2]_flip flip[x],n!raze v}
 i.lagdict:`sum`sub`prod`ratio!(+;-;*;%)
-
-
-\d .
-.ml.ts.loadparams hsym`$.aml.path,"/code/timeseries/hyperparam.txt"
