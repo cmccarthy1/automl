@@ -2,6 +2,7 @@
 
 /* x = output of cumulative_gains_curve
 /* y = `lift or `gain
+/* z = dictionary containing date and time of run start `sttime`stdate! ...
 i.gainliftplt:{
  c1:x 0;c2:x 1;
  pcnt_lift:1_c2`pcnt;
@@ -23,11 +24,11 @@ i.gainliftplt:{
  plt[`:legend][`loc pykw "lower right"];
  plt[`:xlabel]["% of sample";`fontsize pykw 18];
  plt[`:ylabel]["Gain";`fontsize pykw 18];
- system"mkdir -p ",folder_name:path,"/images/img_",string[.z.D];
- plt[`:savefig][folder_name,"/",sv["_";string(`Lift_Gain;.z.T)],".png"];
+ system"mkdir -p ",folder_name:path,"/Outputs/",string[z`stdate],"/Images/Run_",string[z`sttime];
+ plt[`:savefig][folder_name,"/Lift_Gain_Curve.png"];
  plt[`:show][];}
 
-i.impactplot:{[r;m]
+i.impactplot:{[r;m;z]
  plt[`:figure][`figsize pykw 20 20];
  sub:plt[`:subplots][];
  fig:sub[@;0];ax:sub[@;1];
@@ -37,5 +38,5 @@ i.impactplot:{[r;m]
  ax[`:set_title]"Feature Impact: ",string m;
  ax[`:set_ylabel]"Columns";
  ax[`:set_xlabel]"Relative feature impact";
- system"mkdir -p ",folder_name:path,"/images/img_",string[.z.D];
- plt[`:savefig][folder_name,"/",sv["_";string(m;.z.T)],".png";`bbox_inches pykw"tight"];}
+ system"mkdir -p ",folder_name:path,"/Outputs/",string[z`stdate],"/Images/Run_",string[z`sttime];
+ plt[`:savefig][folder_name,"/",sv["_";string(`Impact_Plot;m)],".png";`bbox_inches pykw"tight"];}

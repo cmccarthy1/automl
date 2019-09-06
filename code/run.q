@@ -9,6 +9,7 @@
 /* p    = parameters (::) ~ default other changes user dependent
 
 runexample:{[tb;tgt;typ;mdls;p]
+ dtdict:`stdate`sttime!(.z.D;.z.T);
  dict:i.updparam[tb;p;typ];
  system "S ",string s:dict`seed;
  tb:i.autotype[tb;typ;dict];
@@ -16,7 +17,10 @@ runexample:{[tb;tgt;typ;mdls;p]
  -1"\nData preprocessing completed, starting feature creation\n";
  tb:freshcreate[tb;dict];
  -1"Feature creation completed, starting initial model selection - allow time for large datasets\n";
- -1"Total features created = ",string[count 1_cols tb],"\n";
- runmodels[tb;tgt;mdls;dict];
- -1"Model selection has been completed, continuing to the next step\n";
+ -1"Total features created = ",string[ctb:count 1_cols tb 0],"\n";
+ bm:runmodels[tb 0;tgt;mdls;dict;dtdict];
+ -1"\nModel selection has been completed, continuing to the next step\n";
+ if[2=dict`saveopt;
+ -1"Now saving down a report on this run to Outputs/Reports\n";
+ report[i.report_dict[ctb;bm;tb;dtdict;path];dtdict];]
  }

@@ -6,10 +6,10 @@
 / typ = type of feature extraction (FRESH/normal/tseries ...)
 i.updparam:{[x;p;typ]
  dict:$[typ=`fresh;
-  {d:`aggcols`params`xv`prf`scf`k`seed!
+  {d:`aggcols`params`xv`prf`scf`k`seed`saveopt!
      (first cols x;
       .ml.fresh.params;`kfsplit;
-      xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);5;42);
+      xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);5;42;2);
    $[y~(::);d;
      99h=type y;
      $[min key[y]in key[d];
@@ -44,3 +44,20 @@ i.mattab :{flip value flip x}
 
 // shuffle columns of matrix/table based on col name or idx
 i.shuffle:{idx:neg[n]?n:count x;$[98h~type x;x:@[x;y;@;idx];x[;y]:x[;y]idx];:x}
+
+// save down the best model
+/* x = date-time of model start (dict)
+/* y = best model name (`symbol)
+/* z = best model object (embedPy)
+/* r = all applied models (table)
+i.savemdl:{[x;y;z;r]
+ folder_name:path,"/Outputs/",string[x`stdate],"/Models/Run_",string[x`sttime];
+ save_path: system"mkdir -p ",folder_name;
+ pickle:.p.get[`pickle_save];
+ $[(`sklearn=?[r;enlist(=;`model;y,());();`lib])0;
+    (pickle[folder_name,"/",string[y];z];0N!string[y]," model saved to ",folder_name);
+   (`keras=?[r;enlist(=;`model;y,());();`lib])0;
+    (bm[`:save][folder_name,"/",string[y],".h5"];0N!string[y]," model saved to ",folder_name);
+   0N!"Saving of non keras/sklearn models types is not currently supported"];
+ }
+
