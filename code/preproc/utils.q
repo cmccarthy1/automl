@@ -60,4 +60,3 @@ i.credibility:{[x;c;tgt]
 i.err_col:{[x;y;z]if[count[x]<>count y;
  -1 "\n Removed the following columns due to type restrictions for ",string z;
  0N!x where not x in y]}
-
