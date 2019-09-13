@@ -26,7 +26,7 @@ models:{
 runmodels:{[x;y;m;d;dt]
  system"S ",string s:d`seed;
  c:cols x;
- x:i.mattab x;
+ x:flip value flip x;
 
  / encode categorical as numerical
  if[11h~type y;y:![dy;til count dy:distinct y]y];

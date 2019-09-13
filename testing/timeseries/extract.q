@@ -60,7 +60,7 @@ ts.params:update pnum:{count 1_get[ts.feat x]1}each f,pnames:count[i]#(),pvals:c
 ts.params:1!`pnum xasc update valid:pnum=count each pnames from ts.params
 
 \d .
-.ml.hp:hsym`$.aml.path,"/code/timeseries/hyperparam.txt"
+.ml.hp:hsym`$.aml.path,"/testing/timeseries/hyperparam.txt"
 
 \d .ml
 pp:{(raze value@)each(!).("S=;")0:x}each(!).("S*";"|")0:hp;

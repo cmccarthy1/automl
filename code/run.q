@@ -16,9 +16,11 @@ runexample:{[tb;tgt;typ;mdls;p]
  tb:preproc[tb;tgt;typ;dict];
  -1"\nData preprocessing completed, starting feature creation\n";
  tb:freshcreate[tb;dict];
- -1"Feature creation completed, starting initial model selection - allow time for large datasets\n";
- -1"Total features created = ",string[ctb:count 1_cols tb 0],"\n";
- bm:runmodels[tb 0;tgt;mdls;dict;dtdict];
+ feats:freshsignificance[tb 0;tgt];
+ tab:feats#tb 0;
+ -1"\nFeature creation and significance testing completed.\nStarting initial model selection - allow ample time for large datasets\n";
+ -1"Total features being passed to the models = ",string[ctb:count 1_cols tab];
+ bm:runmodels[tab;tgt;mdls;dict;dtdict];
  -1"\nModel selection has been completed, continuing to the next step\n";
  if[2=dict`saveopt;
  -1"Now saving down a report on this run to Outputs/Reports\n";
