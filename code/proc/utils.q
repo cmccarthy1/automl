@@ -8,7 +8,7 @@ i.updparam:{[x;p;typ]
  dict:$[typ=`fresh;
   {d:`aggcols`params`xv`prf`scf`k`seed`saveopt!
      (first cols x;
-      .ml.fresh.params;`kfsplit;
+      .ml.fresh.params;`kfshuff;
       xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);5;42;2);
    $[y~(::);d;
      99h=type y;
@@ -18,7 +18,17 @@ i.updparam:{[x;p;typ]
      '`$"You must pass identity `(::)` or dictionary with appropriate key/value pairs to function"];
    d}[x;p];
   typ=`normal;
-   '`$"This will need to be added once the normal recipe is in place";
+   {d:`xv`prf`scf`k`seed`saveopt!
+      (`kfshuff;xv.fitpredict;
+       `class`reg!(`.ml.accuracy;`.ml.mse);
+       5;42;2);
+    $[y~(::);d;
+     99h=type y;
+     $[min key[y]in key[d];
+       d[key y]:value y;
+       '`$"You can only pass appropriate keys to fresh"];
+     '`$"You must pass identity `(::)` or dictionary with appropriate key/value pairs to function"];
+   d}[x;p]; 
   typ=`tseries;
    '`$"This will need to be added once the time-series recipe is in place";
   '`$"Incorrect input type"]}

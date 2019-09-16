@@ -15,7 +15,7 @@ runexample:{[tb;tgt;typ;mdls;p]
  tb:i.autotype[tb;typ;dict];
  tb:preproc[tb;tgt;typ;dict];
  -1"\nData preprocessing completed, starting feature creation\n";
- tb:freshcreate[tb;dict];
+ tb:$[typ=`fresh;freshcreate[tb;dict];typ=`normal;normalcreate[tb;dict];'`err];
  feats:freshsignificance[tb 0;tgt];
  tab:feats#tb 0;
  -1"\nFeature creation and significance testing completed.\nStarting initial model selection - allow ample time for large datasets\n";

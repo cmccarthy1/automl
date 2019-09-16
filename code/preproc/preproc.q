@@ -14,6 +14,5 @@ preproc:{[tb;tgt;typ;p]
  t:i.symencode[tb;10];
  t:.ml.dropconstant[t];
  t:"f"$i.null_encode[t;med];
- $[`fresh=typ;
-   (flip p[`cols2drop]#flip tb),'.ml.infreplace[t];
-   .ml.infreplace[t]]}
+ $[`fresh=typ;(flip p[`cols2drop]#flip tb),'.ml.infreplace[t];t]
+ }
