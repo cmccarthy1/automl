@@ -63,9 +63,9 @@ i.shuffle:{idx:neg[n]?n:count x;$[98h~type x;x:@[x;y;@;idx];x[;y]:x[;y]idx];:x}
 i.savemdl:{[x;y;z;r]
  folder_name:path,"/Outputs/",string[x`stdate],"/Models/Run_",string[x`sttime];
  save_path: system"mkdir -p ",folder_name;
- pickle:.p.get[`pickle_save];
+ pickle:.p.import[`sklearn.externals][`:joblib];
  $[(`sklearn=?[r;enlist(=;`model;y,());();`lib])0;
-    (pickle[folder_name,"/",string[y];z];0N!string[y]," model saved to ",folder_name);
+    (pickle[`:dump][z;folder_name,"/",string[y]];0N!string[y]," model saved to ",folder_name);
    (`keras=?[r;enlist(=;`model;y,());();`lib])0;
     (bm[`:save][folder_name,"/",string[y],".h5"];0N!string[y]," model saved to ",folder_name);
    0N!"Saving of non keras/sklearn models types is not currently supported"];
