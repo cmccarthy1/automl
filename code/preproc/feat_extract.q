@@ -38,6 +38,7 @@ normalcreate:{[x;p]
  x:(cols[x]except c)#x;
  x:i.truncsvd[x;::;2];
  x:"f"$i.bulktransform[x;::];
+ x:.ml.polytab[x;2];
  x:.ml.dropconstant i.null_encode[.ml.infreplace x;med];
  tab:$[0<count tcols;
        x^.ml.timesplit[(c:.ml.i.fndcols[x;"dmntvupz"])#x;::];
