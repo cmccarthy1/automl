@@ -38,7 +38,6 @@ normalcreate:{[x;p]
  x:(cols[x]except c)#x;
  x:i.truncsvd[x;::;2];
  x:"f"$i.bulktransform[x;::];
- x:.ml.polytab[x;2];
  x:.ml.dropconstant i.null_encode[.ml.infreplace x;med];
  tab:$[0<count tcols;
        x^.ml.timesplit[(c:.ml.i.fndcols[x;"dmntvupz"])#x;::];
@@ -50,12 +49,12 @@ normalcreate:{[x;p]
 
 
 i.bulktransform:{[x;c]
- if[(::)~c;c:.ml.i.fndcols[x;"hij"]];
- n:raze(,'/)`$(raze each string c@:.ml.combs[count c;2]),\:/:("_multi";"_sum";"_div";"_sub");
- flip flip[x],n!(,/)(prd;sum;{first(%)x};{last deltas x})@/:\:x c}
+  if[(::)~c;c:.ml.i.fndcols[x;"hij"]];
+  n:raze(,'/)`$(raze each string c@:.ml.combs[count c;2]),\:/:("_multi";"_sum";"_div";"_sub");
+  flip flip[x],n!(,/)(prd;sum;{first(%)x};{last deltas x})@/:\:x c}
 i.truncsvd:{[x;c;d]
- if[(::)~c;c:.ml.i.fndcols[x;"f"]];
- c@:.ml.combs[count c,:();d];
- svd:.p.import[`sklearn.decomposition;`:TruncatedSVD;`n_components pykw 1];
- flip flip[x],(`$(raze each string c),\:"_trsvd")!{raze x[`:fit_transform][flip y]`}[svd]each x c}
+  if[(::)~c;c:.ml.i.fndcols[x;"f"]];
+  c@:.ml.combs[count c,:();d];
+  svd:.p.import[`sklearn.decomposition;`:TruncatedSVD;`n_components pykw 1];
+  flip flip[x],(`$(raze each string c),\:"_trsvd")!{raze x[`:fit_transform][flip y]`}[svd]each x c}
 

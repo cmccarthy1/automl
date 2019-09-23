@@ -13,6 +13,7 @@ runexample:{[tb;tgt;typ;mdls;p]
  dict:i.updparam[tb;p;typ];
  system "S ",string s:dict`seed;
  tb:i.autotype[tb;typ;dict];
+ -1"\nThe following is a breakdown of information for each of the relevant columns in the dataset\n";
  tb:preproc[tb;tgt;typ;dict];
  -1"\nData preprocessing completed, starting feature creation\n";
  tb:$[typ=`fresh;freshcreate[tb;dict];typ=`normal;normalcreate[tb;dict];'`err];

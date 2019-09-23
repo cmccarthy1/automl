@@ -11,6 +11,7 @@
 /* p   = is a set of parameters as a dictionary or :: ('default set')
 preproc:{[tb;tgt;typ;p]
  i.lencheck[tb;tgt;typ;p];
+ show describe[tb];
  t:i.symencode[tb;10];
  t:.ml.dropconstant[t];
  t:"f"$i.null_encode[t;med];
