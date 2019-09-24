@@ -8,7 +8,7 @@ i.updparam:{[x;p;typ]
  dict:$[typ=`fresh;
   {d:`aggcols`params`xv`prf`scf`k`seed`saveopt!
      (first cols x;
-      .ml.fresh.params;`kfsplit;
+      .ml.fresh.params;`kfshuff;
       xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);5;42;2);
    $[y~(::);d;
      99h=type y;
@@ -18,7 +18,17 @@ i.updparam:{[x;p;typ]
      '`$"You must pass identity `(::)` or dictionary with appropriate key/value pairs to function"];
    d}[x;p];
   typ=`normal;
-   '`$"This will need to be added once the normal recipe is in place";
+   {d:`xv`prf`scf`k`seed`saveopt!
+      (`kfshuff;xv.fitpredict;
+       `class`reg!(`.ml.accuracy;`.ml.mse);
+       5;42;2);
+    $[y~(::);d;
+     99h=type y;
+     $[min key[y]in key[d];
+       d[key y]:value y;
+       '`$"You can only pass appropriate keys to fresh"];
+     '`$"You must pass identity `(::)` or dictionary with appropriate key/value pairs to function"];
+   d}[x;p]; 
   typ=`tseries;
    '`$"This will need to be added once the time-series recipe is in place";
   '`$"Incorrect input type"]}
@@ -53,9 +63,9 @@ i.shuffle:{idx:neg[n]?n:count x;$[98h~type x;x:@[x;y;@;idx];x[;y]:x[;y]idx];:x}
 i.savemdl:{[x;y;z;r]
  folder_name:path,"/Outputs/",string[x`stdate],"/Models/Run_",string[x`sttime];
  save_path: system"mkdir -p ",folder_name;
- pickle:.p.get[`pickle_save];
+ pickle:.p.import[`sklearn.externals][`:joblib];
  $[(`sklearn=?[r;enlist(=;`model;y,());();`lib])0;
-    (pickle[folder_name,"/",string[y];z];0N!string[y]," model saved to ",folder_name);
+    (pickle[`:dump][z;folder_name,"/",string[y]];0N!string[y]," model saved to ",folder_name);
    (`keras=?[r;enlist(=;`model;y,());();`lib])0;
     (bm[`:save][folder_name,"/",string[y],".h5"];0N!string[y]," model saved to ",folder_name);
    0N!"Saving of non keras/sklearn models types is not currently supported"];

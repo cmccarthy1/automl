@@ -26,14 +26,15 @@ models:{
 runmodels:{[x;y;m;d;dt]
  system"S ",string s:d`seed;
  c:cols x;
- x:i.mattab x;
+ x:flip value flip x;
 
  / encode categorical as numerical
  if[11h~type y;y:![dy;til count dy:distinct y]y];
 
  / keep holdout for feature impact
  tt:.ml.traintestsplit[x;y;.3];
- if[(count distinct y)>min {count distinct x}each tt`ytrain`ytest;m:i.err_tgt[m]]; 
+ if[(`MultiKeras in m`model)&(count distinct y)>min {count distinct x
+	}each tt`ytrain`ytest;m:i.err_tgt[m]]; 
 
  / seeded cross validation returning predictions
  xv_tstart:.z.T;
