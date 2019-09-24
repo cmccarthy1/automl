@@ -59,9 +59,13 @@ i.credibility:{[x;c;tgt]
 /* y = sublist of columns we use
 /* z = type of feature creation we are doing
 i.err_col:{[x;y;z]if[count[x]<>count y;
-  -1 "\n Removed the following columns due to type restrictions for ",string z;
-  0N!x where not x in y]}
+ -1 "\n Removed the following columns due to type restrictions for ",string z;
+ 0N!x where not x in y]}
 
+i.err_tgt:{
+ -1 "\n Test set does not contain examples of each class. Removed MultiKeras from models";
+ delete from x where model=`MultiKeras}
+ 
 // Automl version of the describe function from the toolkit
 /* x =
 describe:{

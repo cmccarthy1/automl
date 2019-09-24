@@ -33,6 +33,8 @@ runmodels:{[x;y;m;d;dt]
 
  / keep holdout for feature impact
  tt:.ml.traintestsplit[x;y;.3];
+ if[(`MultiKeras in m`model)&(count distinct y)>min {count distinct x
+	}each tt`ytrain`ytest;m:i.err_tgt[m]]; 
 
  / seeded cross validation returning predictions
  xv_tstart:.z.T;
