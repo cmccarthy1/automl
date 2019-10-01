@@ -32,10 +32,10 @@ runmodels:{[x;y;m;d;dt]
   if[11h~type y;y:![dy;til count dy:distinct y]y];
 
   / keep holdout for feature impact
-  tt:.ml.traintestsplit[x;y;.3];
+  tt:d[`tts][x;y;d`hld];
   if[(`MultiKeras in m`model)&(count distinct y)>min {count distinct x}each tt`ytrain`ytest;
      m:i.err_tgt[m]]; 
-
+ 
  / seeded cross validation returning predictions
  xv_tstart:.z.T;
  p1:gs.seed[tt`xtrain;tt`ytrain;d]'[m];
@@ -53,13 +53,13 @@ runmodels:{[x;y;m;d;dt]
  bm_tstart:.z.T;
  bm[`:fit][tt`xtrain;tt`ytrain];
  show s2:fn[;ytst:tt`ytest]bm[`:predict][xtst:tt`xtest]`;
- if[d[`saveopt]in(1;2);-1"";i.savemdl[dt;bs;bm;m]];
  bm_tend:.z.T-bm_tstart;
+
  / feature impact graph produced on holdout data if setting appropriate
  if[2=d[`saveopt];i.featureimpact[bs;bm;xtst;ytst;c;f;o;dt]];
 
  / outputs from run models, used in report generation
- (s1;bs;s2;xv_tend;bm_tend;fn)}
+ (s1;bs;s2;xv_tend;bm_tend;fn;bm)}
 
 / grid search w/ random seed where applicable
 gs.seed:{[x;y;d;m]
@@ -71,5 +71,6 @@ gs.seed:{[x;y;d;m]
 
 / returns (ypred;ytrue) for each k
 xv.fitpredict:{[f;p;d]($[-7h~type p;f[d;p];@[.[f[][p]`:fit;d 0]`:predict;d[1]0]`];d[1]1)}
+xv.fitpredict2:{[fn;f;p;d]fn . ($[-7h~type p;f[d;p];@[.[f[][p]`:fit;d 0]`:predict;d[1]0]`];d[1]1)}
 
 if[0>system"s";.ml.mproc.init[abs system"s"]enlist".ml.loadfile`:init.q"]

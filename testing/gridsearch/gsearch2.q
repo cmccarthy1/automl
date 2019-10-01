@@ -23,16 +23,16 @@ i.extract_dict:{key[k]!value each value k:i.txtparse2[x;y]z}
 // paths and names will need to change on merge into main system
 e_dict:{.aml.i.extract_dict["ffile.txt";"/testing/gridsearch/"]x}
 
-gs.psearch:{[xt;yt;mdl;d;typ]
+gs.psearch:{[xt;yt;mdl;d;typ;mdls]
   // extract the required hyperparameters for given model from flat file 
   dict:e_dict[mdl];
 
   // create the appropriate module for the model being applied
   module:` sv 2#i.txtparse[typ;"/code/mdl_def/"]mdl;
-
+  fn:d[`scf]$[`reg in distinct mdls`typ;`reg;`class];
   // produce the required fitting and scoring projection based on best model
-  fit_score:.ml.xv.fitscore{y;x}[.p.import[module][hsym mdl];];
-
+  // at present this returns the scores based on the models provided by the user/algo
+  fit_score:xv.fitpredict2[get fn]{y;x}[.p.import[module][hsym mdl];];
   // run the grid-search over the parameter set 
   get[` sv `.ml.gs,d`typ_gs][d`k;1;xt;yt;fit_score;dict;d`hld]
   }
