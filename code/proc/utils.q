@@ -6,10 +6,11 @@
 / typ = type of feature extraction (FRESH/normal/tseries ...)
 i.updparam:{[x;p;typ]
  dict:$[typ=`fresh;
-  {d:`aggcols`params`xv`prf`scf`k`seed`saveopt!
+  {d:`aggcols`params`xv`prf`scf`k`seed`saveopt`typ_gs`hld!
      (first cols x;
       .ml.fresh.params;`kfshuff;
-      xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);5;42;2);
+      xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);
+      5;42;2;`kfsplit;0.2);
    $[y~(::);d;
      99h=type y;
      $[min key[y]in key[d];
@@ -18,10 +19,10 @@ i.updparam:{[x;p;typ]
      '`$"You must pass identity `(::)` or dictionary with appropriate key/value pairs to function"];
    d}[x;p];
   typ=`normal;
-   {d:`xv`prf`scf`k`seed`saveopt!
+   {d:`xv`prf`scf`k`seed`saveopt`hld`typ_gs!
       (`kfshuff;xv.fitpredict;
        `class`reg!(`.ml.accuracy;`.ml.mse);
-       5;42;2);
+       5;42;2;0.2;`kfsplit);
     $[y~(::);d;
      99h=type y;
      $[min key[y]in key[d];

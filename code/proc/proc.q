@@ -24,17 +24,17 @@ models:{
 /* d = dictionary of populated parameters (defined earlier in the workflow)
 /* dt = date and time that the entire 
 runmodels:{[x;y;m;d;dt]
- system"S ",string s:d`seed;
- c:cols x;
- x:flip value flip x;
+  system"S ",string s:d`seed;
+  c:cols x;
+  x:flip value flip x;
 
- / encode categorical as numerical
- if[11h~type y;y:![dy;til count dy:distinct y]y];
+  / encode categorical as numerical
+  if[11h~type y;y:![dy;til count dy:distinct y]y];
 
- / keep holdout for feature impact
- tt:.ml.traintestsplit[x;y;.3];
- if[(`MultiKeras in m`model)&(count distinct y)>min {count distinct x
-	}each tt`ytrain`ytest;m:i.err_tgt[m]]; 
+  / keep holdout for feature impact
+  tt:.ml.traintestsplit[x;y;.3];
+  if[(`MultiKeras in m`model)&(count distinct y)>min {count distinct x}each tt`ytrain`ytest;
+     m:i.err_tgt[m]]; 
 
  / seeded cross validation returning predictions
  xv_tstart:.z.T;
@@ -43,7 +43,6 @@ runmodels:{[x;y;m;d;dt]
  / scoring functions for results and order asc/desc
  f:get fn:d[`scf]$[`reg in distinct m`typ;`reg;`class];
  o:get string first i.txtparse[`score;"/code/mdl_def/"]fn;
-
  -1"\nScores for all models, using ",string[fn];
  show s1:o m[`model]!{first avg x}each f .''p1;
  xv_tend:.z.T-xv_tstart;
@@ -56,7 +55,6 @@ runmodels:{[x;y;m;d;dt]
  show s2:fn[;ytst:tt`ytest]bm[`:predict][xtst:tt`xtest]`;
  if[d[`saveopt]in(1;2);-1"";i.savemdl[dt;bs;bm;m]];
  bm_tend:.z.T-bm_tstart;
-
  / feature impact graph produced on holdout data if setting appropriate
  if[2=d[`saveopt];i.featureimpact[bs;bm;xtst;ytst;c;f;o;dt]];
 

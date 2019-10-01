@@ -9,3 +9,5 @@
 .aml.loadfile`:code/postproc/plots.q
 .aml.loadfile`:code/postproc/report_gen.q
 .aml.loadfile`:code/run.q
+// to be removed following testing
+.aml.loadfile`:testing/gridsearch/gsearch2.q

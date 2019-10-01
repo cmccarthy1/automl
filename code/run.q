@@ -4,19 +4,21 @@
 
 /* tb   = input table
 /* tgt  = target vector
-/* typ  = type of feature extraction being completed
+/* feat_typ = type of feature extraction being completed
+/* prob_typ = type of problem regression/class (`reg/`class)
 /* mdls = table of models (.aml.models[`class;tgt]/.aml.models[`reg;tgt])
 /* p    = parameters (::) ~ default other changes user dependent
 
-runexample:{[tb;tgt;typ;mdls;p]
+runexample:{[tb;tgt;feat_typ;prob_typ;p]
+ mdls:models[prob_typ;tgt];
  dtdict:`stdate`sttime!(.z.D;.z.T);
- dict:i.updparam[tb;p;typ];
+ dict:i.updparam[tb;p;feat_typ];
  system "S ",string s:dict`seed;
- tb:i.autotype[tb;typ;dict];
+ tb:i.autotype[tb;feat_typ;dict];
  -1"\nThe following is a breakdown of information for each of the relevant columns in the dataset\n";
- tb:preproc[tb;tgt;typ;dict];
+ tb:preproc[tb;tgt;feat_typ;dict];
  -1"\nData preprocessing completed, starting feature creation\n";
- tb:$[typ=`fresh;freshcreate[tb;dict];typ=`normal;normalcreate[tb;dict];'`err];
+ tb:$[feat_typ=`fresh;freshcreate[tb;dict];feat_typ=`normal;normalcreate[tb;dict];'`err];
  feats:freshsignificance[tb 0;tgt];
  tab:feats#tb 0;
  -1"\nFeature creation and significance testing completed.\nStarting initial model selection - allow ample time for large datasets\n";
@@ -25,5 +27,6 @@ runexample:{[tb;tgt;typ;mdls;p]
  -1"\nModel selection has been completed, continuing to the next step\n";
  if[2=dict`saveopt;
  -1"Now saving down a report on this run to Outputs/Reports\n";
- report[i.report_dict[ctb;bm;tb;dtdict;path];dtdict];]
+ report[i.report_dict[ctb;bm;tb;dtdict;path];dtdict];];
+ show gs.psearch[flip value flip tab;tgt;bm 1;dict;prob_typ];
  }
