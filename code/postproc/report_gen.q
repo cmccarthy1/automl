@@ -85,7 +85,7 @@ report:{
  line[pdf;7];
 
 
- system"mkdir -p ",folder_name:path,"/Outputs/",string[y`stdate],"/Reports";
+ system"mkdir -p ",folder_name:path,"/Outputs/",string[y`stdate],"/Run_",string[y`sttime],"/Reports";
  pdf[`:output][folder_name,"/q_automl_report_",sv["_";string(x`mdl;y`sttime)];`F];
  -1"Saving to pdf has been completed";}
 

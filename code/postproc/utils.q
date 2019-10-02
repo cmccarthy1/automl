@@ -37,7 +37,7 @@ i.report_dict:{[x;y;z;r;k]
  select
   feats    :x,
   dict     :y 0,
-  impact   :(k,"/Outputs/",string[r`stdate],"/Images/Run_",string[r`sttime],"/Impact_Plot_",string[y 1],".png"),
+  impact   :(k,"/Outputs/",string[r`stdate],"/Run_",string[r`sttime],"/Images/Impact_Plot_",string[y 1],".png"),
   holdout  :y 2,
   xvtime   :y 3,
   bmtime   :y 4,
