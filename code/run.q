@@ -35,10 +35,12 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
 
   -1"\nThe best model has been selected as ",string[bm[1]],", continuing to grid-search and final model fitting on holdout set\n";
 
-// The following is commented out for now due to the changes imposed by inclusion of gridsearch
+// The following is commented out for now due to the changes which have been imposed by the inclusion of gridsearch
+/
   if[2=dict`saveopt;
     -1"Now saving down a report on this run to Outputs/Reports\n";
     report[i.report_dict[ctb;bm;tb;dtdict;path];dtdict];];
+\
 
   fn:i.scfn[dict;mdls];
   exclude_list:`GaussianNB`LinearRegression;
@@ -50,11 +52,6 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
     score  :first prms;
     exp_mdl:last prms];
   -1"Grid search/final model fitting now completed the final score on the holdout set was: ",string score;
-
-/* x = date-time of model start (dict)
-/* y = best model name (`symbol)
-/* z = best model object (embedPy)
-/* r = all applied models (table)
 
   if[dict[`saveopt]in 1 2;i.savemdl[dtdict;bm[1];exp_mdl;mdls]];
   }

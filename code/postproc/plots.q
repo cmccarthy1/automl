@@ -41,7 +41,8 @@ i.impactplot:{[r;m;z]
  system"mkdir -p ",folder_name:path,"/Outputs/",string[z`stdate],"/Run_",string[z`sttime],"/Images";
  plt[`:savefig][folder_name,"/",sv["_";string(`Impact_Plot;m)],".png";`bbox_inches pykw"tight"];}
 
-// should work but needs implementation decisions prior to integration, note: need to output prediction probabilities for this
+// should work but needs implementation decisions prior to integration
+//  note: need to output prediction probabilities for this
 i.roccurve:{
  rocdict:`frp`tpr`x!.ml.roc[y;yPredProb];
  rocAuc:.ml.auc[rocdict`frp; rocdict`tpr];lw:2;

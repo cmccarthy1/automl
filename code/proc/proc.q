@@ -3,7 +3,7 @@
 
 \d .aml
 
-// table of models
+/  table of models
 /* x = symbol, either `class or `reg
 /* y = target
 models:{
@@ -17,7 +17,7 @@ models:{
  m:update minit:.aml.i.mdlfunc .'flip(lib;fnc;model)from m;
  i.updmodels[m;y]}
 
-// run multiple models
+/  run multiple models
 /* x = table of features
 /* y = target
 /* m = models from `.aml.models`
