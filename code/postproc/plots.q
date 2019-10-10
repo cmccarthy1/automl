@@ -38,5 +38,22 @@ i.impactplot:{[r;m;z]
  ax[`:set_title]"Feature Impact: ",string m;
  ax[`:set_ylabel]"Columns";
  ax[`:set_xlabel]"Relative feature impact";
- system"mkdir -p ",folder_name:path,"/Outputs/",string[z`stdate],"/Images/Run_",string[z`sttime];
+ system"mkdir -p ",folder_name:path,"/Outputs/",string[z`stdate],"/Run_",string[z`sttime],"/Images";
  plt[`:savefig][folder_name,"/",sv["_";string(`Impact_Plot;m)],".png";`bbox_inches pykw"tight"];}
+
+// should work but needs implementation decisions prior to integration
+//  note: need to output prediction probabilities for this
+i.roccurve:{
+ rocdict:`frp`tpr`x!.ml.roc[y;yPredProb];
+ rocAuc:.ml.auc[rocdict`frp; rocdict`tpr];lw:2;
+ plt[`:plot][rocdict`frp;rocdict`tpr;`color pykw "darkorange";`lw pykw lw;`label pykw "ROC curve (Area = ",string[rocAuc]," )"];
+ plt[`:plot][0 1;0 1;`color pykw "navy";`lw pykw lw;`linestyle pykw "--"];
+ plt[`:xlim][0 1];
+ plt[`:ylim][0 1.05];
+ plt[`:xlabel]["False Positive Rate"];
+ plt[`:ylabel]["True Positive Rate"];
+ plt[`:title]["Reciever operating characteristic example"];
+ plt[`:legend][`loc pykw "upper left"];
+ system"mkdir -p ",folder_name:path,"/Outputs/",string[z`stdate],"/Images/Run_",string[z`sttime];
+ plt[`:savefig][folder_name,"/ROC_Curve.png"];
+ plt[`:show][];}

@@ -11,9 +11,9 @@
 /* p   = is a set of parameters as a dictionary or :: ('default set')
 preproc:{[tb;tgt;typ;p]
  i.lencheck[tb;tgt;typ;p];
+ show i.describe[tb];
  t:i.symencode[tb;10];
  t:.ml.dropconstant[t];
  t:"f"$i.null_encode[t;med];
- $[`fresh=typ;
-   (flip p[`cols2drop]#flip tb),'.ml.infreplace[t];
-   .ml.infreplace[t]]}
+ $[`fresh=typ;(flip p[`cols2drop]#flip tb),'.ml.infreplace[t];t]
+ }
