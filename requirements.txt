@@ -3,5 +3,4 @@ numpy
 scikit-learn
 matplotlib
 sklearn
-pickle
 fdpf

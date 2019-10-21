@@ -32,11 +32,32 @@ i.impactplot:{[r;m;z]
  plt[`:figure][`figsize pykw 20 20];
  sub:plt[`:subplots][];
  fig:sub[@;0];ax:sub[@;1];
- ax[`:barh][n:til 20;20#value r;`align pykw`center];
- ax[`:set_yticks][n];
- ax[`:set_yticklabels]20#key r;
+ b:20<cr:count value r;
+ n:$[b;til 20;til cr];
+ v:$[b;20#;cr#]value r;
+ k:$[b;20#;cr#]key r;
+ ax[`:barh][n;v;`align pykw`center];
+ ax[`:set_yticks]n;
+ ax[`:set_yticklabels]k;
  ax[`:set_title]"Feature Impact: ",string m;
  ax[`:set_ylabel]"Columns";
  ax[`:set_xlabel]"Relative feature impact";
- system"mkdir -p ",folder_name:path,"/Outputs/",string[z`stdate],"/Images/Run_",string[z`sttime];
+ system"mkdir -p ",folder_name:path,"/Outputs/",string[z`stdate],"/Run_",string[z`sttime],"/Images";
  plt[`:savefig][folder_name,"/",sv["_";string(`Impact_Plot;m)],".png";`bbox_inches pykw"tight"];}
+
+// should work but needs implementation decisions prior to integration
+//  note: need to output prediction probabilities for this
+i.roccurve:{
+ rocdict:`frp`tpr`x!.ml.roc[y;yPredProb];
+ rocAuc:.ml.auc[rocdict`frp; rocdict`tpr];lw:2;
+ plt[`:plot][rocdict`frp;rocdict`tpr;`color pykw "darkorange";`lw pykw lw;`label pykw "ROC curve (Area = ",string[rocAuc]," )"];
+ plt[`:plot][0 1;0 1;`color pykw "navy";`lw pykw lw;`linestyle pykw "--"];
+ plt[`:xlim][0 1];
+ plt[`:ylim][0 1.05];
+ plt[`:xlabel]["False Positive Rate"];
+ plt[`:ylabel]["True Positive Rate"];
+ plt[`:title]["Reciever operating characteristic example"];
+ plt[`:legend][`loc pykw "upper left"];
+ system"mkdir -p ",folder_name:path,"/Outputs/",string[z`stdate],"/Images/Run_",string[z`sttime];
+ plt[`:savefig][folder_name,"/ROC_Curve.png"];
+ plt[`:show][];}
