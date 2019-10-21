@@ -33,14 +33,13 @@ freshsignificance:{
 normalcreate:{[x;p]
 / cols2use:k where not (k:cols[x])in p`ignore_cols;
   fe_start:.z.T;
-  tcols:c:.ml.i.fndcols[x;"dmntvupz"];
-  x:(cols[x]except c)#x;
-  x:i.truncsvd[x;::;2];
-  x:"f"$i.bulktransform[x;::];
-  x:.ml.dropconstant i.null_encode[.ml.infreplace x;med];
-  tab:$[0<count tcols;
-    x^.ml.timesplit[(c:.ml.i.fndcols[x;"dmntvupz"])#x;::];
-    x];
+  tcols:.ml.i.fndcols[x;"dmntvupz"];
+  t:(cols[x]except tcols)#x;
+  t:i.truncsvd[t;::;2];
+  t:i.bulktransform[t;::];
+  t:.ml.dropconstant i.null_encode[.ml.infreplace t;med];
+  tcols:$[0<count tcols;.ml.timesplit[tcols#x;::];()];
+  t:tcols^t;
   fe_end:.z.T-fe_start;
-  (tab;fe_end)}
+  (t;fe_end)}
 

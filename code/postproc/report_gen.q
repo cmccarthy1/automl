@@ -95,9 +95,6 @@ report:{
     cell[pdf;gstitle];
     line[pdf;5];
     
-    {cell[x;y]}[pdf]each {(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}x`gs;
-    line[pdf;7];
-
 
   ]
 
