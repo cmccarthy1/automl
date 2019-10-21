@@ -32,9 +32,13 @@ i.impactplot:{[r;m;z]
  plt[`:figure][`figsize pykw 20 20];
  sub:plt[`:subplots][];
  fig:sub[@;0];ax:sub[@;1];
- ax[`:barh][n:til 20;20#value r;`align pykw`center];
- ax[`:set_yticks][n];
- ax[`:set_yticklabels]20#key r;
+ b:20<cr:count value r;
+ n:$[b;til 20;til cr];
+ v:$[b;20#;cr#]value r;
+ k:$[b;20#;cr#]key r;
+ ax[`:barh][n;v;`align pykw`center];
+ ax[`:set_yticks]n;
+ ax[`:set_yticklabels]k;
  ax[`:set_title]"Feature Impact: ",string m;
  ax[`:set_ylabel]"Columns";
  ax[`:set_xlabel]"Relative feature impact";
