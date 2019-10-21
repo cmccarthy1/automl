@@ -29,7 +29,7 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
  
   -1"\nFeature creation and significance testing completed.";
   -1"Starting initial model selection - allow ample time for large datasets\n";
-  -1"Total features being passed to the models = ",string[ctb:count 1_cols tab];
+  -1"Total features being passed to the models = ",string[ctb:count $[`fresh~feat_typ;1_;]cols tab];
 
   bm:runmodels[tts`xtrain;tts`ytrain;mdls;dict;dtdict];
 

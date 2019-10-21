@@ -24,6 +24,7 @@ gs.psearch:{[xtrn;ytrn;xtst;ytst;mdl;d;typ;mdls]
 / cross validation search w/ random seed where applicable
 xv.seed:{[x;y;d;m]
  b:m[`lib]~`sklearn;
+ system"S 43";
  s:$[a:m[`seed]~`seed;$[b;enlist[`random_state]!enlist d`seed;d`seed];::];
  $[a&b;first value get[` sv`.ml.gs,d`xv][d`k;1;x;y;d[`prf]m`minit;s;0];
    get[` sv`.ml.xv,d`xv][d`k;1;x;y;d[`prf][m`minit;s]]]}
