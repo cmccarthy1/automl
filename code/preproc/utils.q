@@ -59,7 +59,8 @@ i.symencode:{
    fc:where y<count each distinct each sc!flip[x]sc;     / fc = cols to freq encode
    ohe:sc where not sc in fc;                            / ohe = one hot encoded columns
    r:.ml.onehot[.ml.freqencode[x;fc];ohe]];
-  r}
+  flip sc _ flip r
+  }
 
 
 // Utilities for feat_extract.q

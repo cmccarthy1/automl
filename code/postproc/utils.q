@@ -43,7 +43,7 @@ i.gaincurve:{[y;p;pc]
 // Utilities for report generation
 
 /  dictionary used report population
-i.report_dict:{[x;y;z;r;k]
+i.report_dict:{[x;y;z;r;k;l]
   dd:(0#`)!();
   select
     feats    :x,
@@ -53,6 +53,8 @@ i.report_dict:{[x;y;z;r;k]
     xvtime   :y 3,
     bmtime   :y 4,
     metric   :y 5,
-    feat_time:z 1
+    feat_time:z 1,
+    gs       :l 0,
+    score    :l 1
   from dd}
 

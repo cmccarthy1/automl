@@ -94,9 +94,19 @@ report:{
     gstitle:"Grid search for a ",(string first key[x`dict])," model.";
     cell[pdf;gstitle];
     line[pdf;5];
-    
 
-  ]
+    font[pdf;11;`];
+    gsp:"The following are the hyperparameters which have been deemed optimal for the model";
+    cell[pdf;gsp];
+    line[pdf;5];
+
+    {cell[x;y]}[pdf]each {(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}x`gs;
+    line[pdf;7];
+
+    fin:"The score for the best model with these hyperparameters fit on the entire training set and scored on the test set was = ",string[x`score];
+    cell[pdf;fin];
+    line[pdf;7];
+    ]
 
   
   system"mkdir -p ",folder_name:path,"/Outputs/",string[y`stdate],"/Run_",string[y`sttime],"/Reports";

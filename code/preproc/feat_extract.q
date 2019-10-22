@@ -39,7 +39,7 @@ normalcreate:{[x;p]
   t:i.bulktransform[t;::];
   t:.ml.dropconstant i.null_encode[.ml.infreplace t;med];
   tcols:$[0<count tcols;.ml.timesplit[tcols#x;::];()];
-  t:tcols^t;
+  t:t^tcols;
   fe_end:.z.T-fe_start;
   (t;fe_end)}
 

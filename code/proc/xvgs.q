@@ -18,7 +18,7 @@ gs.psearch:{[xtrn;ytrn;xtst;ytst;mdl;d;typ;mdls]
   / 'best' model
   bmdl:epymdl[pykwargs hyp][`:fit][xtrn;ytrn];
   score:fn[;ytst]bmdl[`:predict][flip value flip xtst]`;
-  (score;bmdl)
+  (score;hyp;bmdl)
   }
 
 / cross validation search w/ random seed where applicable
