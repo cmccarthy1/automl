@@ -8,11 +8,11 @@
 /* typ = type of feature extraction (FRESH/normal/tseries ...)
 i.updparam:{[x;p;typ]
  dict:$[typ=`fresh;
-  {d:`aggcols`params`xv`prf`scf`k`seed`saveopt`hld`typ_gs`tts`sz!
+  {d:`aggcols`params`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
      (first cols x;
-      .ml.fresh.params;`kfshuff;
+      .ml.fresh.params;(`kfshuff;5);(`kfshuff;5);
       xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);
-      5;42;2;0.2;`kfsplit;.ml.traintestsplit;0.2);
+      42;2;0.2;.ml.traintestsplit;0.2);
    $[y~(::);d;
      99h=type y;
      $[min key[y]in key[d];
@@ -21,10 +21,10 @@ i.updparam:{[x;p;typ]
      '`$"You must pass identity `(::)` or dictionary with appropriate key/value pairs to function"];
    d}[x;p];
   typ=`normal;
-   {d:`xv`prf`scf`k`seed`saveopt`hld`typ_gs`tts`sz!
-      (`kfshuff;xv.fitpredict;
+   {d:`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
+      ((`kfshuff;5);(`kfshuff;5);xv.fitpredict;
        `class`reg!(`.ml.accuracy;`.ml.mse);
-       5;42;2;0.2;`kfsplit;.ml.traintestsplit;0.2);
+       42;2;0.2;.ml.traintestsplit;0.2);
     $[y~(::);d;
      99h=type y;
      $[min key[y]in key[d];
