@@ -55,6 +55,7 @@ i.report_dict:{[x;y;z;r;k;l]
     metric   :y 5,
     feat_time:z 1,
     gs       :l 0,
-    score    :l 1
+    score    :l 1,
+    xv       :l 2
   from dd}
 
