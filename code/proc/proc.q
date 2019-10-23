@@ -42,7 +42,7 @@ runmodels:{[x;y;m;d;dt]
   xv_tend:.z.T-xv_tstart;
  
   / Score best model on holdout and save down model if appropriate
-  -1"\nScore for holdout predictions using best model - ",string[bs:first key s1];
+  -1"\nScore for validation predictions using best model - ",string[bs:first key s1];
   bm:(first exec minit from m where model=bs)[][];
   bm_tstart:.z.T;
   bm[`:fit][tt`xtrain;tt`ytrain];

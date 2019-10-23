@@ -11,4 +11,4 @@ LogisticRegression        |penalty=`l1`l2;tol=0.0001 0.0005 0.001 0.005;C=0.1 0.
 KNeighborsClassifier      |n_neighbors=2 5 10;leaf_size=10 20 50;metric=`minkowski
 MLPClassifier             |activation=`relu`tanh`logistic;solver=`adam`sgd;alpha=0.0001 0.001 0.01;learning_rate_init=0.001 0.005 0.01
 SVC                       |C=0.1 0.2 0.5 1.0;degree=2 3 4;tol=0.001 0.005 0.01
-LinearSVC                 |C=0.1 0.2 0.5 1.0;degree=2 3 4;tol=0.001 0.005 0.01
+LinearSVC                 |C=0.1 0.2 0.5 1.0;tol=0.001 0.005 0.01
