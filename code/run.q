@@ -35,8 +35,6 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
 
   -1"\nThe best model has been selected as ",string[bm[1]],", continuing to grid-search and final model fitting on holdout set\n";
 
-// The following is commented out for now due to the changes which have been imposed by the inclusion of gridsearch
-
   fn:i.scfn[dict;mdls];
   exclude_list:`GaussianNB`LinearRegression;
   if[a:bm[1]in exclude_list;
@@ -46,11 +44,11 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
     prms:gs.psearch[flip value flip tts`xtrain;tts`ytrain;tts`xtest;tts`ytest;bm 1;dict;prob_typ;mdls];
     score  :first prms; 
     exp_mdl:last prms];
-  -1"Grid search/final model fitting now completed the final score on the holdout set was: ",string score;
+  -1"Best model fitting now completed the final score on the test set was: ",string score;
 
   if[2=dict`saveopt;
     -1"Now saving down a report on this run to Outputs/",string[dtdict`stdate],"/Run_",string[dtdict`sttime],"/Reports/\n";
-    report[i.report_dict[ctb;bm;tb;dtdict;path;(prms 1;score)];dtdict];];
+    report[i.report_dict[ctb;bm;tb;dtdict;path;(prms 1;score;dict`xv;dict`gs)];dtdict];];
 
   meta_dict:dict,(`features`test_score`best_model!(fcols;score;bm[1])),$[b;enlist[`hyper_parameters]!enlist prms 1;()!()];
   if[dict[`saveopt]in 1 2;i.savemdl[dtdict;bm[1];exp_mdl;mdls];savemeta[meta_dict;dtdict]];

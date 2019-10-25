@@ -56,6 +56,7 @@ i.report_dict:{[x;y;z;r;k;l]
     feat_time:z 1,
     gs       :l 0,
     score    :l 1,
-    xv       :l 2
+    xv       :l 2,
+    gscfg    :l 3
   from dd}
 
