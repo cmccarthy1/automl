@@ -13,7 +13,8 @@ i.featureimpact:{[b;m;x;y;c;f;o;dt]
   r:i.predshuff[m;x;y;f]each til count c;
   im:i.impact[r;c;o];
   i.impactplot[im;b;dt];
-  -1"\nFeature impact calculated for features associated with ",string[b]," model - \nsee img folder in current directory for results";}
+  -1"\nFeature impact calculated for features associated with ",string[b]," model";
+  -1"Plots saved in Outputs/",string[dt`stdate],"/Run_",string[dt`sttime],"/Images/\n";}
 
 /  rerun model after shuffle and output score
 i.predshuff:{[m;x;y;f;c]
