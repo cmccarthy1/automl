@@ -13,6 +13,9 @@ gs.psearch:{[xtrn;ytrn;xtst;ytst;mdl;d;typ;mdls]
   / fitting and scoring projection
   fitscore:gs.fitpredict[get fn]{y;x}[epymdl;];
   / apply grid search
+  spltcnt:$[d[`gs;0]in`mcsplit`pcsplit;1-d[`gs]1;(d[`gs;1]-1)%d[`gs]1]*count[xtrn]*1-d`hld;
+  if[mdl=`KNeighborsRegressor;
+   if[0<count where n:spltcnt<dict`n_neighbors;dict[`n_neighbors]@:where not n]];
   gsprms:get[` sv `.ml.gs,d[`gs]0][d[`gs]1;1;xtrn;ytrn;fitscore;dict;d`hld];
   hyp:first key o avg each first gsprms;
   / 'best' model

@@ -46,14 +46,14 @@ i.scorepred:{[x;y;z;r] r[;y]z[`:predict][x]`}
 /* z = best model object (embedPy)
 /* r = all applied models (table)
 i.savemdl:{[x;y;z;r]
- folder_name:path,"/Outputs/",string[x`stdate],"/Run_",string[x`sttime],"/Models";
+ folder_name:path,"/",mo:"Outputs/",string[x`stdate],"/Run_",string[x`sttime],"/Models/";
  save_path: system"mkdir -p ",folder_name;
  joblib:.p.import[`sklearn.externals][`:joblib];
  $[(`sklearn=?[r;enlist(=;`model;y,());();`lib])0;
-    (joblib[`:dump][z;folder_name,"/",string[y]];0N!string[y]," model saved to ",folder_name);
+    (joblib[`:dump][z;folder_name,"/",string[y]];-1"Saving down ",string[y]," model to ",mo);
    (`keras=?[r;enlist(=;`model;y,());();`lib])0;
-    (bm[`:save][folder_name,"/",string[y],".h5"];0N!string[y]," model saved to ",folder_name);
-   0N!"Saving of non keras/sklearn models types is not currently supported"];
+    (bm[`:save][folder_name,"/",string[y],".h5"];-1"Saving down ",string[y]," model to ",mo);
+   -1"Saving of non keras/sklearn models types is not currently supported"];
  }
 
 \d .
