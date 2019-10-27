@@ -53,13 +53,14 @@ i.null_encode:{[x;y]
 
 /  Symbol encoding
 i.symencode:{
-  sc:.ml.i.fndcols[x;"s"];                               / sc = symbol columns
-  if[0=count sc;r:x];
+  sc:.ml.i.fndcols[x;"s"];
+  if[0=count sc;r:$[z=1;`freq`ohe!``;x]];
   if[0<count sc;
-   fc:where y<count each distinct each sc!flip[x]sc;     / fc = cols to freq encode
-   ohe:sc where not sc in fc;                            / ohe = one hot encoded columns
-   r:.ml.onehot[.ml.freqencode[x;fc];ohe]];
-  flip sc _ flip r
+    fc:where y<count each distinct each sc!flip[x]sc;
+    ohe:sc where not sc in fc;
+    r:$[z=1;`freq`ohe!(fc;ohe);.ml.onehot[.ml.freqencode[x;fc];ohe]]];
+  if[z<>1;r:flip sc _ flip r];
+  r
   }
 
 

@@ -9,6 +9,6 @@ savemeta:{
   -1"Saving down model parameters to ",po;}
 
 getmeta:{
-  file_path:`$":",path,"/Outputs/",x;
+  file_path:`$":",x;
   $[()~key file_path;'`$"metadata file doesn't exist";get file_path]
   }

@@ -13,7 +13,7 @@ preproc:{[tb;tgt;typ;p]
  $[`fresh=typ;[sep_data:(p[`aggcols],())#flip tb;t:flip (cols[tb]except p[`aggcols])#flip tb];t:tb];
  i.lencheck[tb;tgt;typ;p];
  show i.describe t;
- t:i.symencode[t;10];
+ t:i.symencode[t;10;0];
  t:.ml.dropconstant t;
  t:i.null_encode[t;med];
  $[`fresh=typ;flip sep_data,;flip]flip .ml.infreplace t
