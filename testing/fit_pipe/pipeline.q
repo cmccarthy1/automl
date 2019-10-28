@@ -9,11 +9,11 @@
 
 \d .aml
 
+skload:.p.import[`sklearn.externals][`:joblib][`:load]
+krload:.p.import[`keras.models][`:load_model]
+
 fitnew:{
-  metadata:getmeta[.aml.path,y,"Config/metadata"];
-  // the loads function and model decision functions will be wrapped into a 'bigger' routine once this has been expanded (if keras different)
-  loads:.p.import[`sklearn.externals][`:joblib][`:load];
-  model:loads[.aml.path,y,"/Models/",string metadata[`best_model]];
+  metadata:getmeta[.aml.path,"/Outputs/",y,"Config/metadata"];
   typ:metadata`type;
   data:$[`normal=typ;
     i.normalproc[x;metadata];
@@ -21,7 +21,10 @@ fitnew:{
     '`$"This is next to be implemented";
     '`$"This form of operation is not currently supported"
     ];
-  model[`:predict;<]data
+  $[(mp:metadata[`pylib])in `sklearn`keras;
+    [model:$[mp~`sklearn;skload;krload].aml.path,"/Outputs/",y,"/Models/",string metadata[`best_model];
+     model[`:predict;<]data];
+    '`$"The current model type you are attempting to apply is not currently supported"]  
   }
 
 /* x = data

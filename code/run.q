@@ -25,22 +25,19 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
   -1 runout[`tot],string[ctb:count fcols:$[`fresh~feat_typ;1_;]cols tab];
   bm:runmodels[tts`xtrain;tts`ytrain;mdls;dict;dtdict];
   fn:i.scfn[dict;mdls];
-  exclude_list:`GaussianNB`LinearRegression;
-  if[a:bm[1]in exclude_list:`GaussianNB`LinearRegression;
-    -1 runout`ex;
-    score:i.scorepred[flip value flip tts`xtest;tts`ytest;last bm;fn];
-    exp_mdl:last bm];
-  if[b:not bm[1]in exclude_list;
-    -1 runout`gs;
+  exclude_list:`GaussianNB`LinearRegression`RegKeras;
+  if[a:bm[1]in exclude_list;-1 runout`ex
+    score:i.scorepred[flip value flip tts`xtest;tts`ytest;last bm;fn];exp_mdl:last bm];
+  if[b:not bm[1]in exclude_list;-1 runout`gs;
     prms:gs.psearch[flip value flip tts`xtrain;tts`ytrain;tts`xtest;tts`ytest;bm 1;dict;prob_typ;mdls];
-    score:first prms;
-    exp_mdl:last prms];
+    score:first prms;exp_mdl:last prms];
   -1 runout[`sco],string[score],"\n";
   if[2=dict`saveopt;
     -1 runout[`save],string[dtdict`stdate],"/Run_",string[dtdict`sttime],"/Reports/";
     report[i.report_dict[ctb;bm;tb;dtdict;path;(prms 1;score;dict`xv;dict`gs)];dtdict]];
   hp:$[b;enlist[`hyper_parameters]!enlist prms 1;()!()];
-  meta_dict:dict,hp,`features`test_score`best_model`type`symencode!(fcols;score;bm 1;feat_typ;encoding);
+  pylib:?[mdls;enlist(=;`model;enlist bm 1);();`lib];
+  meta_dict:dict,hp,`features`test_score`best_model`type`symencode`pylib!(fcols;score;bm 1;feat_typ;encoding;pylib 0);
   if[dict[`saveopt]in 1 2;i.savemdl[dtdict;bm 1;exp_mdl;mdls];savemeta[meta_dict;dtdict]];}
 
 .ml.labelencode:{(asc distinct x)?x}
