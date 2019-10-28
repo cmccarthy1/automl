@@ -18,7 +18,7 @@ fitnew:{
   data:$[`normal=typ;
     i.normalproc[x;metadata];
     `fresh=typ;
-    '`$"This is next to be implemented";
+    i.freshproc[x;metadata];
     '`$"This form of operation is not currently supported"
     ];
   $[(mp:metadata[`pylib])in `sklearn`keras;
@@ -31,11 +31,21 @@ fitnew:{
 /* y = metadata
 i.normalproc:{
   x:i.symbencode[x;y`symencode];
-  x:.ml.dropconstant x;
   x:i.null_encode[x;med];
   x:.ml.infreplace[x];
   x:first normalcreate[x;::];
   flip value flip y[`features]#x
+  }
+i.freshproc:{
+  agg:y`aggcols;prm:y`params;
+  cols2use:k where not (k:cols[x])in agg;
+  x:"f"$i.null_encode[value .ml.fresh.createfeatures[x;agg;cols2use;prm];med];
+  x:.ml.infreplace x;
+  // This is necessary as it is not guaranteed that new feature creation will produce the requisite features -> need to add dummy data
+  if[not all ftc:y[`features]in cols x;
+    new_cols:y[`features]where not ftc;
+    x:y[`features] xcols flip flip[x],new_cols!(2;count x)#0f];
+  flip value flip y[`features]#"f"$0^x
   }
 
 /* x = data
