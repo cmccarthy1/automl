@@ -13,7 +13,7 @@ skload:.p.import[`sklearn.externals][`:joblib][`:load]
 krload:.p.import[`keras.models][`:load_model]
 
 fitnew:{
-  metadata:getmeta[.aml.path,"/Outputs/",y,"Config/metadata"];
+  metadata:getmeta[.aml.path,"/Outputs/",y,"/Config/metadata"];
   typ:metadata`type;
   data:$[`normal=typ;
     i.normalproc[x;metadata];
@@ -43,6 +43,6 @@ i.normalproc:{
 i.symbencode:{
   // if there is only one input for each key and they're non named columns return the table unchanged
   $[all {not ` in x}each value y;.ml.onehot[.ml.freqencode[x;y`freq];y`ohe];
-    not ` in y`freq;.ml.onehot[x;y`freq];
-    not ` in y`ohe;.ml.freqencode[x;y`ohe];
+    ` in y`freq;.ml.onehot[x;y`ohe];
+    ` in y`ohe;.ml.freqencode[x;y`freq];
     x]}
