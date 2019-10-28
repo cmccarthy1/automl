@@ -22,7 +22,7 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
   tts:dict[`tts][;tgt;dict`sz]tab:feats#tb 0;
   mdls:i.kerascheck[mdls;tts;tgt];
   -1 runout`sig;-1 runout`slct;
-  -1 runout[`tot],string[ctb:count fcols:$[`fresh~feat_typ;1_;]cols tab];
+  -1 runout[`tot],string[ctb:count cols tab];
   bm:runmodels[tts`xtrain;tts`ytrain;mdls;dict;dtdict];
   fn:i.scfn[dict;mdls];
   exclude_list:`GaussianNB`LinearRegression`RegKeras;
@@ -37,7 +37,7 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
     report[i.report_dict[ctb;bm;tb;dtdict;path;(prms 1;score;dict`xv;dict`gs)];dtdict]];
   hp:$[b;enlist[`hyper_parameters]!enlist prms 1;()!()];
   pylib:?[mdls;enlist(=;`model;enlist bm 1);();`lib];
-  meta_dict:dict,hp,`features`test_score`best_model`type`symencode`pylib!(fcols;score;bm 1;feat_typ;encoding;pylib 0);
+  meta_dict:dict,hp,`features`test_score`best_model`type`symencode`pylib!(feats;score;bm 1;feat_typ;encoding;pylib 0);
   if[dict[`saveopt]in 1 2;i.savemdl[dtdict;bm 1;exp_mdl;mdls];savemeta[meta_dict;dtdict]];}
 
 .ml.labelencode:{(asc distinct x)?x}
