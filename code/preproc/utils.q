@@ -19,18 +19,18 @@ i.autotype:{[x;typ;p]
 /  Description of input table
 /* x = table
 i.describe:{
- columns :`count`unique`mean`std`min`max`type;
- numcols :.ml.i.fndcols[x;"hijef"];
- timecols:.ml.i.fndcols[x;"pmdznuvt"];
- boolcols:.ml.i.fndcols[x;"b"];
- catcols :.ml.i.fndcols[x;"s"];
- textcols:.ml.i.fndcols[x;"c"];
- num  :i.metafn[x;numcols ;(count;{count distinct x};avg;sdev;min;max;{`numeric})];
- symb :i.metafn[x;catcols ;i.non_numeric[{`categorical}]];
- times:i.metafn[x;timecols;i.non_numeric[{`time}]];
- bool :i.metafn[x;boolcols;i.non_numeric[{`boolean}]];
- flip columns!flip num,symb,times,bool
- }
+  columns :`count`unique`mean`std`min`max`type;
+  numcols :.ml.i.fndcols[x;"hijef"];
+  timecols:.ml.i.fndcols[x;"pmdznuvt"];
+  boolcols:.ml.i.fndcols[x;"b"];
+  catcols :.ml.i.fndcols[x;"s"];
+  textcols:.ml.i.fndcols[x;"c"];
+  num  :i.metafn[x;numcols ;(count;{count distinct x};avg;sdev;min;max;{`numeric})];
+  symb :i.metafn[x;catcols ;i.non_numeric[{`categorical}]];
+  times:i.metafn[x;timecols;i.non_numeric[{`time}]];
+  bool :i.metafn[x;boolcols;i.non_numeric[{`boolean}]];
+  flip columns!flip num,symb,times,bool
+  }
 
 /  Length checking
 i.lencheck:{[x;tgt;typ;p]

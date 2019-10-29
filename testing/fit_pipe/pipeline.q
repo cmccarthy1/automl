@@ -36,10 +36,15 @@ i.normalproc:{
   x:first normalcreate[x;::];
   flip value flip y[`features]#x
   }
+
 i.freshproc:{
-  agg:y`aggcols;prm:y`params;
+  agg:y`aggcols;
   cols2use:k where not (k:cols[x])in agg;
-  x:"f"$i.null_encode[value .ml.fresh.createfeatures[x;agg;cols2use;prm];med];
+
+  // only apply relevant functions based on the extracted features 
+  app_fns:1!select from 0!.ml.fresh.params where f in `$distinct{("_" vs string x)1}each y`features;
+
+  x:i.null_encode[value .ml.fresh.createfeatures[x;agg;cols2use;app_fns];med];
   x:.ml.infreplace x;
   // This is necessary as it is not guaranteed that new feature creation will produce the requisite features -> need to add dummy data
   if[not all ftc:y[`features]in cols x;
