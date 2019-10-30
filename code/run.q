@@ -9,9 +9,9 @@
 /* p    = parameters (::) ~ default other changes user dependent
 
 runexample:{[tb;tgt;feat_typ;prob_typ;p]
-  mdls:models[prob_typ;tgt];
   dtdict:`stdate`sttime!(.z.D;.z.T);
   dict:i.updparam[tb;p;feat_typ];
+  mdls:models[prob_typ;tgt;dict];
   system"S ",string s:dict`seed;
   tb:i.autotype[tb;feat_typ;dict] ;-1 runout`col;
   encoding:i.symencode[tb;10;1];
@@ -21,12 +21,13 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
   if[11h~type tgt;tgt:.ml.labelencode tgt];
   tts:dict[`tts][;tgt;dict`sz]tab:feats#tb 0;
   mdls:i.kerascheck[mdls;tts;tgt];
+  if[not 0~checkimport[];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
   -1 runout`sig;-1 runout`slct;
   -1 runout[`tot],string[ctb:count cols tab];
   bm:runmodels[tts`xtrain;tts`ytrain;mdls;dict;dtdict];
   fn:i.scfn[dict;mdls];
   exclude_list:`GaussianNB`LinearRegression`RegKeras;
-  if[a:bm[1]in exclude_list;-1 runout`ex
+  if[a:bm[1]in exclude_list;-1 runout`ex;
     score:i.scorepred[flip value flip tts`xtest;tts`ytest;last bm;fn];exp_mdl:last bm];
   if[b:not bm[1]in exclude_list;-1 runout`gs;
     prms:gs.psearch[flip value flip tts`xtrain;tts`ytrain;tts`xtest;tts`ytest;bm 1;dict;prob_typ;mdls];
