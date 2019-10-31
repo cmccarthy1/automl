@@ -11,10 +11,10 @@
 runexample:{[tb;tgt;feat_typ;prob_typ;p]
   mdls:models[prob_typ;tgt];
   dtdict:`stdate`sttime!(.z.D;.z.T);
-  dict:i.updparam[tb;p;feat_typ];
+  dict:i.updparam[tb;p;feat_typ],enlist[`typ]!enlist feat_typ;
   system"S ",string s:dict`seed;
   tb:i.autotype[tb;feat_typ;dict] ;-1 runout`col;
-  encoding:i.symencode[tb;10;1];
+  encoding:i.symencode[tb;10;1;(::)];
   tb:preproc[tb;tgt;feat_typ;dict];-1 runout`pre;
   tb:$[feat_typ=`fresh;freshcreate[tb;dict];feat_typ=`normal;normalcreate[tb;dict];'`err];
   feats:freshsignificance[tb 0;tgt];
@@ -26,7 +26,7 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
   bm:runmodels[tts`xtrain;tts`ytrain;mdls;dict;dtdict];
   fn:i.scfn[dict;mdls];
   exclude_list:`GaussianNB`LinearRegression`RegKeras;
-  if[a:bm[1]in exclude_list;-1 runout`ex
+  if[a:bm[1]in exclude_list;-1 runout`ex;
     score:i.scorepred[flip value flip tts`xtest;tts`ytest;last bm;fn];exp_mdl:last bm];
   if[b:not bm[1]in exclude_list;-1 runout`gs;
     prms:gs.psearch[flip value flip tts`xtrain;tts`ytrain;tts`xtest;tts`ytest;bm 1;dict;prob_typ;mdls];
@@ -37,8 +37,9 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
     report[i.report_dict[ctb;bm;tb;dtdict;path;(prms 1;score;dict`xv;dict`gs)];dtdict]];
   hp:$[b;enlist[`hyper_parameters]!enlist prms 1;()!()];
   pylib:?[mdls;enlist(=;`model;enlist bm 1);();`lib];
-  meta_dict:dict,hp,`features`test_score`best_model`type`symencode`pylib!(feats;score;bm 1;feat_typ;encoding;pylib 0);
+  meta_dict:dict,hp,`features`test_score`best_model`symencode`pylib!(feats;score;bm 1;encoding;pylib 0);
   if[dict[`saveopt]in 1 2;i.savemdl[dtdict;bm 1;exp_mdl;mdls];savemeta[meta_dict;dtdict]];}
+  
 
 .ml.labelencode:{(asc distinct x)?x}
 
