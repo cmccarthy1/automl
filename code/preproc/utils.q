@@ -52,17 +52,18 @@ i.null_encode:{[x;y]
   $[0=count k;x;flip y[x]^flip[x],nms!vals]}
 
 /  Symbol encoding
-i.symencode:{
-  sc:.ml.i.fndcols[x;"s"];
-  if[0=count sc;r:$[z=1;`freq`ohe!``;x]];
+i.symencode:{[tab;n;b;d]
+  sc:.ml.i.fndcols[tab;"s"] except $[tp:`fresh~d`typ;acol:d`aggcols;`];
+  if[0=count sc;r:$[b=1;`freq`ohe!``;tab]];
   if[0<count sc;
-    fc:where y<count each distinct each sc!flip[x]sc;
+    fc:where n<count each distinct each sc!flip[tab]sc;
     ohe:sc where not sc in fc;
-    r:$[z=1;`freq`ohe!(fc;ohe);.ml.onehot[.ml.freqencode[x;fc];ohe]]];
-  if[z<>1;r:flip sc _ flip r];
+    r:$[b=1;`freq`ohe!(fc;ohe);tp;.ml.onehot[raze .ml.freqencode[;fc]each 
+       flip each 0!acol xgroup tab;ohe];
+       .ml.onehot[.ml.freqencode[tab;fc];ohe]]];
+  if[b<>1;r:flip sc _ flip r];
   r
   }
-
 
 // Utilities for feat_extract.q
 
