@@ -83,6 +83,7 @@ i.symencode:{[tab;n;b;d;typ]
       if[b=0;r:flip sc _ flip r]]];
   r}
 
+
 // Utilities for feat_extract.q
 
 /  Credibility score
