@@ -31,7 +31,7 @@ i.updparam:{[x;p;typ]
        d[key y]:value y;
        '`$"You can only pass appropriate keys to fresh"];
      '`$"You must pass identity `(::)` or dictionary with appropriate key/value pairs to function"];
-   d}[x;p];
+   d,enlist[`tf]!enlist all `Keras`tensorflow in `$checkimport[]}[x;p];
   typ=`tseries;
    '`$"This will need to be added once the time-series recipe is in place";
   '`$"Incorrect input type"]}
