@@ -21,7 +21,7 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
   if[11h~type tgt;tgt:.ml.labelencode tgt];
   tts:dict[`tts][;tgt;dict`sz]tab:feats#tb 0;
   mdls:i.kerascheck[mdls;tts;tgt];
-  if[not 0~checkimport[];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
+  if[0~checkimport[];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
   -1 runout`sig;-1 runout`slct;
   -1 runout[`tot],string[ctb:count cols tab];
   bm:runmodels[tts`xtrain;tts`ytrain;mdls;dict;dtdict];

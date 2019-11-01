@@ -4,7 +4,7 @@
 loadfile`:code/preproc/checkimport.p
 loadfile`:code/proc/utils.q
 loadfile`:code/proc/proc.q
-$[all `Keras`tensorflow in `$checkimport[];
+$[0~checkimport[];
    loadfile`:code/mdl_def/kmdls.q;
    [-1"Requirements for deep learning models not available, these will not be run";]]
 loadfile`:code/preproc/utils.q
