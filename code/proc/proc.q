@@ -10,7 +10,7 @@
 models:{
  if[not x in key i.files;'`$"text file not found"];
  d:i.txtparse[x;"/code/mdl_def/"];
- if[1~z`tf;d:l!d l:key[d]where not `keras=first each value d];
+ if[0b~z`tf;d:l!d l:key[d]where not `keras=first each value d];
  m:flip`model`lib`fnc`seed`typ!flip key[d],'value d;
  if[x=`class;
     m:$[2<count distinct y;
