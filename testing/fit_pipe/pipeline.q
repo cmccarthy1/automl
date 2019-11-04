@@ -15,7 +15,7 @@ krload:.p.import[`keras.models][`:load_model]
 
 fitnew:{
   metadata:getmeta[.aml.path,"/Outputs/",y,"/Config/metadata"];
-  typ:metadata`type;
+  typ:metadata`typ;
   data:$[`normal=typ;
     i.normalproc[x;metadata];
     `fresh=typ;
