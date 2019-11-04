@@ -2,39 +2,57 @@
 
 // Utilities for run.q
 
+i.getdict:{
+ d:i.paramparse[x;"/code/mdl_def/"];
+ idx:(k except`scf;(k:key d)except`xv`gs`scf;`xv`gs;`scf);
+ fnc:(key;{get string first x};{(x 0;get string x 1)};{key[x]!`$value x});
+ {@[x;y;z]}/[d;idx;fnc]}
+
 /  This function sets or updates the default parameter dictionary as appropriate
 /* x   = data as table
 /* p   = dictionary of parameters (type of feature extract dependant)
 /* typ = type of feature extraction (FRESH/normal/tseries ...)
 i.updparam:{[x;p;typ]
- dict:$[typ=`fresh;
-  {d:`aggcols`params`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
-     (first cols x;
-      .ml.fresh.params;(`kfshuff;5);(`kfshuff;5);
-      xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);
-      42;2;0.2;.ml.traintestsplit;0.2);
-   $[y~(::);d;
-     99h=type y;
-     $[min key[y]in key[d];
-       d[key y]:value y;
-       '`$"You can only pass appropriate keys to fresh"];
-     '`$"You must pass identity `(::)` or dictionary with appropriate key/value pairs to function"];
-   d}[x;p];
-  typ=`normal;
-   {d:`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
-      ((`kfshuff;5);(`kfshuff;5);xv.fitpredict;
-       `class`reg!(`.ml.accuracy;`.ml.mse);
-       42;2;0.2;.ml.traintestsplit;0.2);
-    $[y~(::);d;
-     99h=type y;
-     $[min key[y]in key[d];
-       d[key y]:value y;
-       '`$"You can only pass appropriate keys to fresh"];
-     '`$"You must pass identity `(::)` or dictionary with appropriate key/value pairs to function"];
-   d,enlist[`tf]!enlist 0~checkimport[]}[x;p];
-  typ=`tseries;
-   '`$"This will need to be added once the time-series recipe is in place";
-  '`$"Incorrect input type"]}
+ 0N!dict:
+  / if file path or symbol given
+  $[-11h~tp:type p;
+      i.getdict string p;
+  / if string of filename given
+    10h~tp;
+      i.getdict p;
+  / otherwise create dictionary based on feature extraction
+  / FRESH
+    typ=`fresh;
+      {d:`aggcols`params`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
+         (first cols x;
+         .ml.fresh.params;(`kfshuff;5);(`kfshuff;5);
+         xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);
+         42;2;0.2;.ml.traintestsplit;0.2);
+       $[y~(::);d;
+         99h=type y;
+         $[min key[y]in key[d];
+           d[key y]:value y;
+           '`$"You can only pass appropriate keys to fresh"];
+         '`$"You must pass identity `(::)` or dictionary with appropriate key/value pairs to function"];
+       d}[x;p];
+  / NORMAL
+    typ=`normal;
+      {d:`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
+         ((`kfshuff;5);(`kfshuff;5);xv.fitpredict;
+         `class`reg!(`.ml.accuracy;`.ml.mse);
+         42;2;0.2;.ml.traintestsplit;0.2);
+       $[y~(::);d;
+         99h=type y;
+         $[min key[y]in key[d];
+           d[key y]:value y;
+           '`$"You can only pass appropriate keys to fresh"];
+         '`$"You must pass identity `(::)` or dictionary with appropriate key/value pairs to function"];
+       d,enlist[`tf]!enlist 0~checkimport[]}[x;p];
+  / TIMESERIES
+    typ=`tseries;
+      '`$"This will need to be added once the time-series recipe is in place";
+  / ERROR
+    '`$"Incorrect input type"]}
 
 /  apply scoring function to precitions from model
 /* x = x-test; y = y-test; z = model; r = scoring function
