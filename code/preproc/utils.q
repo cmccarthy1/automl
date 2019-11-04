@@ -52,16 +52,36 @@ i.null_encode:{[x;y]
   $[0=count k;x;flip y[x]^flip[x],nms!vals]}
 
 /  Symbol encoding
-i.symencode:{
-  sc:.ml.i.fndcols[x;"s"];
-  if[0=count sc;r:$[z=1;`freq`ohe!``;x]];
-  if[0<count sc;
-    fc:where y<count each distinct each sc!flip[x]sc;
-    ohe:sc where not sc in fc;
-    r:$[z=1;`freq`ohe!(fc;ohe);.ml.onehot[.ml.freqencode[x;fc];ohe]]];
-  if[z<>1;r:flip sc _ flip r];
-  r
-  }
+/* tab = input table
+/* n   = number of distinct values in a column after which we symbol encode
+/* b   = boolean flag indicating if table is to be returned (0) or encoding type returned (1)
+/* d   = the parameter dictionary outlining the run setup
+/* typ = how the encoding should work, if it's a dictionary which could be returned from b=1 then encode according to problem
+/        type for that dictionary, otherwise use function to encode the full table or return the dictionary for later use
+/. returns the table with appropriate encoding applied
+i.symencode:{[tab;n;b;d;typ]
+  $[99h=type typ;
+    r:$[`fresh~d`type;
+        $[all {not ` in x}each value typ;.ml.onehot[raze .ml.freqencode[;typ`freq]each flip each 0!d[`aggcols]xgroup tab;typ`ohe];
+          ` in typ`freq;.ml.onehot[tab;typ`ohe];
+          ` in typ`ohe;raze .ml.freqencode[;typ`freq]each flip each 0!d[`aggcols]xgroup tab;
+          tab];
+        `normal~d`type;
+        $[all {not ` in x}each value typ;.ml.onehot[.ml.freqencode[tab;typ`freq];typ`ohe];
+          ` in typ`freq;.ml.onehot[tab;typ`ohe];
+          ` in typ`ohe;raze .ml.freqencode[tab;typ`fc];
+          tab];
+        '`$"This form of encoding has yet to be implemented for specified column encodings"];
+    [sc:.ml.i.fndcols[tab;"s"]except $[tp:`fresh~d`typ;acol:d`aggcols;`];
+      if[0=count sc;r:$[b=1;`freq`ohe!``;tab]];
+      if[0<count sc;
+        fc:where n<count each distinct each sc!flip[tab]sc;
+        ohe:sc where not sc in fc;
+        r:$[b=1;`freq`ohe!(fc;ohe);tp;.ml.onehot[raze .ml.freqencode[;fc]each
+          flip each 0!acol xgroup tab;ohe];
+          .ml.onehot[.ml.freqencode[tab;fc];ohe]]];
+      if[b=0;r:flip sc _ flip r]]];
+  r}
 
 
 // Utilities for feat_extract.q
