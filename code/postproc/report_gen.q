@@ -119,7 +119,7 @@ report:{
     cell[pdf;fin];
     line[pdf;7];
   
-  system"mkdir -p ",folder_name:path,"/Outputs/",string[y`stdate],"/Run_",string[y`sttime],"/Reports";
+  system"mkdir",$[.z.o like "w*";" ";" -p "],folder_name:path,"/Outputs/",string[y`stdate],"/Run_",string[y`sttime],"/Reports";
   pdf[`:output][folder_name,"/q_automl_report_",sv["_";string(x`mdl;y`sttime)];`F];}
 
 font    :{x[`:set_font][`Arial;`size pykw y;`style pykw z]}
