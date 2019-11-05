@@ -119,8 +119,8 @@ report:{
     cell[pdf;fin];
     line[pdf;7];
   
-  system"mkdir",$[.z.o like "w*";" ";" -p "],folder_name:path,"/Outputs/",string[y`stdate],"/Run_",string[y`sttime],"/Reports";
-  pdf[`:output][folder_name,"/q_automl_report_",sv["_";string(x`mdl;y`sttime)];`F];}
+  system"mkdir",$[.z.o like "w*";" ";" -p "],folder_name:ssr[path,"/Outputs/",string[y`stdate],"/Run_",string[y`sttime],"/Reports";":";"."];
+  pdf[`:output][ssr[folder_name,"/q_automl_report_",sv["_";string(x`mdl;y`sttime)],".pdf";":";"."];`F];}
 
 font    :{x[`:set_font][`Arial;`size pykw y;`style pykw z]}
 title   :{x[`:multi_cell][175;5;pykwargs `txt`align!(y;"C")]}
