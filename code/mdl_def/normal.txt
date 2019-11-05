@@ -1,0 +1,9 @@
+xv      | kfshuff;5
+gs      | kfshuff;5
+scf     | reg = .ml.mse ; class = .ml.accuracy
+hld     | 0.2
+prf     | .aml.xv.fitpredict
+seed    | 42
+saveopt | 2
+tts     | .ml.traintestsplit
+sz      | 0.2
