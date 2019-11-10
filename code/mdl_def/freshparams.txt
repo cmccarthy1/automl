@@ -1,0 +1,11 @@
+aggcols |{first cols x}
+params  |.ml.fresh.params
+xv      |kfshuff;5
+gs      |kfshuff;5
+prf     |.aml.xv.fitpredict
+scf     |class=.ml.accuracy;reg=.ml.mse
+seed    |42
+saveopt |0
+hld     |0.2
+tts     |.ml.traintestsplit
+sz      |0.2
