@@ -28,13 +28,12 @@ i.updparam:{[x;p;typ]
        d:$[(ty:type y)in 10 -11 99h;
 	      [if[10h~ty;y:.aml.i.getdict y];
 		   if[-11h~ty;y:.aml.i.getdict$[":"~first y;1_;]y:string y];
-		   $[min key[y]in key d;
-		     [d[key y]:value y;d];
+		   $[min key[y]in key d;d,y;
 			 '`$"You can only pass appropriate keys to fresh"]];
 		  y~(::);d;
 		  '`$"p must be passed the identity `(::)`, a filepath to a parameter flatfile or a dictionary with appropriate key/value pairs"];
-	   d[`aggcols]@:x;
-	   d,enlist[`tf]!enlist 0~checkimport[]}[x;p];    
+	   d[`aggcols]:$[100h~typagg:type d`aggcols;d[`aggcols]x;11h~abs typagg;d`aggcols;'`$"aggcols must be passed function or list of columns"];
+	   d,enlist[`tf]!enlist 0~checkimport[]}[x;p];
   / NORMAL
     typ=`normal;
       {d:`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
@@ -44,8 +43,7 @@ i.updparam:{[x;p;typ]
        d:$[(ty:type y)in 10 -11 99h;
 	      [if[10h~ty;y:.aml.i.getdict y];
 		   if[-11h~ty;y:.aml.i.getdict$[":"~first y;1_;]y:string y];
-		   $[min key[y]in key d;
-		     [d[key y]:value y;d];
+		   $[min key[y]in key d;d,y;
 			 '`$"You can only pass appropriate keys to normal"]];
 		  y~(::);d;
 		  '`$"p must be passed the identity `(::)`, a filepath to a parameter flatfile or a dictionary with appropriate key/value pairs"];

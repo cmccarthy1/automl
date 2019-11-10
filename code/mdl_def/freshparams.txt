@@ -1,4 +1,4 @@
-aggcols |{first cols x}
+aggcols |`x
 params  |.ml.fresh.params
 xv      |kfshuff;5
 gs      |kfshuff;5
