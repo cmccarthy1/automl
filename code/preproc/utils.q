@@ -49,7 +49,10 @@ i.lencheck:{[x;tgt;typ;p]
 i.null_encode:{[x;y]
   vals:l k:where 0<sum each l:null each flip x;
   nms:`$string[k],\:"_null";
-  $[0=count k;x;flip y[x]^flip[x],nms!vals]}
+  // 0 filling needed if median value also null (encoding maintained through added columns)
+  // could use med where med <> 0n but this will skew distribution also (although less drastic)
+  $[0=count k;x;flip 0^(y each flip x)^flip[x],nms!vals]}
+
 
 /  Symbol encoding
 /* tab = input table
@@ -61,12 +64,12 @@ i.null_encode:{[x;y]
 /. returns the table with appropriate encoding applied
 i.symencode:{[tab;n;b;d;typ]
   $[99h=type typ;
-    r:$[`fresh~d`type;
+    r:$[`fresh~d`typ;
         $[all {not ` in x}each value typ;.ml.onehot[raze .ml.freqencode[;typ`freq]each flip each 0!d[`aggcols]xgroup tab;typ`ohe];
           ` in typ`freq;.ml.onehot[tab;typ`ohe];
           ` in typ`ohe;raze .ml.freqencode[;typ`freq]each flip each 0!d[`aggcols]xgroup tab;
           tab];
-        `normal~d`type;
+        `normal~d`typ;
         $[all {not ` in x}each value typ;.ml.onehot[.ml.freqencode[tab;typ`freq];typ`ohe];
           ` in typ`freq;.ml.onehot[tab;typ`ohe];
           ` in typ`ohe;raze .ml.freqencode[tab;typ`fc];

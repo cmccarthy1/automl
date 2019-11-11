@@ -64,7 +64,7 @@ i.scorepred:{[x;y;z;r] r[;y]z[`:predict][x]`}
 /* z = best model object (embedPy)
 /* r = all applied models (table)
 i.savemdl:{[x;y;z;r]
- folder_name:path,"/",mo:"Outputs/",string[x`stdate],"/Run_",string[x`sttime],"/Models/";
+ folder_name:path,"/",mo:ssr["Outputs/",string[x`stdate],"/Run_",string[x`sttime],"/Models/";":";"."];
  save_path: system"mkdir -p ",folder_name;
  joblib:.p.import[`joblib];
  $[(`sklearn=?[r;enlist(=;`model;y,());();`lib])0;

@@ -24,7 +24,7 @@ i.gainliftplt:{
  plt[`:legend][`loc pykw "lower right"];
  plt[`:xlabel]["% of sample";`fontsize pykw 18];
  plt[`:ylabel]["Gain";`fontsize pykw 18];
- system"mkdir -p ",folder_name:path,"/Outputs/",string[z`stdate],"/Images/Run_",string[z`sttime];
+ system"mkdir",$[.z.o like "w*";" ";" -p "],folder_name:ssr[path,"/Outputs/",string[z`stdate],"/Images/Run_",string[z`sttime];":";"."];
  plt[`:savefig][folder_name,"/Lift_Gain_Curve.png"];
  plt[`:show][];}
 
@@ -42,7 +42,7 @@ i.impactplot:{[r;m;z]
  ax[`:set_title]"Feature Impact: ",string m;
  ax[`:set_ylabel]"Columns";
  ax[`:set_xlabel]"Relative feature impact";
- system"mkdir -p ",folder_name:path,"/Outputs/",string[z`stdate],"/Run_",string[z`sttime],"/Images";
+ system"mkdir",$[.z.o like "w*";" ";" -p "],folder_name:ssr[path,"/Outputs/",string[z`stdate],"/Run_",string[z`sttime],"/Images";":";"."];
  plt[`:savefig][folder_name,"/",sv["_";string(`Impact_Plot;m)],".png";`bbox_inches pykw"tight"];}
 
 // should work but needs implementation decisions prior to integration
@@ -58,6 +58,6 @@ i.roccurve:{
  plt[`:ylabel]["True Positive Rate"];
  plt[`:title]["Reciever operating characteristic example"];
  plt[`:legend][`loc pykw "upper left"];
- system"mkdir -p ",folder_name:path,"/Outputs/",string[z`stdate],"/Images/Run_",string[z`sttime];
+ system"mkdir",$[.z.o like "w*";" ";" -p "],folder_name:ssr[path,"/Outputs/",string[z`stdate],"/Images/Run_",string[z`sttime];":";"."];
  plt[`:savefig][folder_name,"/ROC_Curve.png"];
  plt[`:show][];}
