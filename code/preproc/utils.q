@@ -3,37 +3,37 @@
 // Utilities for preproc.q
 
 /  Automatic type checking
-i.autotype:{[x;typ;p]
+prep.i.autotype:{[x;typ;p]
   $[typ in `tseries`normal;
     [cls:.ml.i.fndcols[x;"sfihjbepmdznuvt"];
       tb:flip cls!x cls;
-      i.err_col[cols x;cls;typ]];
+      prep.u.err_col[cols x;cls;typ]];
     typ=`fresh;
     [aprcls:flip (l:p[`aggcols]) _ flip x;
       cls:.ml.i.fndcols[aprcls;"sfiehjb"];
       tb:flip (l!x l,:()),cls!x cls;
-      i.err_col[cols x;cols tb;typ]];
+      prep.u.err_col[cols x;cols tb;typ]];
     tb:(::)];
   tb}
 
 /  Description of input table
 /* x = table
-i.describe:{
+prep.i.describe:{
   columns :`count`unique`mean`std`min`max`type;
   numcols :.ml.i.fndcols[x;"hijef"];
   timecols:.ml.i.fndcols[x;"pmdznuvt"];
   boolcols:.ml.i.fndcols[x;"b"];
   catcols :.ml.i.fndcols[x;"s"];
   textcols:.ml.i.fndcols[x;"c"];
-  num  :i.metafn[x;numcols ;(count;{count distinct x};avg;sdev;min;max;{`numeric})];
-  symb :i.metafn[x;catcols ;i.non_numeric[{`categorical}]];
-  times:i.metafn[x;timecols;i.non_numeric[{`time}]];
-  bool :i.metafn[x;boolcols;i.non_numeric[{`boolean}]];
+  num  :prep.u.metafn[x;numcols ;(count;{count distinct x};avg;sdev;min;max;{`numeric})];
+  symb :prep.u.metafn[x;catcols ;prep.u.non_numeric[{`categorical}]];
+  times:prep.u.metafn[x;timecols;prep.u.non_numeric[{`time}]];
+  bool :prep.u.metafn[x;boolcols;prep.u.non_numeric[{`boolean}]];
   flip columns!flip num,symb,times,bool
   }
 
 /  Length checking
-i.lencheck:{[x;tgt;typ;p]
+prep.i.lencheck:{[x;tgt;typ;p]
   if[typ~(::);typ:`normal];
   $[-11h=type typ;
     $[`fresh=typ;
@@ -46,7 +46,7 @@ i.lencheck:{[x;tgt;typ;p]
     '`$"Input for typ must be a supported symbol or ::"]}
 
 /  Null encoding
-i.null_encode:{[x;y]
+prep.i.nullencode:{[x;y]
   vals:l k:where 0<sum each l:null each flip x;
   nms:`$string[k],\:"_null";
   // 0 filling needed if median value also null (encoding maintained through added columns)
@@ -55,14 +55,14 @@ i.null_encode:{[x;y]
 
 
 /  Symbol encoding
-/* tab = input table
+/* tab   = input table
 /* n   = number of distinct values in a column after which we symbol encode
 /* b   = boolean flag indicating if table is to be returned (0) or encoding type returned (1)
 /* d   = the parameter dictionary outlining the run setup
 /* typ = how the encoding should work, if it's a dictionary which could be returned from b=1 then encode according to problem
 /        type for that dictionary, otherwise use function to encode the full table or return the dictionary for later use
 /. returns the table with appropriate encoding applied
-i.symencode:{[tab;n;b;d;typ]
+prep.i.symencode:{[tab;n;b;d;typ]
   $[99h=type typ;
     r:$[`fresh~d`typ;
         $[all {not ` in x}each value typ;.ml.onehot[raze .ml.freqencode[;typ`freq]each flip each 0!d[`aggcols]xgroup tab;typ`ohe];
@@ -90,7 +90,7 @@ i.symencode:{[tab;n;b;d;typ]
 // Utilities for feat_extract.q
 
 /  Credibility score
-i.credibility:{[x;c;tgt]
+prep.i.credibility:{[x;c;tgt]
   if[(::)~c;c:.ml.i.fndcols[x;"s"]];
   avgtot:avg tgt;
   counts:{(count each group x)x}each x c,:();
@@ -100,13 +100,13 @@ i.credibility:{[x;c;tgt]
   x^flip names!scores}
 
 /  perform +/-/*/% transformations of hij columns for unique linear combinations of such columns
-i.bulktransform:{[x;c]
+prep.i.bulktransform:{[x;c]
   if[(::)~c;c:.ml.i.fndcols[x;"hij"]];
   n:raze(,'/)`$(raze each string c@:.ml.combs[count c;2]),\:/:("_multi";"_sum";"_div";"_sub");
   flip flip[x],n!(,/)(prd;sum;{first(%)x};{last deltas x})@/:\:x c}
 
 /  perform a truncated single value decomposition on unique linear combinations of float columns
-i.truncsvd:{[x;c;d]
+prep.i.truncsvd:{[x;c;d]
   if[(::)~c;c:.ml.i.fndcols[x;"f"]];
   c@:.ml.combs[count c,:();d];
   svd:.p.import[`sklearn.decomposition;`:TruncatedSVD;`n_components pykw 1];
@@ -118,14 +118,14 @@ i.truncsvd:{[x;c;d]
 /* x = entire column list
 /* y = sublist of columns we use
 /* z = type of feature creation we are doing
-i.err_col:{[x;y;z]if[count[x]<>count y;
+prep.u.err_col:{[x;y;z]if[count[x]<>count y;
  -1 "\n Removed the following columns due to type restrictions for ",string z;
  0N!x where not x in y]}
 
-i.err_tgt:{
+prep.u.err_tgt:{
  -1 "\n Test set does not contain examples of each class. Removed MultiKeras from models";
  delete from x where model=`MultiKeras}
 
-i.metafn:{$[0<count y;z@\:/:flip(y)#x;()]}
+prep.u.metafn:{$[0<count y;z@\:/:flip(y)#x;()]}
 
-i.non_numeric:{(count;{count distinct x};{};{};{};{};x)}
+prep.u.non_numeric:{(count;{count distinct x};{};{};{};{};x)}

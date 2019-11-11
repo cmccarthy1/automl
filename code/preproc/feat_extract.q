@@ -7,7 +7,7 @@ freshcreate:{[x;p]
   agg:p`aggcols;prm:p`params;
   cols2use:k where not (k:cols[x])in agg;
   fe_start:.z.T;
-  x:"f"$i.null_encode[value .ml.fresh.createfeatures[x;agg;cols2use;prm];med];
+  x:"f"$prep.i.nullencode[value .ml.fresh.createfeatures[x;agg;cols2use;prm];med];
   fe_end:.z.T-fe_start;
   x:.ml.infreplace x;
   ("f"$0^.ml.dropconstant x;fe_end)}
@@ -34,9 +34,9 @@ normalcreate:{[x;p]
   fe_start:.z.T;
   tcols:.ml.i.fndcols[x;"dmntvupz"];
   t:(cols[x]except tcols)#x;
-  t:i.truncsvd[t;::;2];
-  t:i.bulktransform[t;::];
-  t:.ml.dropconstant i.null_encode[.ml.infreplace t;med];
+  t:prep.i.truncsvd[t;::;2];
+  t:prep.i.bulktransform[t;::];
+  t:.ml.dropconstant prep.i.nullencode[.ml.infreplace t;med];
   if[0<count tcols;t^:.ml.timesplit[tcols#x;::]];
   fe_end:.z.T-fe_start;
   (t;fe_end)}

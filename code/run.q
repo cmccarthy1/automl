@@ -13,8 +13,8 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
   dict:i.updparam[tb;p;feat_typ],enlist[`typ]!enlist feat_typ;
   mdls:models[prob_typ;tgt;dict];
   system"S ",string s:dict`seed;
-  tb:i.autotype[tb;feat_typ;dict] ;-1 runout`col;
-  encoding:i.symencode[tb;10;1;dict;::];
+  tb:prep.i.autotype[tb;feat_typ;dict] ;-1 runout`col;
+  encoding:prep.i.symencode[tb;10;1;dict;::];
   tb:preproc[tb;tgt;feat_typ;dict];-1 runout`pre;
   tb:$[feat_typ=`fresh;freshcreate[tb;dict];feat_typ=`normal;normalcreate[tb;dict];'`err];
   feats:freshsignificance[tb 0;tgt];

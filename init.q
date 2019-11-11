@@ -1,7 +1,6 @@
 \d .aml
 \l p.q
-
-loadfile`:code/preproc/checkimport.p
+loadfile`:code/checkimport.p
 loadfile`:code/proc/utils.q
 loadfile`:code/proc/proc.q
 $[0~checkimport[];
