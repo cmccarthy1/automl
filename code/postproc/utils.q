@@ -13,7 +13,8 @@ i.featureimpact:{[b;m;x;y;c;f;o;dt]
   r:i.predshuff[m;x;y;f]each til count c;
   im:i.impact[r;c;o];
   i.impactplot[im;b;dt];
-  -1"\nFeature impact calculated for features associated with ",string[b]," model - \nsee img folder in current directory for results";}
+  -1"\nFeature impact calculated for features associated with ",string[b]," model";
+  -1"Plots saved in Outputs/",string[dt`stdate],"/Run_",string[dt`sttime],"/Images/\n";}
 
 /  rerun model after shuffle and output score
 i.predshuff:{[m;x;y;f;c]
@@ -43,7 +44,7 @@ i.gaincurve:{[y;p;pc]
 // Utilities for report generation
 
 /  dictionary used report population
-i.report_dict:{[x;y;z;r;k]
+i.report_dict:{[x;y;z;r;k;l]
   dd:(0#`)!();
   select
     feats    :x,
@@ -53,6 +54,10 @@ i.report_dict:{[x;y;z;r;k]
     xvtime   :y 3,
     bmtime   :y 4,
     metric   :y 5,
-    feat_time:z 1
+    feat_time:z 1,
+    gs       :l 0,
+    score    :l 1,
+    xv       :l 2,
+    gscfg    :l 3
   from dd}
 

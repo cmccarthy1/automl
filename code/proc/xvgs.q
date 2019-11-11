@@ -13,12 +13,15 @@ gs.psearch:{[xtrn;ytrn;xtst;ytst;mdl;d;typ;mdls]
   / fitting and scoring projection
   fitscore:gs.fitpredict[get fn]{y;x}[epymdl;];
   / apply grid search
-  gsprms:get[` sv `.ml.gs,d`typ_gs][d`k;1;xtrn;ytrn;fitscore;dict;d`hld];
+  spltcnt:$[d[`gs;0]in`mcsplit`pcsplit;1-d[`gs]1;(d[`gs;1]-1)%d[`gs]1]*count[xtrn]*1-d`hld;
+  if[mdl=`KNeighborsRegressor;
+   if[0<count where n:spltcnt<dict`n_neighbors;dict[`n_neighbors]@:where not n]];
+  gsprms:get[` sv `.ml.gs,d[`gs]0][d[`gs]1;1;xtrn;ytrn;fitscore;dict;d`hld];
   hyp:first key o avg each first gsprms;
   / 'best' model
   bmdl:epymdl[pykwargs hyp][`:fit][xtrn;ytrn];
   score:fn[;ytst]bmdl[`:predict][flip value flip xtst]`;
-  (score;bmdl)
+  (score;hyp;bmdl)
   }
 
 / cross validation search w/ random seed where applicable
@@ -26,8 +29,8 @@ xv.seed:{[x;y;d;m]
  b:m[`lib]~`sklearn;
  system"S 43";
  s:$[a:m[`seed]~`seed;$[b;enlist[`random_state]!enlist d`seed;d`seed];::];
- $[a&b;first value get[` sv`.ml.gs,d`xv][d`k;1;x;y;d[`prf]m`minit;s;0];
-   get[` sv`.ml.xv,d`xv][d`k;1;x;y;d[`prf][m`minit;s]]]}
+ $[a&b;first value get[` sv`.ml.gs,d[`xv]0][d[`xv]1;1;x;y;d[`prf]m`minit;s;0];
+   get[` sv`.ml.xv,d[`xv]0][d[`xv]1;1;x;y;d[`prf][m`minit;s]]]}
 
 / returns (ypred;ytrue) for each k
 xv.fitpredict:{[f;p;d]($[-7h~type p;f[d;p];@[.[f[][p]`:fit;d 0]`:predict;d[1]0]`];d[1]1)}

@@ -31,15 +31,13 @@ freshsignificance:{
 /* x = table on which to perform the feature creation
 /* p = parameters to be passed to the model in line with i.updparams
 normalcreate:{[x;p]
-/ cols2use:k where not (k:cols[x])in p`ignore_cols;
   fe_start:.z.T;
   tcols:.ml.i.fndcols[x;"dmntvupz"];
   t:(cols[x]except tcols)#x;
   t:i.truncsvd[t;::;2];
   t:i.bulktransform[t;::];
   t:.ml.dropconstant i.null_encode[.ml.infreplace t;med];
-  tcols:$[0<count tcols;.ml.timesplit[tcols#x;::];()];
-  t:tcols^t;
+  if[0<count tcols;t^:.ml.timesplit[tcols#x;::]];
   fe_end:.z.T-fe_start;
   (t;fe_end)}
 

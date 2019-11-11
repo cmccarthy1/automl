@@ -11,7 +11,8 @@ FPDF:.p.import[`fpdf][`:FPDF]
 /* `bmtime -> amount of time to fit and predict on the best model
 /* `mdl    -> best model (symbol)
 /* `impact -> path to impact graph (path as string)
-/* `lgain  -> path to lift gain curve (path as string)
+/* `xv     -> mixed list with type of cross validation and number of folds or percentage of data
+/* `gscfg     -> mixed list with type of grid search and number of folds/percentage of data
 
 // !!! make sure to put in semi colons after calls to pdf !!!
 
@@ -46,12 +47,15 @@ report:{
   line[pdf;7];
 
   font[pdf;11;`];
-  cell[pdf;"The 5-fold cross validation scores for all the run models run on the training data are as follows:"];
+  xval:$[(x[`xv]0)in `mcsplit`pcsplit;
+                "A percentage based cross validation .ml.",string[x[`xv]0]," was performed with a holdout set of ",string[x[`xv]1],"% of training data used for validation.";
+                string[x[`xv]1],"-fold cross validation was performed on the training set to find the best model using, .ml.",string[x[`xv]0],"."];
+  cell[pdf;xval];
   line[pdf;5];
 
   image[pdf;path,"/code/postproc/Images/train_test_validate.png"];
   font[pdf;8;`];
-  fig_1:"Figure 1: This is representative image of the form of train-validate-test split performed here.";
+  fig_1:"Figure 1: This is representative image showing the data split into training, validation and testing sets.";
   cell[pdf;fig_1];
   line[pdf;7];
 
@@ -60,9 +64,9 @@ report:{
   cell[pdf;xvtime];
   line[pdf;7];
 
-  metric:"The metric that is being used for the scoring of the models was: ",string[x`metric],".";
+  metric:"The metric that is being used for scoring and optimizing the models was: ",string[x`metric],".";
   cell[pdf;metric];
-  line[pdf;7];
+  line[pdf;10];
  
   {cell[x;y]}[pdf]each {(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}x`dict;
   line[pdf;7];
@@ -74,7 +78,7 @@ report:{
   line[pdf;7];
 
   font[pdf;13;`B];
-  cell[pdf;"Initial model selection summary"];
+  cell[pdf;"Model selection summary"];
   line[pdf;7];
  
   font[pdf;11;`];
@@ -94,14 +98,29 @@ report:{
     gstitle:"Grid search for a ",(string first key[x`dict])," model.";
     cell[pdf;gstitle];
     line[pdf;5];
-    
 
-  ]
+    font[pdf;11;`];
+    gscfg:$[(x[`gscfg]0)in `mcsplit`pcsplit;
+            "The grid search was completed using .ml.gs.",string[x[`gscfg]0]," with a percentage of ",string[x[`gscfg]1],"% of training data used for validation.";
+            "A ",string[x[`gscfg]1],"-fold grid-search was performed on the training set to find the best model using, .ml.gs.",string[x[`gscfg]0],"."];
+    cell[pdf;gscfg];
+    line[pdf;7];
 
+    font[pdf;11;`];
+    gsp:"The following are the hyperparameters which have been deemed optimal for the model";
+    cell[pdf;gsp];
+    line[pdf;5];
+
+    {cell[x;y]}[pdf]each {(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}x`gs;
+    line[pdf;7];
+    ]
+
+    fin:"The score for the best model fit on the entire training set and scored on the test set was = ",string[x`score];
+    cell[pdf;fin];
+    line[pdf;7];
   
   system"mkdir -p ",folder_name:path,"/Outputs/",string[y`stdate],"/Run_",string[y`sttime],"/Reports";
-  pdf[`:output][folder_name,"/q_automl_report_",sv["_";string(x`mdl;y`sttime)];`F];
-  -1"Saving to pdf has been completed";}
+  pdf[`:output][folder_name,"/q_automl_report_",sv["_";string(x`mdl;y`sttime)];`F];}
 
 font    :{x[`:set_font][`Arial;`size pykw y;`style pykw z]}
 title   :{x[`:multi_cell][175;5;pykwargs `txt`align!(y;"C")]}
