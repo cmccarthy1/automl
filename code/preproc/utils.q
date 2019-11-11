@@ -49,7 +49,10 @@ i.lencheck:{[x;tgt;typ;p]
 i.null_encode:{[x;y]
   vals:l k:where 0<sum each l:null each flip x;
   nms:`$string[k],\:"_null";
-  $[0=count k;x;flip y[x]^flip[x],nms!vals]}
+  // 0 filling needed if median value also null (encoding maintained through added columns)
+  // could use med where med <> 0n but this will skew distribution also (although less drastic)
+  $[0=count k;x;flip 0^(y each flip x)^flip[x],nms!vals]}
+
 
 /  Symbol encoding
 /* tab = input table
