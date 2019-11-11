@@ -14,7 +14,7 @@ i.featureimpact:{[b;m;x;y;c;f;o;dt]
   im:i.impact[r;c;o];
   i.impactplot[im;b;dt];
   -1"\nFeature impact calculated for features associated with ",string[b]," model";
-  -1"Plots saved in Outputs/",string[dt`stdate],"/Run_",string[dt`sttime],"/Images/\n";}
+  -1 ssr["Plots saved in Outputs/",string[dt`stdate],"/Run_",string[dt`sttime],"/Images/\n";":";"."];}
 
 /  rerun model after shuffle and output score
 i.predshuff:{[m;x;y;f;c]
@@ -49,7 +49,7 @@ i.report_dict:{[x;y;z;r;k;l]
   select
     feats    :x,
     dict     :y 0,
-    impact   :(k,"/Outputs/",string[r`stdate],"/Run_",string[r`sttime],"/Images/Impact_Plot_",string[y 1],".png"),
+    impact   :ssr[k,"/Outputs/",string[r`stdate],"/Run_",string[r`sttime],"/Images/Impact_Plot_",string[y 1],".png";":";"."],
     holdout  :y 2,
     xvtime   :y 3,
     bmtime   :y 4,

@@ -2,7 +2,7 @@
 
 savemeta:{
   `:metadata set x;
-  system"mkdir -p ",folder_name:path,"/",po:"Outputs/",string[y`stdate],"/Run_",string[y`sttime],"/Config/";
+  system "mkdir",$[.z.o like "w*";" ";" -p "],folder_name:path,"/",po:ssr["Outputs/",string[y`stdate],"/Run_",string[y`sttime],"/Config/";":";"."];
   $[first[string .z.o]in "lm";
     system"mv metadata ",folder_name;
     system"move metadata ",folder_name]
