@@ -17,14 +17,14 @@ prep.i.autotype:{[t;typ;p]
   $[typ in `tseries`normal;
     [cls:.ml.i.fndcols[t;"sfihjbepmdznuvt"];
       tb:flip cls!t cls;
-      prep.u.err_col[cols t;cls;typ]];
+      prep.i.errcol[cols t;cls;typ]];
     typ=`fresh;
     // ignore the aggregating colums for FRESH as these can be of any type
     [aprcls:flip (l:p[`aggcols]) _ flip t;
       cls:.ml.i.fndcols[aprcls;"sfiehjb"];
       // restore the aggregating columns 
       tb:flip (l!t l,:()),cls!t cls;
-      prep.u.err_col[cols t;cols tb;typ]];
+      prep.i.errcol[cols t;cols tb;typ]];
     tb:(::)];
   tb}
 
@@ -37,10 +37,10 @@ prep.i.describe:{[t]
   boolcols:.ml.i.fndcols[t;"b"];
   catcols :.ml.i.fndcols[t;"s"];
   textcols:.ml.i.fndcols[t;"c"];
-  num  :prep.u.metafn[t;numcols ;(count;{count distinct x};avg;sdev;min;max;{`numeric})];
-  symb :prep.u.metafn[t;catcols ;prep.u.non_numeric[{`categorical}]];
-  times:prep.u.metafn[t;timecols;prep.u.non_numeric[{`time}]];
-  bool :prep.u.metafn[t;boolcols;prep.u.non_numeric[{`boolean}]];
+  num  :prep.i.metafn[t;numcols ;(count;{count distinct x};avg;sdev;min;max;{`numeric})];
+  symb :prep.i.metafn[t;catcols ;prep.i.non_numeric[{`categorical}]];
+  times:prep.i.metafn[t;timecols;prep.i.non_numeric[{`time}]];
+  bool :prep.i.metafn[t;boolcols;prep.i.non_numeric[{`boolean}]];
   flip columns!flip num,symb,times,bool
   }
 
@@ -144,23 +144,16 @@ prep.i.freshsigerr:"The feature significance extraction process deemed none of t
 // Error flag for removal of inappropriate columms
 /* cl = entire column list
 /* sl = sublist of columns to be used
-prep.u.err_col:{[cl;sl;typ]
+prep.i.errcol:{[cl;sl;typ]
   if[count[cl]<>count sl;
   -1 "\n Removed the following columns due to type restrictions for ",string typ;
   0N!cl where not cl in sl]}
-
-// Error flag if test set is not appropriate for multiKeras model
-/* mdls = table denoting all the models with associated information used in this repository
-/. r    > the models table with the MultiKeras model removed
-prep.u.err_tgt:{[mdls]
-  -1 "\n Test set does not contain examples of each class. Removed MultiKeras from models";
-  delete from mdls where model=`MultiKeras}
 
 // Metadata information based on list of transforms and supplied columns
 /* sl = sub list of columns to apply functions to
 /* fl = list of functions which will provide the appropriate metadata
 /. r  > dictionary with the appropriate metadata returned
-prep.u.metafn:{[t;sl;fl]$[0<count sl;fl@\:/:flip(sl)#t;()]}
+prep.i.metafn:{[t;sl;fl]$[0<count sl;fl@\:/:flip(sl)#t;()]}
 
 // List of functions to be applied in metadata function for non-numeric data
-prep.u.non_numeric:{[t](count;{count distinct x};{};{};{};{};t)}
+prep.i.non_numeric:{[t](count;{count distinct x};{};{};{};{};t)}

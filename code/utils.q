@@ -112,6 +112,29 @@ i.savemdl:{[x;y;z;r]
    -1"Saving of non keras/sklearn models types is not currently supported"];
  }
 
+// Util functions used in multiple util files
+
+// Error flag if test set is not appropriate for multiKeras model
+/* mdls = table denoting all the models with associated information used in this repository
+/. r    > the models table with the MultiKeras model removed
+i.errtgt:{[mdls]
+  -1 "\n Test set does not contain examples of each class. Removed MultiKeras from models";
+  delete from mdls where model=`MultiKeras}
+
+// Extract the scoring function to be applied for model selection
+/* p    = parameter dictionary
+/* mdls = table with all appropriate models
+/. r    > the scoring function appropriate to the problem being solved
+i.scfn:{[p;mdls]p[`scf]$[`reg in distinct mdls`typ;`reg;`class]}
+
+// Check if MultiKeras model is to be applied and each target exists in both training and testing sets
+/* mdls = models table
+/* tts  = train-test split dataset
+/* tgt  = target data
+/. 
+i.kerascheck:{$[(`MultiKeras in x`model)&(count distinct z)>min{count distinct x}each y`ytrain`ytest;i.errtgt;]x}
+
+
 \d .
 \d .ml
 

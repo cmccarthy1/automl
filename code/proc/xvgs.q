@@ -4,28 +4,28 @@
 /* d   = parameter dictionary used throughout the functions (must include holdout `hld`typ_gs)
 /* typ = is the task `class/`reg
 /* mdls= table of the models which could be applied
-gs.psearch:{[xtrn;ytrn;xtst;ytst;mdl;d;typ;mdls]
-  dict:i.extract_dict[mdl];					// dictionary hyperparameters
-  module:` sv 2#i.txtparse[typ;"/code/mdl_def/"]mdl;            // required module names
+proc.gs.psearch:{[xtrn;ytrn;xtst;ytst;mdl;d;typ;mdls]
+  dict:proc.i.extractdict[mdl];					// dictionary hyperparameters
+  module:` sv 2#proc.i.txtparse[typ;"/code/mdl_def/"]mdl;       // required module names
   fn:i.scfn[d;mdls];						// relevant scoring function
-  o:i.ord fn;     						// required ordering to data
-  epymdl:.p.import[module][hsym mdl];				// embedPy model definition for relevant model
+  o :proc.i.ord fn;    						// required ordering to data
+  epymdl:.p.import[module][hsym mdl];			        // model definition for relevant model
   / fitting and scoring projection
   fitscore:gs.fitpredict[get fn]{y;x}[epymdl;];
   / apply grid search
   spltcnt:$[d[`gs;0]in`mcsplit`pcsplit;1-d[`gs]1;(d[`gs;1]-1)%d[`gs]1]*count[xtrn]*1-d`hld;
   if[mdl=`KNeighborsRegressor;
-   if[0<count where n:spltcnt<dict`n_neighbors;dict[`n_neighbors]@:where not n]];
+    if[0<count where n:spltcnt<dict`n_neighbors;
+      dict[`n_neighbors]@:where not n]];
   gsprms:get[` sv `.ml.gs,d[`gs]0][d[`gs]1;1;xtrn;ytrn;fitscore;dict;d`hld];
   hyp:first key o avg each first gsprms;
-  / 'best' model
   bmdl:epymdl[pykwargs hyp][`:fit][xtrn;ytrn];
   score:fn[;ytst]bmdl[`:predict][flip value flip xtst]`;
   (score;hyp;bmdl)
   }
 
 / cross validation search w/ random seed where applicable
-xv.seed:{[x;y;d;m]
+proc.xv.seed:{[x;y;d;m]
  b:m[`lib]~`sklearn;
  system"S 43";
  s:$[a:m[`seed]~`seed;$[b;enlist[`random_state]!enlist d`seed;d`seed];::];
