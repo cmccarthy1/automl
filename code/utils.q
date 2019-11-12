@@ -12,6 +12,44 @@ i.getdict:{
  d:{$[0<count y;@[x;y;z];x]}/[d;idx;fnc];
  if[sgl;d:1_d];
  d}
+ 
+i.freshdefault:`aggcols`params`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
+  ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.xv.kfshuff;5);`.aml.xv.fitpredict;
+   `class`reg!(`.ml.accuracy;`.ml.mse);42;2;0.2;`.ml.traintestsplit;0.2)
+i.normaldefault:`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
+  ((`.ml.xv.kfshuff;5);(`.ml.xv.kfshuff;5);`.aml.xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);
+   42;2;0.2;`.ml.traintestsplit;0.2)
+
+// Saves down flatfile of default dict
+/* f = filename as string, symbol or hsym
+/* feat_typ = type of feature extraction, e.g. `fresh or `normal
+/. Returns flatfile of dictionary parameters
+
+savedefault:{[f;feat_typ]
+  // Check type of filename and convert to string
+  f:$[10h~typf:type f;f;
+      -11h~typf;$[":"~first strf;1_;]strf:string typf;
+      '`$"filename must be string, symbol or hsym"];
+  // Open handle to file f
+  h:hopen hsym`$raze[.aml.path],"/automl/code/mdl_def/",f;
+  // Set d to default dictionary for feat_typ
+  d:$[`fresh~feat_typ;.aml.i.freshdefault;
+      `normal~feat_typ;.aml.i.normaldefault;
+      '`$"feature extraction type not supported"];
+  // String values for file
+  vals:{$[1=count x;
+            string x;
+          11h~abs typx:type x;
+            ";"sv{raze$[1=count x;y;"`"sv y]}'[x;string x];
+          99h~typx;
+            ";"sv{string[x],"=",string y}'[key x;value x];
+          0h~typx;
+            ";"sv string x;x]}each value d;
+  // Add key, pipe and newline indicator
+  strd:{(" |" sv x),"\n"}each flip(7#'string[key d],\:5#" ";vals);
+  // Write to file
+  {x y}[h]each strd;
+  hclose h;}
   
 /  This function sets or updates the default parameter dictionary as appropriate
 /* x   = data as table
