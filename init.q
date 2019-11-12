@@ -8,7 +8,7 @@ $[0~checkimport[];
    [-1"Requirements for deep learning models not available, these will not be run";]]
 loadfile`:code/preproc/utils.q
 loadfile`:code/preproc/preproc.q
-loadfile`:code/preproc/feat_extract.q
+loadfile`:code/preproc/featextract.q
 loadfile`:code/postproc/utils.q
 loadfile`:code/postproc/plots.q
 loadfile`:code/postproc/report_gen.q

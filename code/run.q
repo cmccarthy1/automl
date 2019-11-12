@@ -16,8 +16,8 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
   tb:prep.i.autotype[tb;feat_typ;dict] ;-1 runout`col;
   encoding:prep.i.symencode[tb;10;1;dict;::];
   tb:preproc[tb;tgt;feat_typ;dict];-1 runout`pre;
-  tb:$[feat_typ=`fresh;freshcreate[tb;dict];feat_typ=`normal;normalcreate[tb;dict];'`err];
-  feats:freshsignificance[tb 0;tgt];
+  tb:$[feat_typ=`fresh;prep.freshcreate[tb;dict];feat_typ=`normal;prep.normalcreate[tb;dict];'`err];
+  feats:prep.freshsignificance[tb 0;tgt];
   if[11h~type tgt;tgt:.ml.labelencode tgt];
   tts:dict[`tts][;tgt;dict`sz]tab:feats#tb 0;
   mdls:i.kerascheck[mdls;tts;tgt];
