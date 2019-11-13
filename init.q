@@ -9,9 +9,9 @@ $[0~checkimport[];
 loadfile`:code/preproc/utils.q
 loadfile`:code/preproc/preproc.q
 loadfile`:code/preproc/featextract.q
-loadfile`:code/postproc/utils.q
 loadfile`:code/postproc/plots.q
-loadfile`:code/postproc/report_gen.q
+loadfile`:code/postproc/report.q
+loadfile`:code/postproc/utils.q
 loadfile`:code/postproc/meta.q
 loadfile`:code/utils.q
 loadfile`:code/run.q

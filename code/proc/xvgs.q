@@ -18,8 +18,8 @@
 proc.gs.psearch:{[xtrn;ytrn;xtst;ytst;bm;p;typ;mdls]
   dict:proc.i.extractdict[bm];
   // Extract the required sklearn module name
-  module:` sv 2#proc.i.txtparse[typ;"/code/mdl_def/"]mdl;
-  fn:i.scfn[d;mdls];
+  module:` sv 2#proc.i.txtparse[typ;"/code/mdl_def/"]bm;
+  fn:i.scfn[p;mdls];
   o :proc.i.ord fn;
   // Import the required embedPy module
   epymdl:.p.import[module][hsym bm];

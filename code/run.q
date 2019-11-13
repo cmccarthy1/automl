@@ -37,7 +37,8 @@ runexample:{[tb;tgt;feat_typ;prob_typ;p]
   -1 runout[`sco],string[score],"\n";
   if[2=dict`saveopt;
     -1 runout[`save],string[dtdict`stdate],"/Run_",string[dtdict`sttime],"/Reports/";
-    report[i.report_dict[ctb;bm;tb;dtdict;path;(prms 1;score;dict`xv;dict`gs)];dtdict]];
+    report_param:post.i.reportdict[ctb;bm;tb;dtdict;path;(prms 1;score;dict`xv;dict`gs)];
+    post.report[report_param;dtdict]];
   hp:$[b;enlist[`hyper_parameters]!enlist prms 1;()!()];
   pylib:?[mdls;enlist(=;`model;enlist bm 1);();`lib];
   meta_dict:dict,hp,`features`test_score`best_model`symencode`pylib!(feats;score;bm 1;encoding;pylib 0);
