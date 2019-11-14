@@ -1,33 +1,9 @@
-// Load in and initialize the machine learning toolkit located in $QHOME
-\l ml/ml.q
-.ml.loadfile`:init.q
-
 \d .aml
 
 // For the following code the parameter naming convention holds
 // defined here is applied to avoid repetition throughout the file
 /* tgt = target data
 /* p   = parameter dictionary passed as default or modified by user
-
-
-// Table of models appropriate for the problem type being solved
-/* typ = symbol, either `class or `reg
-/. r   > table with all information needed for appropriate models to be applied to data
-proc.models:{[typ;tgt;p]
-  if[not typ in key proc.i.files;'`$"text file not found"];
-  d:proc.i.txtparse[typ;"/code/mdl_def/"];
-  if[0b~p`tf;
-    d:l!d l:key[d]where not `keras=first each value d];
-  m:flip`model`lib`fnc`seed`typ!flip key[d],'value d;
-  if[typ=`class;
-    // For classification tasks remove inappropriate classification models
-    m:$[2<count distinct tgt;
-        delete from m where typ=`binary;
-        delete from m where model=`MultiKeras]];
-  // Add a column with appropriate initialized models for each row
-  m:update minit:.aml.proc.i.mdlfunc .'flip(lib;fnc;model)from m;
-  // Threshold models used based on unique target values
-  proc.i.updmodels[m;tgt]}
 
 // Run cross validated machine learning models on training data and choose the best model.
 /* t = table of features as output from preprocessing pipeline/feature extraction

@@ -83,8 +83,8 @@ prep.i.symencode:{[t;n;b;p;enc]
         $[all {not ` in x}each value enc;
           // Encoding for FRESH is performed on aggregation sub table basis not entire columns
           .ml.onehot[raze .ml.freqencode[;enc`freq]each flip each 0!p[`aggcols]xgroup t;enc`ohe];
-          ` in typ`freq;.ml.onehot[t;enc`ohe];
-          ` in typ`ohe;raze .ml.freqencode[;enc`freq]each flip each 0!p[`aggcols]xgroup t;
+          ` in enc`freq;.ml.onehot[t;enc`ohe];
+          ` in enc`ohe;raze .ml.freqencode[;enc`freq]each flip each 0!p[`aggcols]xgroup t;
           t];
         `normal~p`typ;
         $[all {not ` in x}each value enc;.ml.onehot[.ml.freqencode[t;enc`freq];enc`ohe];

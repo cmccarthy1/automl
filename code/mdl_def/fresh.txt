@@ -1,7 +1,7 @@
-xv      | kfshuff;5
-gs      | kfshuff;5
+xv      | .ml.xv.kfshuff;5
+gs      | .ml.gs.kfshuff;5
 scf     | reg = .ml.mse ; class = .ml.accuracy
-aggcols | x
+aggcols | {first cols x}
 hld     | 0.2
 prf     | .aml.xv.fitpredict
 seed    | 42
