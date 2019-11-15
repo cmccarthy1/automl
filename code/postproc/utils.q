@@ -89,7 +89,7 @@ post.i.gainliftplt:{[d;dt]
 /* mdl = model name as a symbol
 /* dt  = dictionary containing date and time of run start `sttime`stdate! ...
 /. r   > impact plot saved to disk
-post.i.impactplot:{[im;mdl;dt]
+post.i.impactplot:{[im;mdl;dt;fpath]
   plt[`:figure][`figsize pykw 20 20];
   sub:plt[`:subplots][];
   fig:sub[@;0];ax:sub[@;1];
@@ -103,9 +103,7 @@ post.i.impactplot:{[im;mdl;dt]
   ax[`:set_title]"Feature Impact: ",string mdl;
   ax[`:set_ylabel]"Columns";
   ax[`:set_xlabel]"Relative feature impact";
-  system"mkdir",$[.z.o like "w*";" ";" -p "],
-    fname:ssr[path,"/Outputs/",string[dt`stdate],"/Run_",string[dt`sttime],"/Images";":";"."];
-  plt[`:savefig][fname,"/",sv["_";string(`Impact_Plot;mdl)],".png";`bbox_inches pykw"tight"];}
+  plt[`:savefig][fpath[0][`images],sv["_";string(`Impact_Plot;mdl)],".png";`bbox_inches pykw"tight"];}
 
 // This function will be used to produce an ROC plot, this however necessitates the need for
 // predicted probabilities to be returned from the models which is not at present implemented
@@ -142,13 +140,12 @@ post.i.roccurve:{[tgt;prob;dt]
 /* path  = output from ".aml.path" for the system
 /* xvgs  = list of information about the models used and scores achieved for xval and grid-search
 /. r     > dictionary with the appropriate information added
-post.i.reportdict:{[cfeat;bm;tm;dt;path;xvgs]
+post.i.reportdict:{[cfeat;bm;tm;dt;path;xvgs;fpath]
   dd:(0#`)!();
   select
     feats    :cfeat,
     dict     :bm 0,
-    impact   :ssr[path,"/Outputs/",string[dt`stdate],"/Run_",string[dt`sttime],
-                  "/Images/Impact_Plot_",string[bm 1],".png";":";"."],
+    impact   :(fpath[0][`images],"Impact_Plot_",string[bm 1],".png"),
     holdout  :bm 2,
     xvtime   :bm 3,
     bmtime   :bm 4,

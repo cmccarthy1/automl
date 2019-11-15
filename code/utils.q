@@ -23,7 +23,7 @@ i.freshdefault:{`aggcols`params`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
   ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;
    `class`reg!(`.ml.accuracy;`.ml.mse);42;2;0.2;`.ml.traintestsplit;0.2)}
 i.normaldefault:{`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
-  ((`.ml.xv.kfshuff;5);(`.ml.xv.kfshuff;5);`.aml.xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);
+  ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);
    42;2;0.2;`.ml.traintestsplit;0.2)}
 
 /  This function sets or updates the default parameter dictionary as appropriate
@@ -74,8 +74,8 @@ i.scorepred:{[xtst;ytst;mdl;scf]scf[;ytst]mdl[`:predict][xtst]`}
 /* y = best model name (`symbol)
 /* z = best model object (embedPy)
 /* r = all applied models (table)
-i.savemdl:{[x;y;z;r]
-  fname:path,"/",mo:ssr["Outputs/",string[x`stdate],"/Run_",string[x`sttime],"/Models/";":";"."];
+i.savemdl:{[x;y;z;r;nms]
+  fname:nms[0]`models;mo:nms[1]`models;
   system"mkdir -p ",fname;
   joblib:.p.import[`joblib];
   $[(`sklearn=?[r;enlist(=;`model;y,());();`lib])0;
@@ -121,19 +121,17 @@ i.excludelist:`GaussianNB`LinearRegression`RegKeras`MultiKeras`BinKeras;
 
 // Save down the metadata dictionary as a binary file which can be retrieved by a user or
 // is to be used in running of the models on new data
-/* d  = dictionary of parameters to be saved
-/* dt = dictionary with the date and time that a run was started, required for naming of save path 
-/. r  > the location that the metadata was saved to
-i.savemeta:{[d;dt]
+/* d     = dictionary of parameters to be saved
+/* dt    = dictionary with the date and time that a run was started, required for naming of save path 
+/* fpath = dictionary of file paths for saving
+/. r     > the location that the metadata was saved to
+i.savemeta:{[d;dt;fpath]
   `:metadata set d;
-  system "mkdir",$[.z.o like "w*";" ";" -p "],fname:path,"/",
-    // Save path, ssr required as mac does not support ':' as input in file paths.
-    spath:ssr["Outputs/",string[dt`stdate],"/Run_",string[dt`sttime],"/Config/";":";"."];
   // move the metadata information to the appropriate location based on OS
   $[first[string .z.o]in "lm";
-    system"mv metadata ",fname;
-    system"move metadata ",fname];
-  -1"Saving down model parameters to ",spath;}
+    system"mv metadata ",;
+    system"move metadata ",]fpath[0]`config;
+  -1"Saving down model parameters to ",fpath[1]`config;}
 
 // Retrieve the metadata information from a specified path
 /* fp = full file path denoting the location of the metadata to be retrieved
@@ -180,6 +178,16 @@ i.freshproc:{[t;d]
     t:d[`features] xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
   flip value flip d[`features]#"f"$0^t}
 
+i.pathconstruct:{[dt;b]
+  names:`config`models;
+  if[b=2;names:names,`images`report]
+  pname:{"/",ssr["outputs/",string[x`stdate],"/run_",string[x`sttime],"/",y,"/";":";"."]};
+  paths:path,/:pname[dt]each string names;
+  paths:i.ssrwin[paths];
+  {[fnm]system"mkdir",$[.z.o like "w*";" ";" -p "],fnm}each paths;
+  (names!paths;names!{count[path]_x}each paths)
+  }
+
 
 // Util functions used in multiple util files
 
@@ -206,3 +214,7 @@ i.kerascheck:{[mdls;tts;tgt]
   tgtcheck:(count distinct tgt)>min{count distinct x}each tts`ytrain`ytest;
   $[mkcheck&tgtcheck;i.errtgt;]mdls}
 
+// Used throughout the library to convert windows/mac file names to windows equivalent
+/* path = the linux 'like' path
+/. r    > the path modified to be suitable for windows systems
+i.ssrwin:{[path]$[.z.o like "w*";ssr[path;"/";"\\"];path]}

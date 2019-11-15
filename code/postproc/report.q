@@ -3,10 +3,11 @@
 FPDF:.p.import[`fpdf][`:FPDF]
 
 // Generate a report using FPDF outlining the results from a run of the automl pipeline
-/* dict = dictionary with needed with values for the pdf
-/. dt   = dictionary denoting the start and end time of an automl run
-/. r    > a pdf report saved to disk
-post.report:{[dict;dt]
+/* dict  = dictionary with needed with values for the pdf
+/* dt    = dictionary denoting the start and end time of an automl run
+/* fname = This is a file path which denotes a save location for the generated report.
+/. r     > a pdf report saved to disk
+post.report:{[dict;dt;fname]
   pdf:FPDF[];
   pdf[`:add_page][];
 
@@ -47,7 +48,7 @@ post.report:{[dict;dt]
   cell[pdf;xval];
   line[pdf;5];
 
-  image[pdf;path,"/code/postproc/Images/train_test_validate.png"];
+  image[pdf;path,"/code/postproc/images/train_test_validate.png"];
   font[pdf;8;`];
   fig_1:"Figure 1: This is representative image showing the data split into training,",
         "validation and testing sets.";
@@ -122,8 +123,6 @@ post.report:{[dict;dt]
   cell[pdf;fin];
   line[pdf;7];
   
-  system"mkdir",$[.z.o like "w*";" ";" -p "],
-        fname:ssr[path,"/Outputs/",string[dt`stdate],"/Run_",string[dt`sttime],"/Reports";":";"."];
   pdf[`:output][ssr[fname,"/q_automl_report_",sv["_";string(dict`mdl;dt`sttime)],".pdf";":";"."];`F];}
 
 // Utilities for the report generation functionality

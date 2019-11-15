@@ -9,7 +9,9 @@
 /* t = table of features as output from preprocessing pipeline/feature extraction
 /* mdls = appropriate models from `.aml.proc.models` above
 /* dt = date and time that the run was initialized (this is used in the feature impact function) 
-proc.runmodels:{[t;tgt;mdls;p;dt]
+/* fpath = file paths for saving down information
+/. r     > all relevant information about the running of the sets of models
+proc.runmodels:{[t;tgt;mdls;p;dt;fpath]
   system"S ",string s:p`seed;
   c:cols t;t:flip value flip t;
   // Apply train test split to keep holdout for feature impact plot and testing of vanilla best model
@@ -35,7 +37,7 @@ proc.runmodels:{[t;tgt;mdls;p;dt]
   -1"Score for validation predictions using best model = ",string[s2],"\n";
   bm_tend:.z.T-bm_tstart;
   // Feature impact graph produced on holdout data if setting is appropriate
-  if[2=p[`saveopt];post.featureimpact[bs;bm;xtst;ytst;c;scf;ord;dt]];
+  if[2=p[`saveopt];post.featureimpact[bs;bm;(xtst;ytst);c;scf;ord;dt;fpath]];
   // Outputs from run models. These are used in the generation of a pdf report
   // or are used within later sections of the pipeline.
   (s1;bs;s2;xv_tend;bm_tend;scf;bm)}
