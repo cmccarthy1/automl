@@ -1,4 +1,3 @@
-\l p.q / embedPy
 \d .aml
 version:@[{AUTOMLVERSION};`;`development]
 path:{string`automl^`$@[{"/"sv -1_"/"vs ssr[;"\\";"/"](-3#get .z.s)0};`;""]}`

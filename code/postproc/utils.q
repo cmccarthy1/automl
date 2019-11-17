@@ -57,7 +57,7 @@ post.cgcurve:{[tgt;prob]
 /* d  = output of post.cgcurve
 /* dt = dictionary containing date and time of run start `sttime`stdate! ...
 /. r  > cumulative gain/lift curve saved to disk
-post.i.gainliftplt:{[d;dt]
+post.i.gainliftplt:{[d;dt;fpath]
   c1:d 0;c2:d 1;
   pcnt_lift:1_c2`pcnt;
   pcnt_gain:c2`pcnt;
@@ -78,17 +78,16 @@ post.i.gainliftplt:{[d;dt]
   plt[`:legend][`loc pykw "lower right"];
   plt[`:xlabel]["% of sample";`fontsize pykw 18];
   plt[`:ylabel]["Gain";`fontsize pykw 18];
-  system"mkdir",$[.z.o like "w*";" ";" -p "],
-    fname:ssr[path,"/Outputs/",string[dt`stdate],"/Images/Run_",string[dt`sttime];":";"."];
-  plt[`:savefig][fname,"/Lift_Gain_Curve.png"];
+  plt[`:savefig][fpath[0][`images],"/Lift_Gain_Curve.png"];
   plt[`:show][];}
 
 // This function will plot and save the feature impact plot to an appropriate location
 // the maximum number of features plotted is 20 
-/* im  = impact scores
-/* mdl = model name as a symbol
-/* dt  = dictionary containing date and time of run start `sttime`stdate! ...
-/. r   > impact plot saved to disk
+/* im    = impact scores
+/* mdl   = model name as a symbol
+/* dt    = dictionary containing date and time of run start `sttime`stdate! ...
+/* fpath = file path to the images folfer 
+/. r     > impact plot saved to disk
 post.i.impactplot:{[im;mdl;dt;fpath]
   plt[`:figure][`figsize pykw 20 20];
   sub:plt[`:subplots][];
@@ -111,7 +110,7 @@ post.i.impactplot:{[im;mdl;dt;fpath]
 /* prob = predicted probability
 /* dt   = dictionary containing date and time of run start `sttime`stdate! ...
 /. r    > ROC plot saved to disk
-post.i.roccurve:{[tgt;prob;dt]
+post.i.roccurve:{[tgt;prob;dt;fpath]
   rocdict:`frp`tpr!.ml.roc[tgt;prob];
   rocAuc:.ml.rocaucscore[rocdict`frp; rocdict`tpr];lw:2;
   plt[`:plot][rocdict`frp;rocdict`tpr;`color pykw "darkorange";`lw pykw lw;
@@ -125,7 +124,7 @@ post.i.roccurve:{[tgt;prob;dt]
   plt[`:legend][`loc pykw "upper left"];
   system"mkdir",$[.z.o like "w*";" ";" -p "],
     fname:ssr[path,"/Outputs/",string[dt`stdate],"/Images/Run_",string[dt`sttime];":";"."];
-  plt[`:savefig][fname,"/ROC_Curve.png"];
+  plt[`:savefig][fpath[0][`images],"/ROC_Curve.png"];
   plt[`:show][];}
 
 

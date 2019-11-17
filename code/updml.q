@@ -1,3 +1,7 @@
+// The purpose of this file is to act as a placer for functions which may be moved into the
+// machine learning toolkit or which overwrite the present behaviour of functions in the
+// toolkit
+
 \d .ml
 
 infreplace:{
@@ -11,6 +15,7 @@ infreplace:{
 
 // Encode the target data to be from
 labelencode:{(asc distinct x)?x}
+
 
 // Utilities for functions to be added to the toolkit
 i.infrep:{

@@ -1,5 +1,6 @@
-numpy
-scikit-learn
+fpdf
+joblib
 matplotlib
-sklearn
-fdpf
+numpy
+statsmodels
+scikit-learn
