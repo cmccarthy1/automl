@@ -41,5 +41,3 @@ proc.runmodels:{[t;tgt;mdls;p;dt;fpath]
   // Outputs from run models. These are used in the generation of a pdf report
   // or are used within later sections of the pipeline.
   (s1;bs;s2;xv_tend;bm_tend;scf;bm)}
-
-if[0>system"s";.ml.mproc.init[abs system"s"]enlist".ml.loadfile`:init.q"]

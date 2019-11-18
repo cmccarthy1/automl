@@ -33,9 +33,10 @@ proc.gs.psearch:{[xtrn;ytrn;xtst;ytst;bm;p;typ;mdls]
     if[0<count where n:spltcnt<dict`n_neighbors;
       dict[`n_neighbors]@:where not n]];
   // Complete an appropriate grid search, returning scores for each validation fold
-  gsprms:get[p[`gs]0][p[`gs]1;1;xtrn;ytrn;fitpred;dict;p`hld];
+  bm:first exec minit from mdls where model=bm;
+  gsprms:get[p[`gs]0][p[`gs]1;1;xtrn;ytrn;p[`prf]bm;dict;`val`ord`scf!(p`hld;o;fn)];
   // Extract the best hyperparameter set based on scoring function 
-  hyp:first key o avg each first gsprms;
+  hyp:first key first gsprms;
   bmdl:epymdl[pykwargs hyp][`:fit][xtrn;ytrn];
   score:fn[;ytst]bmdl[`:predict][flip value flip xtst]`;
   (score;hyp;bmdl)
@@ -54,7 +55,7 @@ proc.xv.seed:{[xtrn;ytrn;p;mdls]
   $[ms&sk;
     // Grid search version of the cross-validation is completed if a random seed
     // and the model is from sklearn, this is in order to incorporate the random state definition
-    first value get[p[`gs]0][p[`xv]1;1;xtrn;ytrn;p[`prf]mdls`minit;s;0];
+    first value get[p[`gs]0][p[`gs]1;1;xtrn;ytrn;p[`prf]mdls`minit;s;enlist[`val]!enlist 0];
     // Otherwise a base level cross validation is performed
     get[p[`xv]0][p[`xv]1;1;xtrn;ytrn;p[`prf][mdls`minit;s]]]}
 
