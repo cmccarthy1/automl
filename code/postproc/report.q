@@ -44,7 +44,7 @@ post.report:{[dict;dt;fname]
            " was performed with a holdout set of ",string[dict[`xv]1],
            "% of training data used for validation.";
          string[dict[`xv]1],"-fold cross validation was performed on the training",
-           "set to find the best model using, .ml.",string[dict[`xv]0],"."];
+           "set to find the best model using, ",string[dict[`xv]0],"."];
   cell[pdf;xval];
   line[pdf;5];
 
@@ -105,7 +105,7 @@ post.report:{[dict;dt;fname]
             "The grid search was completed using .ml.gs.",string[dict[`gscfg]0],
               " with a percentage of ",string[dict[`gscfg]1],"% of training data used for validation";
             ". A ",string[dict[`gscfg]1],"-fold grid-search was performed on the training set",
-              " to find the best model using, .ml.gs.",string[dict[`gscfg]0],"."];
+              " to find the best model using, ",string[dict[`gscfg]0],"."];
     cell[pdf;gscfg];
     line[pdf;7];
 

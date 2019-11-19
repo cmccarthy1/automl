@@ -21,10 +21,10 @@ i.getdict:{[nm]
  
 i.freshdefault:{`aggcols`params`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
   ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;
-   `class`reg!(`.ml.accuracy;`.ml.mse);42;2;0.2;`.ml.traintestsplit;0.2)}
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand;2;0.2;`.ml.traintestsplit;0.2)}
 i.normaldefault:{`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
   ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);
-   42;2;0.2;`.ml.traintestsplit;0.2)}
+   `rand;2;0.2;`.ml.traintestsplit;0.2)}
 
 /  This function sets or updates the default parameter dictionary as appropriate
 /* t   = data as table
@@ -45,7 +45,7 @@ i.updparam:{[t;p;typ]
                          d[`aggcols]t;
                          11h~abs typagg;d`aggcols;
                          '`$"aggcols must be passed function or list of columns"];
-	   d,enlist[`tf]!enlist 0~checkimport[]}[t;p];
+	   d,enlist[`tf]!enlist 1~checkimport[]}[t;p];
       typ=`normal;
       {[t;p]d:i.normaldefault[];
        d:$[(ty:type p)in 10 -11 99h;
@@ -56,7 +56,7 @@ i.updparam:{[t;p;typ]
            p~(::);d;
 	   '`$"p must be passed the identity `(::)`, a filepath to a parameter flatfile",
               " or a dictionary with appropriate key/value pairs"];
-	   d,enlist[`tf]!enlist 0~checkimport[]}[t;p];
+	   d,enlist[`tf]!enlist 1~checkimport[]}[t;p];
       typ=`tseries;
       '`$"This will need to be added once the time-series recipe is in place";
     '`$"Incorrect input type"]}
@@ -91,7 +91,7 @@ i.savemdl:{[x;y;z;r;nms]
 i.models:{[typ;tgt;p]
   if[not typ in key proc.i.files;'`$"text file not found"];
   d:proc.i.txtparse[typ;"/code/mdl_def/"];
-  if[0b~p`tf;
+  if[1b~p`tf;
     d:l!d l:key[d]where not `keras=first each value d];
   m:flip`model`lib`fnc`seed`typ!flip key[d],'value d;
   if[typ=`class;

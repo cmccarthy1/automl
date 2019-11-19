@@ -14,10 +14,11 @@ runexample:{[tb;tgt;ftype;ptype;p]
   dtdict:`stdate`sttime!(.z.D;.z.T);
   // Extract & update the dictionary used to define the workflow
   dict:i.updparam[tb;p;ftype],enlist[`typ]!enlist ftype;
+  if[`rand~dict[`seed];dict[`seed]:"j"$.z.t];
   // if required to save data construct the appropriate folders
   if[dict[`saveopt]in 1 2;spaths:i.pathconstruct[dtdict;dict`saveopt]];
-  mdls:i.models[ptype;tgt;dict]; 
-  system"S ",string s:dict`seed;
+  mdls:i.models[ptype;tgt;dict];
+  system"S ",string dict`seed;
   tb:prep.i.autotype[tb;ftype;dict];
   -1 runout`col;
   encoding:prep.i.symencode[tb;10;1;dict;::];
@@ -34,7 +35,7 @@ runexample:{[tb;tgt;ftype;ptype;p]
   tts:($[-11h=type dict`tts;get;]dict[`tts])[;tgt;dict`sz]tab:feats#tb 0;
   mdls:i.kerascheck[mdls;tts;tgt];
   // Check if Tensorflow/Keras available for use, NN models removed if not
-  if[0~checkimport[];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
+  if[1~checkimport[];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
   -1 runout`sig;-1 runout`slct;-1 runout[`tot],string[ctb:count cols tab];
   // Run all appropriate models on the training set
   bm:proc.runmodels[tts`xtrain;tts`ytrain;mdls;dict;dtdict;spaths];
