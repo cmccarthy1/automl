@@ -21,7 +21,7 @@ i.getdict:{[nm]
  
 i.freshdefault:{`aggcols`params`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
   ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;
-   `class`reg!(`.ml.accuracy;`.ml.mse);`rand;2;0.2;`.ml.traintestsplit;0.2)}
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand;2;0.2;`.ml.ttsnonshuff;0.2)}
 i.normaldefault:{`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
   ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);
    `rand;2;0.2;`.ml.traintestsplit;0.2)}
@@ -178,9 +178,14 @@ i.freshproc:{[t;d]
     t:d[`features] xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
   flip value flip d[`features]#"f"$0^t}
 
-i.pathconstruct:{[dt;b]
+
+// Create the folders that are required for the saving of the config,models, images and reports
+/* dt  = date and time dictionary denoting the start of a run
+/* svo = save option defined by the user, this can only be 1/2 in this case
+/. r   > the file paths in its full format or truncated for use in outputs to terminal
+i.pathconstruct:{[dt;svo]
   names:`config`models;
-  if[b=2;names:names,`images`report]
+  if[svo=2;names:names,`images`report]
   pname:{"/",ssr["outputs/",string[x`stdate],"/run_",string[x`sttime],"/",y,"/";":";"."]};
   paths:path,/:pname[dt]each string names;
   paths:i.ssrwin[paths];
