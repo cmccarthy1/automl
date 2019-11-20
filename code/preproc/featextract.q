@@ -3,8 +3,8 @@
 // For the following code the parameter naming convention holds
 // defined here is applied to avoid repetition throughout the file
 /* t   = input table
-/* tgt = target data
 /* p   = parameter dictionary passed as default or modified by user
+/* tgt = target data
 
 // Create features using the FRESH algorithm
 /. r > table of fresh created features and the time taken to complete extraction

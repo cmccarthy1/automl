@@ -1,5 +1,12 @@
 \d .aml
 
+// The following parameters are used in multiple locations and defined here for convenience
+/* cr = column/row number to be shuffled
+/* tgt  = target data
+/* dt = dictionary containing date and time of run start `sttime`stdate! ...
+/* prob = probability that prediction is the positive class 
+/* fpath = file path to the images folder 
+
 // Utilities for available plotting functionality
 
 // Python functionality
@@ -9,7 +16,6 @@ plt:.p.import`matplotlib.pyplot;
 // This is used in impact plotting to hold all other columns stationary such
 // that the importance of individual columns can be ascertained
 /* tm = table or matrix which is being shuffled
-/* cr = column/row number to be shuffled
 /. r  > the same matrix/table with specified row/column shuffled appropriately
 post.i.shuffle:{[tm;c]
   idx:neg[n]?n:count tm;
@@ -35,8 +41,6 @@ post.i.impact:{[ps;ni;ord]
   asc ni!s%max s:$[ord~desc;1-;]$[any 0>ps;.ml.minmaxscaler;]ps}
 
 // Calculate the required components needed to produce a cumulative gain curve
-/* tgt  = target data
-/* prob = probability that prediction is the positive class 
 /* pc   = positive class
 /. r    > dictionary with positive class, gain and associated percentile
 post.i.gaincurve:{[tgt;prob;pc]
@@ -46,8 +50,6 @@ post.i.gaincurve:{[tgt;prob;pc]
   `pc`gain`pcnt!(pc;gain;pcnt)}
 
 // Data for plotting of a cumulative gain curve
-/* tgt  = true target vector
-/* prob = predicted probability vector
 /. r    > the gain and percentile information needed for the production of the gain curve
 post.cgcurve:{[tgt;prob]
   if[2<>count distinct tgt;'`$"y must be binary"];
@@ -55,7 +57,6 @@ post.cgcurve:{[tgt;prob]
 
 // Produce a cumulative gain/lift curve for binary data and save the result
 /* d  = output of post.cgcurve
-/* dt = dictionary containing date and time of run start `sttime`stdate! ...
 /. r  > cumulative gain/lift curve saved to disk
 post.i.gainliftplt:{[d;dt;fpath]
   c1:d 0;c2:d 1;
@@ -85,8 +86,6 @@ post.i.gainliftplt:{[d;dt;fpath]
 // the maximum number of features plotted is 20 
 /* im    = impact scores
 /* mdl   = model name as a symbol
-/* dt    = dictionary containing date and time of run start `sttime`stdate! ...
-/* fpath = file path to the images folfer 
 /. r     > impact plot saved to disk
 post.i.impactplot:{[im;mdl;dt;fpath]
   plt[`:figure][`figsize pykw 20 20];
@@ -106,9 +105,6 @@ post.i.impactplot:{[im;mdl;dt;fpath]
 
 // This function will be used to produce an ROC plot, this however necessitates the need for
 // predicted probabilities to be returned from the models which is not at present implemented
-/* tgt  = label associated with the prediction
-/* prob = predicted probability
-/* dt   = dictionary containing date and time of run start `sttime`stdate! ...
 /. r    > ROC plot saved to disk
 post.i.roccurve:{[tgt;prob;dt;fpath]
   rocdict:`frp`tpr!.ml.roc[tgt;prob];
@@ -135,7 +131,6 @@ post.i.roccurve:{[tgt;prob;dt;fpath]
 /* cfeat = count of features
 /* bm    = information about the best model returned from `.aml.proc.runmodels`
 /* tm    = list with the time for feature extraction to take place returned from .aml.prep.*create
-/* dt    = dictionary containing the start time and date
 /* path  = output from ".aml.path" for the system
 /* xvgs  = list of information about the models used and scores achieved for xval and grid-search
 /. r     > dictionary with the appropriate information added

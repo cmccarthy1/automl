@@ -15,7 +15,7 @@ loadfile`:code/proc/utils.q
 loadfile`:code/proc/proc.q
 loadfile`:code/proc/xvgs.q
 $[0~checkimport[];
-  loadfile`:code/mdl_def/kmdls.q;
+  loadfile`:code/mdldef/kmdls.q;
   [-1"Requirements for deep learning models not available, these will not be run";]]
 loadfile`:code/postproc/plots.q
 loadfile`:code/postproc/report.q

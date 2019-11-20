@@ -1,35 +1,16 @@
 \d .aml
 
-// Utilities for run.q
-
-//  Function takes in a string which is the name of a parameter flatfile
-/* nm = name of the file from which the dictionary is being extracted
-/. r  > the dictionary as defined in a float file in mdl_def
-i.getdict:{[nm]
-  d:proc.i.paramparse[nm;"/code/mdl_def/"];
-  idx:(k except`scf;
-    k except`xv`gs`scf;
-    $[`xv in k;`xv;()],$[`gs in k;`gs;()];
-    $[`scf in k:key d;`scf;()]);
-  fnc:(key;{get string first x};{(x 0;get string x 1)};{key[x]!`$value x});
-  // addition of empty dictionary entry needed as parsing 
-  // of file behaves oddly with only a single entry
-  if[sgl:1=count d;d:(enlist[`]!enlist""),d];
-  d:{$[0<count y;@[x;y;z];x]}/[d;idx;fnc];
-  if[sgl;d:1_d];
-  d}
- 
-i.freshdefault:{`aggcols`params`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
-  ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;
-   `class`reg!(`.ml.accuracy;`.ml.mse);`rand;2;0.2;`.ml.ttsnonshuff;0.2)}
-i.normaldefault:{`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
-  ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);
-   `rand;2;0.2;`.ml.traintestsplit;0.2)}
-
-/  This function sets or updates the default parameter dictionary as appropriate
+// The following aspects of the naming parameter naming are used throughout this file
 /* t   = data as table
 /* p   = dictionary of parameters (type of feature extract dependant)
 /* typ = type of feature extraction (FRESH/normal/tseries ...)
+/* tgt  = target vector
+/* mdls = table denoting all the models with associated information used in this repository
+
+
+// Utilities for run.q
+
+//  This function sets or updates the default parameter dictionary as appropriate
 i.updparam:{[t;p;typ]
   dict:
     $[typ=`fresh;
@@ -61,6 +42,37 @@ i.updparam:{[t;p;typ]
       '`$"This will need to be added once the time-series recipe is in place";
     '`$"Incorrect input type"]}
 
+//  Function takes in a string which is the name of a parameter flatfile
+/* nm = name of the file from which the dictionary is being extracted
+/. r  > the dictionary as defined in a float file in mdldef
+i.getdict:{[nm]
+  d:proc.i.paramparse[nm;"/code/mdldef/"];
+  idx:(k except`scf;
+    k except`xv`gs`scf`seed;
+    $[`xv in k;`xv;()],$[`gs in k;`gs;()];
+    $[`scf in k;`scf;()];
+    $[`seed in k:key d;`seed;()]);
+  fnc:(key;
+       {get string first x};{(x 0;get string x 1)};
+       {key[x]!`$value x};{$[`rand_val~first x;first x;get string first x]});
+  // Addition of empty dictionary entry needed as parsing 
+  // of file behaves oddly if only a single entry is given to the system
+  if[sgl:1=count d;d:(enlist[`]!enlist""),d];
+  d:{$[0<count y;@[x;y;z];x]}/[d;idx;fnc];
+  if[sgl;d:1_d];
+  d}
+
+// Default parameters used in the population of parameters at the start of a run
+// or in the creation of a new initialisation parameter flat file
+/* Neither of these function take a parameter as input
+/. r > default dictionaries which will be used by the automl
+i.freshdefault:{`aggcols`params`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
+  ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.ttsnonshuff;0.2)}
+i.normaldefault:{`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
+  ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);
+   `rand_val;2;0.2;`.ml.traintestsplit;0.2)}
+
 // Apply an appropriate scoring function to predictions from a model
 /* xtst = test data
 /* ytst = test target
@@ -70,31 +82,31 @@ i.updparam:{[t;p;typ]
 i.scorepred:{[xtst;ytst;mdl;scf]scf[;ytst]mdl[`:predict][xtst]`}
 
 /  save down the best model
-/* x = date-time of model start (dict)
-/* y = best model name (`symbol)
-/* z = best model object (embedPy)
+/* dt = date-time of model start (dict)
+/* bmn = best model name (`symbol)
+/* bmo = best model object (embedPy)
 /* r = all applied models (table)
-i.savemdl:{[x;y;z;r;nms]
+i.savemdl:{[bmn;bmo;mdls;nms]
   fname:nms[0]`models;mo:nms[1]`models;
   system"mkdir -p ",fname;
   joblib:.p.import[`joblib];
-  $[(`sklearn=?[r;enlist(=;`model;y,());();`lib])0;
-      (joblib[`:dump][z;fname,"/",string[y]];-1"Saving down ",string[y]," model to ",mo);
-    (`keras=?[r;enlist(=;`model;y,());();`lib])0;
-      (bm[`:save][fname,"/",string[y],".h5"];-1"Saving down ",string[y]," model to ",mo);
+  $[(`sklearn=?[mdls;enlist(=;`model;bmn,());();`lib])0;
+      (joblib[`:dump][bmo;fname,"/",string[bmn]];-1"Saving down ",string[bmn]," model to ",mo);
+    (`keras=?[mdls;enlist(=;`model;bmn,());();`lib])0;
+      (bmo[`:save][fname,"/",string[bmn],".h5"];-1"Saving down ",string[bmn]," model to ",mo);
    -1"Saving of non keras/sklearn models types is not currently supported"];
  }
 
 // Table of models appropriate for the problem type being solved
-/* typ = symbol, either `class or `reg
+/* ptyp = problem type as a symbol, either `class or `reg
 /. r   > table with all information needed for appropriate models to be applied to data
-i.models:{[typ;tgt;p]
-  if[not typ in key proc.i.files;'`$"text file not found"];
-  d:proc.i.txtparse[typ;"/code/mdl_def/"];
+i.models:{[ptyp;tgt;p]
+  if[not ptyp in key proc.i.files;'`$"text file not found"];
+  d:proc.i.txtparse[ptyp;"/code/mdldef/"];
   if[1b~p`tf;
     d:l!d l:key[d]where not `keras=first each value d];
   m:flip`model`lib`fnc`seed`typ!flip key[d],'value d;
-  if[typ=`class;
+  if[ptyp=`class;
     // For classification tasks remove inappropriate classification models
     m:$[2<count distinct tgt;
         delete from m where typ=`binary;
@@ -105,8 +117,6 @@ i.models:{[typ;tgt;p]
   i.updmodels[m;tgt]}
 
 // Update models available for use based on the number of rows in the data set
-/* mdls = table defining models which are to be applied to the dataset
-/* tgt  = target vector
 /. r    > model table with appropriate models removed if needed and model removal highlighted
 i.updmodels:{[mdls;tgt]
  $[100000<count tgt;
@@ -118,6 +128,19 @@ i.updmodels:{[mdls;tgt]
 // at present this should include the Keras models as a sufficient tuning method
 // has yet to be implemented
 i.excludelist:`GaussianNB`LinearRegression`RegKeras`MultiKeras`BinKeras;
+
+// Dictionary with mappings for console printing to reduce clutter in .aml.runexample
+i.runout:`col`pre`sig`slct`tot`ex`gs`sco`save!
+ ("\nThe following is a breakdown of information for each of the relevant columns in the dataset\n";
+  "\nData preprocessing complete, starting feature creation";
+  "\nFeature creation and significance testing complete";
+  "Starting initial model selection - allow ample time for large datasets";
+  "\nTotal features being passed to the models = ";
+  "Continuing to final model fitting on holdout set";
+  "Continuing to grid-search and final model fitting on holdout set";
+  "\nBest model fitting now complete - final score on test set = ";
+  "Saving down procedure report to ")
+
 
 // Save down the metadata dictionary as a binary file which can be retrieved by a user or
 // is to be used in running of the models on new data
@@ -143,40 +166,36 @@ i.getmeta:{[fp]
 
 
 // Apply feature creation and encoding procedures for 'normal' on new data
-/* t = New tabular data to apply creation and encoding on
-/* d = metadata from a previous run of automl as a dictionary
 /. r > table with feature creation and encodings applied appropriately
-i.normalproc:{[t;d]
-  prep.i.autotype[t;d`typ;d];
+i.normalproc:{[t;p]
+  prep.i.autotype[t;p`typ;p];
   // symbol encoding completed based on encoding applied in a previous 'run'
-  t:prep.i.symencode[t;10;0;d;d`symencode];
+  t:prep.i.symencode[t;10;0;p;p`symencode];
   t:prep.i.nullencode[t;med];
   t:.ml.infreplace[t];
   t:first prep.normalcreate[t;::];
-  flip value flip d[`features]#t}
+  flip value flip p[`features]#t}
 
 // Apply feature creation and encoding procedures for FRESH on new data
-/* t = New tabular data to apply creation and encoding on
-/* d = metadata from a previous run of automl as a dictionary
 /. r > table with feature creation and encodings applied appropriately
-i.freshproc:{[t;d]
-  t:prep.i.autotype[t;d`typ;d];
-  agg:d`aggcols;
+i.freshproc:{[t;p]
+  t:prep.i.autotype[t;p`typ;p];
+  agg:p`aggcols;
   // extract relevant functions based on the significant features determined by the model
-  funcs:raze `$distinct{("_" vs string x)1}each d`features;
+  funcs:raze `$distinct{("_" vs string x)1}each p`features;
   // ensures that many calculations that are irrelevant are not run
   appfns:1!select from 0!.ml.fresh.params where f in funcs;
   // apply symbol encoding based on a previous run of automl
-  t:prep.i.symencode[t;10;0;d;d`symencode];
+  t:prep.i.symencode[t;10;0;p;p`symencode];
   cols2use:k where not (k:cols t)in agg;
   t:prep.i.nullencode[value .ml.fresh.createfeatures[t;agg;cols2use;appfns];med];
   t:.ml.infreplace t;
   // It is not guaranteed that new feature creation will produce the all requisite features 
   // if this is not the case dummy features are added to the data
-  if[not all ftc:d[`features]in cols t;
-    newcols:d[`features]where not ftc;
-    t:d[`features] xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
-  flip value flip d[`features]#"f"$0^t}
+  if[not all ftc:p[`features]in cols t;
+    newcols:p[`features]where not ftc;
+    t:p[`features] xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
+  flip value flip p[`features]#"f"$0^t}
 
 
 // Create the folders that are required for the saving of the config,models, images and reports
@@ -197,22 +216,17 @@ i.pathconstruct:{[dt;svo]
 // Util functions used in multiple util files
 
 // Error flag if test set is not appropriate for multiKeras model
-/* mdls = table denoting all the models with associated information used in this repository
 /. r    > the models table with the MultiKeras model removed
 i.errtgt:{[mdls]
   -1 "\n Test set does not contain examples of each class. Removed MultiKeras from models";
   delete from mdls where model=`MultiKeras}
 
 // Extract the scoring function to be applied for model selection
-/* p    = parameter dictionary
-/* mdls = table with all appropriate models
 /. r    > the scoring function appropriate to the problem being solved
 i.scfn:{[p;mdls]p[`scf]$[`reg in distinct mdls`typ;`reg;`class]}
 
 // Check if MultiKeras model is to be applied and each target exists in both training and testing sets
-/* mdls = models table
 /* tts  = train-test split dataset
-/* tgt  = target data
 /. r    > table with multi-class keras model removed if it is not to be applied
 i.kerascheck:{[mdls;tts;tgt]
   mkcheck :(`MultiKeras in mdls`model);

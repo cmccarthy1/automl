@@ -7,6 +7,25 @@
 /* mdls = appropriate models as produced using `.aml.proc.models`
 
 
+// Seeded cross-validation function, designed to ensure that models will be consistent
+// from run to run in order to accurately assess the benefit of updates to parameters
+proc.xv.seed:{[xtrn;ytrn;p;mdls]
+  sk:mdls[`lib]~`sklearn;
+  system"S ",string p`seed;
+  // Add a random state to a model if denoted by the flat file definition of the models
+  // this needs to be handled differently for sklearn and keras models
+  s:$[ms:mdls[`seed]~`seed;
+      $[sk;enlist[`random_state]!enlist p`seed;p`seed];
+      ::];
+  $[ms&sk;
+    // Grid search version of the cross-validation is completed if a random seed
+    // and the model is from sklearn, this is in order to incorporate the random state definition
+    // Final parameter required as dict to allow for grid search to be as flexible as possible
+    first value get[p[`gs]0][p[`gs]1;1;xtrn;ytrn;p[`prf]mdls`minit;s;enlist[`val]!enlist 0];
+    // Otherwise a base level cross validation is performed
+    get[p[`xv]0][p[`xv]1;1;xtrn;ytrn;p[`prf][mdls`minit;s]]]}
+
+
 // Grid search over the set of all hyperparameters outlined in code/mdldef/hyperparams.txt
 /* xtst = Testing features (matrix)
 /* ytst = Testing target (vector)
@@ -18,7 +37,7 @@
 proc.gs.psearch:{[xtrn;ytrn;xtst;ytst;bm;p;typ;mdls]
   dict:proc.i.extractdict[bm];
   // Extract the required sklearn module name
-  module:` sv 2#proc.i.txtparse[typ;"/code/mdl_def/"]bm;
+  module:` sv 2#proc.i.txtparse[typ;"/code/mdldef/"]bm;
   fn:i.scfn[p;mdls];
   o :proc.i.ord fn;
   // Import the required embedPy module
@@ -43,24 +62,6 @@ proc.gs.psearch:{[xtrn;ytrn;xtst;ytst;bm;p;typ;mdls]
   score:fn[;ytst]bmdl[`:predict][flip value flip xtst]`;
   (score;hyp;bmdl)
   }
-
-// Seeded cross-validation function, designed to ensure that models will be consistent
-// from run to run in order to accurately assess the benefit of updates to parameters
-proc.xv.seed:{[xtrn;ytrn;p;mdls]
-  sk:mdls[`lib]~`sklearn;
-  system"S ",string p`seed;
-  // Add a random state to a model if denoted by the flat file definition of the models
-  // this needs to be handled differently for sklearn and keras models
-  s:$[ms:mdls[`seed]~`seed;
-      $[sk;enlist[`random_state]!enlist p`seed;p`seed];
-      ::];
-  $[ms&sk;
-    // Grid search version of the cross-validation is completed if a random seed
-    // and the model is from sklearn, this is in order to incorporate the random state definition
-    // Final parameter required as dict to allow for grid search to be as flexible as possible
-    first value get[p[`gs]0][p[`gs]1;1;xtrn;ytrn;p[`prf]mdls`minit;s;enlist[`val]!enlist 0];
-    // Otherwise a base level cross validation is performed
-    get[p[`xv]0][p[`xv]1;1;xtrn;ytrn;p[`prf][mdls`minit;s]]]}
 
 
 // Defaulted fitting and prediction functions for automl cross-validation and grid search, 

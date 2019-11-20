@@ -1,15 +1,12 @@
 \d .aml
 
-// For the following code the parameter naming convention holds
-// defined here is applied to avoid repetition throughout the file
-/* tgt = target data
-/* p   = parameter dictionary passed as default or modified by user
-
 // Run cross validated machine learning models on training data and choose the best model.
-/* t = table of features as output from preprocessing pipeline/feature extraction
-/* mdls = appropriate models from `.aml.proc.models` above
-/* dt = date and time that the run was initialized (this is used in the feature impact function) 
+/* t     = table of features as output from preprocessing pipeline/feature extraction
+/* mdls  = appropriate models from `.aml.proc.models` above
+/* dt    = date and time that the run was initialized (this is used in the feature impact function) 
 /* fpath = file paths for saving down information
+/* tgt   = target data
+/* p     = parameter dictionary passed as default or modified by user
 /. r     > all relevant information about the running of the sets of models
 proc.runmodels:{[t;tgt;mdls;p;dt;fpath]
   system"S ",string s:p`seed;

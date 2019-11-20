@@ -25,7 +25,7 @@ prep.i.autotype:{[t;typ;p]
       // restore the aggregating columns 
       tb:flip (l!t l,:()),cls!t cls;
       prep.i.errcol[cols t;cols tb;typ]];
-    tb:(::)];
+    '`$"This form of feature extraction is not currently supported"];
   tb}
 
 // Description of tabular data
@@ -38,9 +38,9 @@ prep.i.describe:{[t]
   catcols :.ml.i.fndcols[t;"s"];
   textcols:.ml.i.fndcols[t;"c"];
   num  :prep.i.metafn[t;numcols ;(count;{count distinct x};avg;sdev;min;max;{`numeric})];
-  symb :prep.i.metafn[t;catcols ;prep.i.non_numeric[{`categorical}]];
-  times:prep.i.metafn[t;timecols;prep.i.non_numeric[{`time}]];
-  bool :prep.i.metafn[t;boolcols;prep.i.non_numeric[{`boolean}]];
+  symb :prep.i.metafn[t;catcols ;prep.i.nonnumeric[{`categorical}]];
+  times:prep.i.metafn[t;timecols;prep.i.nonnumeric[{`time}]];
+  bool :prep.i.metafn[t;boolcols;prep.i.nonnumeric[{`boolean}]];
   flip columns!flip num,symb,times,bool
   }
 
@@ -72,7 +72,7 @@ prep.i.nullencode:{[t;fn]
 /* n   = number of distinct values in a column after which we symbol encode
 /* b   = boolean flag indicating if table is to be returned (0) or encoding type returned (1)
 /* enc = how encoding is to be applied, if dictionary outlining encoding perform encoding accordingly
-/*       otherwise, return a table with symbol encoding on all columns
+/*       otherwise, return a table with symbols encoded appropriately on all relevant columns
 /*       or the dictionary outlining how the encoding would be performed
 /. r   > the data encoded appropriately for the task 
 /.       table with symbols encoded or dictionary denoting how to encode the data 
@@ -135,6 +135,8 @@ prep.i.truncsvd:{[t;c;p]
   svd:.p.import[`sklearn.decomposition;`:TruncatedSVD;`n_components pykw 1];
   flip flip[t],(`$(raze each string c),\:"_trsvd")!{raze x[`:fit_transform][flip y]`}[svd]each t c}
 
+// Error message related to the 'refusal' of the feature significance tests to 
+// find appropriate columns to explain the data from those produced
 prep.i.freshsigerr:"The feature significance extraction process deemed none of the features",
   "to be important continuing anyway"
 
@@ -156,4 +158,4 @@ prep.i.errcol:{[cl;sl;typ]
 prep.i.metafn:{[t;sl;fl]$[0<count sl;fl@\:/:flip(sl)#t;()]}
 
 // List of functions to be applied in metadata function for non-numeric data
-prep.i.non_numeric:{[t](count;{count distinct x};{};{};{};{};t)}
+prep.i.nonnumeric:{[t](count;{count distinct x};{};{};{};{};t)}

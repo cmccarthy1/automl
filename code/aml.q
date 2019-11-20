@@ -15,15 +15,17 @@ runexample:{[tb;tgt;ftype;ptype;p]
   // Extract & update the dictionary used to define the workflow
   dict:i.updparam[tb;p;ftype],enlist[`typ]!enlist ftype;
   // update the seed randomly if user does not specify the seed in p
-  if[`rand~dict[`seed];dict[`seed]:"j"$.z.t];
+  if[`rand_val~dict[`seed];dict[`seed]:"j"$.z.t];
   // if required to save data construct the appropriate folders
   if[dict[`saveopt]in 1 2;spaths:i.pathconstruct[dtdict;dict`saveopt]];
   mdls:i.models[ptype;tgt;dict];
   system"S ",string dict`seed;
   tb:prep.i.autotype[tb;ftype;dict];
-  -1 runout`col;
+  -1 i.runout`col;
+  // This provides an encoding map which can be used in reruns of automl even
+  // if the data is no longer in the appropriate format for symbol encoding
   encoding:prep.i.symencode[tb;10;1;dict;::];
-  tb:preproc[tb;tgt;ftype;dict];-1 runout`pre;
+  tb:preproc[tb;tgt;ftype;dict];-1 i.runout`pre;
   tb:$[ftype=`fresh;prep.freshcreate[tb;dict];
        ftype=`normal;prep.normalcreate[tb;dict];
        '`$"Feature extraction type is not currently supported"];
@@ -35,26 +37,25 @@ runexample:{[tb;tgt;ftype;ptype;p]
   // in a file or through the more traditional dictionary/(::) format
   tts:($[-11h=type dict`tts;get;]dict[`tts])[;tgt;dict`sz]tab:feats#tb 0;
   mdls:i.kerascheck[mdls;tts;tgt];
-  // Check if Tensorflow/Keras available for use, NN models removed if not
+  // Check if Tensorflow/Keras not available for use, NN models removed
   if[1~checkimport[];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
-  -1 runout`sig;-1 runout`slct;-1 runout[`tot],string[ctb:count cols tab];
+  -1 i.runout`sig;-1 i.runout`slct;-1 i.runout[`tot],string[ctb:count cols tab];
   // Run all appropriate models on the training set
   bm:proc.runmodels[tts`xtrain;tts`ytrain;mdls;dict;dtdict;spaths];
   fn:i.scfn[dict;mdls];
   // Do not run grid search on deterministic models returning score on the test set and model
   if[a:bm[1]in i.excludelist;
-    -1 runout`ex;score:i.scorepred[flip value flip tts`xtest;tts`ytest;last bm;fn];expmdl:last bm];
+    -1 i.runout`ex;score:i.scorepred[flip value flip tts`xtest;tts`ytest;last bm;fn];expmdl:last bm];
   // Run grid search on the best model for the parameter sets defined in hyperparams.txt
   if[b:not a;
-    -1 runout`gs;
+    -1 i.runout`gs;
     prms:proc.gs.psearch[flip value flip tts`xtrain;tts`ytrain;
-      tts`xtest;tts`ytest;
-      bm 1;dict;ptype;mdls];
+                         tts`xtest;tts`ytest;bm 1;dict;ptype;mdls];
     score:first prms;expmdl:last prms];
-  -1 runout[`sco],string[score],"\n";
+  -1 i.runout[`sco],string[score],"\n";
   // Save down a pdf report summarizing the running of the pipeline
   if[2=dict`saveopt;
-    -1 runout[`save],spaths[1]`report;
+    -1 i.runout[`save],spaths[1]`report;
     report_param:post.i.reportdict[ctb;bm;tb;dtdict;path;(prms 1;score;dict`xv;dict`gs);spaths];
     post.report[report_param;dtdict;spaths[0]`report]];
   if[dict[`saveopt]in 1 2;
@@ -64,10 +65,11 @@ runexample:{[tb;tgt;ftype;ptype;p]
     hp:$[b;enlist[`hyper_parameters]!enlist prms 1;()!()];
     exmeta:`features`test_score`best_model`symencode`pylib!(feats;score;bm 1;encoding;pylib 0);
     metadict:dict,hp,exmeta;
-    i.savemdl[dtdict;bm 1;expmdl;mdls;spaths];
+    i.savemdl[bm 1;expmdl;mdls;spaths];
     i.savemeta[metadict;dtdict;spaths]];
   }
-  
+
+
 // Function for the processing of new data based on a previous run and return of predicted target 
 /* t = table of new data to be predicted
 /* fp = the path to the folder which the /Config and /Models folders are
@@ -87,10 +89,12 @@ newproc:{[t;fp]
     ];
   $[(mp:metadata[`pylib])in `sklearn`keras;
     // Apply the relevant saved down model to new data
-    [model:$[mp~`sklearn;skload;krload]i.ssrwin[path,"/outputs/",fp,"/models/",string metadata[`best_model]];
+    [fp_upd:i.ssrwin[path,"/outputs/",fp,"/models/",string metadata[`best_model]];
+     model:$[mp~`sklearn;skload;krload]fp_upd;
      model[`:predict;<]data];
     '`$"The current model type you are attempting to apply is not currently supported"]
   }
+
 
 // Saves down flatfile of default dict
 /* fn    = filename as string, symbol or hsym
@@ -102,7 +106,7 @@ savedefault:{[fn;ftype]
       -11h~typf;$[":"~first strf;1_;]strf:string typf;
       '`$"filename must be string, symbol or hsym"];
   // Open handle to file fn
-  h:hopen hsym`$i.ssrwin[raze[path],"/code/mdl_def/",fn];
+  h:hopen hsym`$i.ssrwin[raze[path],"/code/mdldef/",fn];
   // Set d to default dictionary for feat_typ
   d:$[`fresh ~ftype;.aml.i.freshdefault[];
       `normal~ftype;.aml.i.normaldefault[];
@@ -122,13 +126,3 @@ savedefault:{[fn;ftype]
   {x y}[h]each strd;
   hclose h;}
 
-runout:`col`pre`sig`slct`tot`ex`gs`sco`save!
- ("\nThe following is a breakdown of information for each of the relevant columns in the dataset\n";
-  "\nData preprocessing complete, starting feature creation";
-  "\nFeature creation and significance testing complete";
-  "Starting initial model selection - allow ample time for large datasets";
-  "\nTotal features being passed to the models = ";
-  "Continuing to final model fitting on holdout set";
-  "Continuing to grid-search and final model fitting on holdout set";
-  "\nBest model fitting now complete - final score on test set = ";
-  "Saving down procedure report to ")
