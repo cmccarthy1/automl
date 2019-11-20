@@ -1,131 +1,161 @@
 \d .aml
 
+// For the following code the parameter naming convention holds
+// defined here is applied to avoid repetition throughout the file
+/* t   = input table
+/* typ = symbol type of the problem being solved (this determines accepted types)
+/* tgt = target data
+/* p   = parameter dictionary passed as default or modified by user
+/* c   = columns to apply the transformation, if c~(::) then apply to all appropriate columns 
+
+
 // Utilities for preproc.q
 
-/  Automatic type checking
-i.autotype:{[x;typ;p]
+// Automatic type checking
+/. r   > the table with acceptable types only and error message with removed columns named
+prep.i.autotype:{[t;typ;p]
   $[typ in `tseries`normal;
-    [cls:.ml.i.fndcols[x;"sfihjbepmdznuvt"];
-      tb:flip cls!x cls;
-      i.err_col[cols x;cls;typ]];
+    [cls:.ml.i.fndcols[t;"sfihjbepmdznuvt"];
+      tb:flip cls!t cls;
+      prep.i.errcol[cols t;cls;typ]];
     typ=`fresh;
-    [aprcls:flip (l:p[`aggcols]) _ flip x;
+    // ignore the aggregating colums for FRESH as these can be of any type
+    [aprcls:flip (l:p[`aggcols]) _ flip t;
       cls:.ml.i.fndcols[aprcls;"sfiehjb"];
-      tb:flip (l!x l,:()),cls!x cls;
-      i.err_col[cols x;cols tb;typ]];
-    tb:(::)];
+      // restore the aggregating columns 
+      tb:flip (l!t l,:()),cls!t cls;
+      prep.i.errcol[cols t;cols tb;typ]];
+    '`$"This form of feature extraction is not currently supported"];
   tb}
 
-/  Description of input table
-/* x = table
-i.describe:{
+// Description of tabular data
+/. r > keyed table with information about each of the columns
+prep.i.describe:{[t]
   columns :`count`unique`mean`std`min`max`type;
-  numcols :.ml.i.fndcols[x;"hijef"];
-  timecols:.ml.i.fndcols[x;"pmdznuvt"];
-  boolcols:.ml.i.fndcols[x;"b"];
-  catcols :.ml.i.fndcols[x;"s"];
-  textcols:.ml.i.fndcols[x;"c"];
-  num  :i.metafn[x;numcols ;(count;{count distinct x};avg;sdev;min;max;{`numeric})];
-  symb :i.metafn[x;catcols ;i.non_numeric[{`categorical}]];
-  times:i.metafn[x;timecols;i.non_numeric[{`time}]];
-  bool :i.metafn[x;boolcols;i.non_numeric[{`boolean}]];
+  numcols :.ml.i.fndcols[t;"hijef"];
+  timecols:.ml.i.fndcols[t;"pmdznuvt"];
+  boolcols:.ml.i.fndcols[t;"b"];
+  catcols :.ml.i.fndcols[t;"s"];
+  textcols:.ml.i.fndcols[t;"c"];
+  num  :prep.i.metafn[t;numcols ;(count;{count distinct x};avg;sdev;min;max;{`numeric})];
+  symb :prep.i.metafn[t;catcols ;prep.i.nonnumeric[{`categorical}]];
+  times:prep.i.metafn[t;timecols;prep.i.nonnumeric[{`time}]];
+  bool :prep.i.metafn[t;boolcols;prep.i.nonnumeric[{`boolean}]];
   flip columns!flip num,symb,times,bool
   }
 
-/  Length checking
-i.lencheck:{[x;tgt;typ;p]
+// Length checking to ensure that the table and target are appropriate for the task being performed
+/. r > on successful execution returns null, will return error if execution unsuccessful
+prep.i.lencheck:{[t;tgt;typ;p]
   if[typ~(::);typ:`normal];
   $[-11h=type typ;
     $[`fresh=typ;
-      if[count[tgt]<>count distinct $[1=count p`aggcols;x[p`aggcols];(,'/)x p`aggcols];
+      // Check that the number of unique aggregating sets is the same as number of targets
+      if[count[tgt]<>count distinct $[1=count p`aggcols;t[p`aggcols];(,'/)t p`aggcols];
          '`$"Target count must equal count of unique agg values for fresh"];
       typ in`tseries`normal;
-      if[count[tgt]<>count x;
+      if[count[tgt]<>count t;
          '`$"Must have the same number of targets as values in table"];
     '`$"Input for typ must be a supported symbol or ::"];
     '`$"Input for typ must be a supported symbol or ::"]}
 
-/  Null encoding
-i.null_encode:{[x;y]
-  vals:l k:where 0<sum each l:null each flip x;
+// Null encoding of table
+/* fn = function to be applied to column from which the value to fill nulls is derived (med/min/max)
+/. r  > the table will null values filled if required
+prep.i.nullencode:{[t;fn]
+  vals:l k:where 0<sum each l:null each flip t;
   nms:`$string[k],\:"_null";
-  // 0 filling needed if median value also null (encoding maintained through added columns)
-  // could use med where med <> 0n but this will skew distribution also (although less drastic)
-  $[0=count k;x;flip 0^(y each flip x)^flip[x],nms!vals]}
+  // 0 filling needed if return value also null (encoding maintained through added columns)
+  $[0=count k;t;flip 0^(fn each flip t)^flip[t],nms!vals]}
 
-
-/  Symbol encoding
-/* tab = input table
+//  Symbol encoding function allowing encoding scheme to be persisted or encoding to be applied
 /* n   = number of distinct values in a column after which we symbol encode
 /* b   = boolean flag indicating if table is to be returned (0) or encoding type returned (1)
-/* d   = the parameter dictionary outlining the run setup
-/* typ = how the encoding should work, if it's a dictionary which could be returned from b=1 then encode according to problem
-/        type for that dictionary, otherwise use function to encode the full table or return the dictionary for later use
-/. returns the table with appropriate encoding applied
-i.symencode:{[tab;n;b;d;typ]
-  $[99h=type typ;
-    r:$[`fresh~d`typ;
-        $[all {not ` in x}each value typ;.ml.onehot[raze .ml.freqencode[;typ`freq]each flip each 0!d[`aggcols]xgroup tab;typ`ohe];
-          ` in typ`freq;.ml.onehot[tab;typ`ohe];
-          ` in typ`ohe;raze .ml.freqencode[;typ`freq]each flip each 0!d[`aggcols]xgroup tab;
-          tab];
-        `normal~d`typ;
-        $[all {not ` in x}each value typ;.ml.onehot[.ml.freqencode[tab;typ`freq];typ`ohe];
-          ` in typ`freq;.ml.onehot[tab;typ`ohe];
-          ` in typ`ohe;raze .ml.freqencode[tab;typ`fc];
-          tab];
-        '`$"This form of encoding has yet to be implemented for specified column encodings"];
-    [sc:.ml.i.fndcols[tab;"s"]except $[tp:`fresh~d`typ;acol:d`aggcols;`];
-      if[0=count sc;r:$[b=1;`freq`ohe!``;tab]];
+/* enc = how encoding is to be applied, if dictionary outlining encoding perform encoding accordingly
+/*       otherwise, return a table with symbols encoded appropriately on all relevant columns
+/*       or the dictionary outlining how the encoding would be performed
+/. r   > the data encoded appropriately for the task 
+/.       table with symbols encoded or dictionary denoting how to encode the data 
+prep.i.symencode:{[t;n;b;p;enc]
+  $[99h=type enc;
+    r:$[`fresh~p`typ;
+        // Both frequency and one hot encoding is to be applied
+        $[all {not ` in x}each value enc;
+          // Encoding for FRESH is performed on aggregation sub table basis not entire columns
+          .ml.onehot[raze .ml.freqencode[;enc`freq]each flip each 0!p[`aggcols]xgroup t;enc`ohe];
+          ` in enc`freq;.ml.onehot[t;enc`ohe];
+          ` in enc`ohe;raze .ml.freqencode[;enc`freq]each flip each 0!p[`aggcols]xgroup t;
+          t];
+        `normal~p`typ;
+        $[all {not ` in x}each value enc;.ml.onehot[.ml.freqencode[t;enc`freq];enc`ohe];
+          ` in enc`freq;.ml.onehot[t;enc`ohe];
+          ` in enc`ohe;raze .ml.freqencode[t;enc`fc];
+          t];
+        '`$"This form of encoding has yet to be implemented for the specified column encoding type"];
+    [sc:.ml.i.fndcols[t;"s"]except $[tp:`fresh~p`typ;acol:p`aggcols;`];
+      if[0=count sc;r:$[b=1;`freq`ohe!``;t]];
       if[0<count sc;
-        fc:where n<count each distinct each sc!flip[tab]sc;
+        fc:where n<count each distinct each sc!flip[t]sc;
         ohe:sc where not sc in fc;
-        r:$[b=1;`freq`ohe!(fc;ohe);tp;.ml.onehot[raze .ml.freqencode[;fc]each
-          flip each 0!acol xgroup tab;ohe];
-          .ml.onehot[.ml.freqencode[tab;fc];ohe]]];
+        r:$[b=1;`freq`ohe!(fc;ohe);
+            tp;.ml.onehot[raze .ml.freqencode[;fc]each flip each 0!acol xgroup t;ohe];
+            .ml.onehot[.ml.freqencode[t;fc];ohe]]];
       if[b=0;r:flip sc _ flip r]]];
   r}
 
 
 // Utilities for feat_extract.q
 
-/  Credibility score
-i.credibility:{[x;c;tgt]
-  if[(::)~c;c:.ml.i.fndcols[x;"s"]];
+// Calculate the credibility score symbol columns based on target distribution in regression tasks
+/. r > the estimated credibility score appended as additional columns 
+prep.i.credibility:{[t;c;tgt]
+  if[(::)~c;c:.ml.i.fndcols[t;"s"]];
   avgtot:avg tgt;
-  counts:{(count each group x)x}each x c,:();
-  avggroup:{(key[k]!avg each y@value k:group x)x}[;tgt]each x c,:();
+  counts:{(count each group x)x}each t c,:();
+  // average target value for the each group
+  avggroup:{(key[k]!avg each y@value k:group x)x}[;tgt]each t c,:();
   scores:{z*(x-y)}[avgtot]'[avggroup;counts];
   names:(`$string[c],\:"_credibility_estimate");
   x^flip names!scores}
 
-/  perform +/-/*/% transformations of hij columns for unique linear combinations of such columns
-i.bulktransform:{[x;c]
-  if[(::)~c;c:.ml.i.fndcols[x;"hij"]];
+// Perform bulk transformations of hij columns for all unique linear combinations of such columns
+/. r > table with bulk transformtions applied appropriately
+prep.i.bulktransform:{[t;c]
+  if[(::)~c;c:.ml.i.fndcols[t;"hij"]];
+  // Name the columns based on the unique combinations
   n:raze(,'/)`$(raze each string c@:.ml.combs[count c;2]),\:/:("_multi";"_sum";"_div";"_sub");
-  flip flip[x],n!(,/)(prd;sum;{first(%)x};{last deltas x})@/:\:x c}
+  // Apply transforms based on naming conventions chosen and re-form the table with these appended
+  flip flip[t],n!(,/)(prd;sum;{first(%)x};{last deltas x})@/:\:t c}
 
-/  perform a truncated single value decomposition on unique linear combinations of float columns
-i.truncsvd:{[x;c;d]
-  if[(::)~c;c:.ml.i.fndcols[x;"f"]];
-  c@:.ml.combs[count c,:();d];
+// Perform a truncated single value decomposition on unique linear combinations of float columns
+// https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html
+prep.i.truncsvd:{[t;c;p]
+  if[(::)~c;c:.ml.i.fndcols[t;"f"]];
+  c@:.ml.combs[count c,:();p];
   svd:.p.import[`sklearn.decomposition;`:TruncatedSVD;`n_components pykw 1];
-  flip flip[x],(`$(raze each string c),\:"_trsvd")!{raze x[`:fit_transform][flip y]`}[svd]each x c}
+  flip flip[t],(`$(raze each string c),\:"_trsvd")!{raze x[`:fit_transform][flip y]`}[svd]each t c}
+
+// Error message related to the 'refusal' of the feature significance tests to 
+// find appropriate columns to explain the data from those produced
+prep.i.freshsigerr:"The feature significance extraction process deemed none of the features",
+  "to be important continuing anyway"
 
 
+// Utils.q utilities
 
-// utils.q utilities
-/* x = entire column list
-/* y = sublist of columns we use
-/* z = type of feature creation we are doing
-i.err_col:{[x;y;z]if[count[x]<>count y;
- -1 "\n Removed the following columns due to type restrictions for ",string z;
- 0N!x where not x in y]}
+// Error flag for removal of inappropriate columms
+/* cl = entire column list
+/* sl = sublist of columns to be used
+prep.i.errcol:{[cl;sl;typ]
+  if[count[cl]<>count sl;
+  -1 "\n Removed the following columns due to type restrictions for ",string typ;
+  0N!cl where not cl in sl]}
 
-i.err_tgt:{
- -1 "\n Test set does not contain examples of each class. Removed MultiKeras from models";
- delete from x where model=`MultiKeras}
+// Metadata information based on list of transforms and supplied columns
+/* sl = sub list of columns to apply functions to
+/* fl = list of functions which will provide the appropriate metadata
+/. r  > dictionary with the appropriate metadata returned
+prep.i.metafn:{[t;sl;fl]$[0<count sl;fl@\:/:flip(sl)#t;()]}
 
-i.metafn:{$[0<count y;z@\:/:flip(y)#x;()]}
-
-i.non_numeric:{(count;{count distinct x};{};{};{};{};x)}
+// List of functions to be applied in metadata function for non-numeric data
+prep.i.nonnumeric:{[t](count;{count distinct x};{};{};{};{};t)}

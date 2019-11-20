@@ -1,63 +1,153 @@
 \d .aml
 
-// Utilities for plotting functions
+// The following parameters are used in multiple locations and defined here for convenience
+/* cr = column/row number to be shuffled
+/* tgt  = target data
+/* dt = dictionary containing date and time of run start `sttime`stdate! ...
+/* prob = probability that prediction is the positive class 
+/* fpath = file path to the images folder 
 
-/  Python functionality
+// Utilities for available plotting functionality
+
+// Python functionality
 plt:.p.import`matplotlib.pyplot;
 
-/  shuffle columns of matrix/table based on col name or idx
-i.shuffle:{idx:neg[n]?n:count x;$[98h~type x;x:@[x;y;@;idx];x[;y]:x[;y]idx];:x}
+// Shuffle columns of matrix/table based on col name or idx.
+// This is used in impact plotting to hold all other columns stationary such
+// that the importance of individual columns can be ascertained
+/* tm = table or matrix which is being shuffled
+/. r  > the same matrix/table with specified row/column shuffled appropriately
+post.i.shuffle:{[tm;c]
+  idx:neg[n]?n:count tm;
+  $[98h~type tm;tm:@[tm;c;@;idx];tm[;c]:tm[;c]idx];:tm}
 
-/  calculate impact of each feature and save plot of top 20
-i.featureimpact:{[b;m;x;y;c;f;o;dt]
-  r:i.predshuff[m;x;y;f]each til count c;
-  im:i.impact[r;c;o];
-  i.impactplot[im;b;dt];
-  -1"\nFeature impact calculated for features associated with ",string[b]," model";
-  -1 ssr["Plots saved in Outputs/",string[dt`stdate],"/Run_",string[dt`sttime],"/Images/\n";":";"."];}
+// Predict output from models after shuffling
+/* bm   = fitted best model to be used for prediction 
+/* xtst = test data 
+/* ytst = tgt data for prediction 
+/* scf  = scoring function
+/* cr   = column/row number depending on table/matrix
+/. r    > score of the model with one column/row shuffled 
+post.i.predshuff:{[bm;xtst;ytst;scf;cr]
+  pred:bm[`:predict][post.i.shuffle[xtst;cr]]`;
+  scf[pred;ytst]}
 
-/  rerun model after shuffle and output score
-i.predshuff:{[m;x;y;f;c]
-  x:i.shuffle[x;c];
-  p:m[`:predict][x]`;
-  f[p;y]}
+// Calculation of impact score for each column/row of the table/matrix
+/* ps  = output from prediction/shuffle set
+/* ni  = column name or index of row
+/* ord = ordering to be applied to scored predictions to ensure best model is found
+/. r   > a dictionary mapping the feature impact to associated column/row
+post.i.impact:{[ps;ni;ord]
+  asc ni!s%max s:$[ord~desc;1-;]$[any 0>ps;.ml.minmaxscaler;]ps}
 
-/  impact score
-i.impact:{asc y!s%max s:$[z~desc;1-;]$[any 0>x;.ml.minmaxscaler;]x}
-
-/  Data points for plotting curve
-/* y = true target vector
-/* p = predicted probability vector
-i.cumulative_gain_curve:{[y;p]
-  if[2<>count distinct y;'`$"y must be binary"];
-  i.gaincurve[y]'[flip p;c:asc distinct y]}
-
-/  cumulative gains curve
-/* pc = positive class
-i.gaincurve:{[y;p;pc]
-  gain:sums y:(pc=y)idesc p;
-  gain:0.,gain%sum y;
-  pcnt:0.,(1+til n)%n:count y;
+// Calculate the required components needed to produce a cumulative gain curve
+/* pc   = positive class
+/. r    > dictionary with positive class, gain and associated percentile
+post.i.gaincurve:{[tgt;prob;pc]
+  gain:sums tgt:(pc=tgt)idesc prob;
+  gain:0.,gain%sum tgt;
+  pcnt:0.,(1+til n)%n:count tgt;
   `pc`gain`pcnt!(pc;gain;pcnt)}
+
+// Data for plotting of a cumulative gain curve
+/. r    > the gain and percentile information needed for the production of the gain curve
+post.cgcurve:{[tgt;prob]
+  if[2<>count distinct tgt;'`$"y must be binary"];
+  post.i.gaincurve[tgt]'[flip prob;c:asc distinct tgt]}
+
+// Produce a cumulative gain/lift curve for binary data and save the result
+/* d  = output of post.cgcurve
+/. r  > cumulative gain/lift curve saved to disk
+post.i.gainliftplt:{[d;dt;fpath]
+  c1:d 0;c2:d 1;
+  pcnt_lift:1_c2`pcnt;
+  pcnt_gain:c2`pcnt;
+  gain_lift:`gl1`gl2!{(1_y`gain)%'x}[pcnt_lift]each(c1;c2);
+  gain_gain:`gg1`gg2!{x`gain}each(c1;c2);
+  plt[`:figure][1;`figsize pykw 10 10];
+  plt[`:subplot][211];
+  plt[`:plot][pcnt_lift;gain_lift`gl1;`lw pykw 3;`label pykw"class ",string c1`pc];
+  plt[`:plot][pcnt_lift;gain_lift`gl2;`lw pykw 3;`label pykw"class ",string c2`pc];
+  plt[`:plot][0 1;1 1;"k--";`lw pykw 2;`label pykw"baseline"];
+  plt[`:legend][`loc pykw "upper right"];
+  plt[`:title]["Lift-Gain charts";`fontsize pykw 20];
+  plt[`:ylabel]["Lift";`fontsize pykw 18];
+  plt[`:subplot][212];
+  plt[`:plot][pcnt_gain;gain_gain`gg1;`lw pykw 3;`label pykw"class ",string c1`pc];
+  plt[`:plot][pcnt_gain;gain_gain`gg2;`lw pykw 3;`label pykw"class ",string c2`pc];
+  plt[`:plot][0 1;1 1;"k--";`lw pykw 2;`label pykw"baseline"];
+  plt[`:legend][`loc pykw "lower right"];
+  plt[`:xlabel]["% of sample";`fontsize pykw 18];
+  plt[`:ylabel]["Gain";`fontsize pykw 18];
+  plt[`:savefig][fpath[0][`images],"/Lift_Gain_Curve.png"];
+  plt[`:show][];}
+
+// This function will plot and save the feature impact plot to an appropriate location
+// the maximum number of features plotted is 20 
+/* im    = impact scores
+/* mdl   = model name as a symbol
+/. r     > impact plot saved to disk
+post.i.impactplot:{[im;mdl;dt;fpath]
+  plt[`:figure][`figsize pykw 20 20];
+  sub:plt[`:subplots][];
+  fig:sub[@;0];ax:sub[@;1];
+  b:20<cr:count value im;
+  n:$[b;til 20;til cr];
+  v:$[b;20#;cr#]value im;
+  k:$[b;20#;cr#]key im;
+  ax[`:barh][n;v;`align pykw`center];
+  ax[`:set_yticks]n;
+  ax[`:set_yticklabels]k;
+  ax[`:set_title]"Feature Impact: ",string mdl;
+  ax[`:set_ylabel]"Columns";
+  ax[`:set_xlabel]"Relative feature impact";
+  plt[`:savefig][fpath[0][`images],sv["_";string(`Impact_Plot;mdl)],".png";`bbox_inches pykw"tight"];}
+
+// This function will be used to produce an ROC plot, this however necessitates the need for
+// predicted probabilities to be returned from the models which is not at present implemented
+/. r    > ROC plot saved to disk
+post.i.roccurve:{[tgt;prob;dt;fpath]
+  rocdict:`frp`tpr!.ml.roc[tgt;prob];
+  rocAuc:.ml.rocaucscore[rocdict`frp; rocdict`tpr];lw:2;
+  plt[`:plot][rocdict`frp;rocdict`tpr;`color pykw "darkorange";`lw pykw lw;
+              `label pykw "ROC curve (Area = ",string[rocAuc]," )"];
+  plt[`:plot][0 1;0 1;`color pykw "navy";`lw pykw lw;`linestyle pykw "--"];
+  plt[`:xlim][0 1];
+  plt[`:ylim][0 1.05];
+  plt[`:xlabel]["False Positive Rate"];
+  plt[`:ylabel]["True Positive Rate"];
+  plt[`:title]["Reciever operating characteristic example"];
+  plt[`:legend][`loc pykw "upper left"];
+  system"mkdir",$[.z.o like "w*";" ";" -p "],
+    fname:ssr[path,"/Outputs/",string[dt`stdate],"/Images/Run_",string[dt`sttime];":";"."];
+  plt[`:savefig][fpath[0][`images],"/ROC_Curve.png"];
+  plt[`:show][];}
+
 
 
 // Utilities for report generation
 
-/  dictionary used report population
-i.report_dict:{[x;y;z;r;k;l]
+// The following dictionary is used to make report generation more seamless
+/* cfeat = count of features
+/* bm    = information about the best model returned from `.aml.proc.runmodels`
+/* tm    = list with the time for feature extraction to take place returned from .aml.prep.*create
+/* path  = output from ".aml.path" for the system
+/* xvgs  = list of information about the models used and scores achieved for xval and grid-search
+/. r     > dictionary with the appropriate information added
+post.i.reportdict:{[cfeat;bm;tm;dt;path;xvgs;fpath]
   dd:(0#`)!();
   select
-    feats    :x,
-    dict     :y 0,
-    impact   :ssr[k,"/Outputs/",string[r`stdate],"/Run_",string[r`sttime],"/Images/Impact_Plot_",string[y 1],".png";":";"."],
-    holdout  :y 2,
-    xvtime   :y 3,
-    bmtime   :y 4,
-    metric   :y 5,
-    feat_time:z 1,
-    gs       :l 0,
-    score    :l 1,
-    xv       :l 2,
-    gscfg    :l 3
+    feats    :cfeat,
+    dict     :bm 0,
+    impact   :(fpath[0][`images],"Impact_Plot_",string[bm 1],".png"),
+    holdout  :bm 2,
+    xvtime   :bm 3,
+    bmtime   :bm 4,
+    metric   :bm 5,
+    feat_time:tm 1,
+    gs       :xvgs 0,
+    score    :xvgs 1,
+    xv       :xvgs 2,
+    gscfg    :xvgs 3
   from dd}
 

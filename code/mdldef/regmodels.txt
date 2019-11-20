@@ -2,7 +2,7 @@ AdaBoostRegressor         | sklearn   ;   ensemble       ; seed ; reg
 RandomForestRegressor     | sklearn   ;   ensemble       ; seed ; reg
 GradientBoostingRegressor | sklearn   ;   ensemble       ; seed ; reg
 KNeighborsRegressor       | sklearn   ;   neighbors      ;  ::  ; reg
-MLPRegressor              | sklearn   ;   neural_network ;  ::  ; reg
+MLPRegressor              | sklearn   ;   neural_network ; seed ; reg
 Lasso                     | sklearn   ;   linear_model   ; seed ; reg
 LinearRegression          | sklearn   ;   linear_model   ;  ::  ; reg
 RegKeras                  | keras     ;   regfitscore    ; seed ; reg
