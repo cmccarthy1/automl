@@ -20,6 +20,8 @@ preproc:{[t;tgt;typ;p]
     [sepdata:(p[`aggcols],())#flip t;tb:flip (cols[t]except p[`aggcols])#flip t];
     tb:t];
   show prep.i.describe tb;
+  // Symbol encode the table with frequency encoding for columns with more than
+  // 10 unique symbols, returning an appropriately encoded table
   tb:prep.i.symencode[tb;10;0;p;::];
   tb:.ml.dropconstant tb;
   tb:prep.i.nullencode[tb;med];

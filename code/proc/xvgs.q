@@ -19,10 +19,10 @@ proc.xv.seed:{[xtrn;ytrn;p;mdls]
       ::];
   $[ms&sk;
     // Grid search version of the cross-validation is completed if a random seed
-    // and the model is from sklearn, this is in order to incorporate the random state definition
-    // Final parameter required as dict to allow for grid search to be as flexible as possible
+    // and the model is from sklearn, this is in order to incorporate the random state definition.
+    // Final parameter upd was required as dict for grid search to be as flexible as possible
     first value get[p[`gs]0][p[`gs]1;1;xtrn;ytrn;p[`prf]mdls`minit;s;enlist[`val]!enlist 0];
-    // Otherwise a base level cross validation is performed
+    // Otherwise a vanilla cross validation is performed
     get[p[`xv]0][p[`xv]1;1;xtrn;ytrn;p[`prf][mdls`minit;s]]]}
 
 

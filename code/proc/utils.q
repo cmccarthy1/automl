@@ -34,9 +34,16 @@ proc.i.updmodels:{[mdls;tgt]
 
 // Utilities for xvgs.q
 
-// parse the hyperparameter flatfile
+// The following functions are used to extract information from flatfiles
+
+// Parse a dictionary from a flat file
+/* fn = function which is to be applied to each of the parsed lines,
+/*      required for the extraction of appropriate keys in txtparse
+ffparse:{[fp;fn;fn]{y(!).("S=;")0:x}[;fn]each(!).("S*";"|")0:hsym`$path,fp,fn}
+
+// Parse the hyperparameter flatfile
 /. r  > dict mapping model name to possible hyper parameters
-proc.i.paramparse:{[fn;fp]key[k]!(value@){(!).("S=;")0:x}each k:(!).("S*";"|")0:hsym`$.aml.path,fp,fn}
+proc.i.paramparse:{[fn;fp]key[k]!(value@)k:ffparse[fp;fn;(::)]}
 
 // The following two functions together extract the hyperparameter dictionaries
 // based on the applied model
@@ -44,12 +51,9 @@ proc.i.paramparse:{[fn;fp]key[k]!(value@){(!).("S=;")0:x}each k:(!).("S*";"|")0:
 proc.i.edict:{[fn;fp;mdl]key[k]!value each value k:proc.i.paramparse[fn;fp]mdl}
 proc.i.extractdict:proc.i.edict["hyperparams.txt";"/code/mdldef/";]
 
-
-// Utilities for both scripts
-
 // Extraction of an appropriately valued dictionary from a non complex flat file
 /* sn = name mapping to appropriate text file in, as a symbol
-proc.i.txtparse:{[sn;fp]{key(!).("S=;")0:x}each(!).("S*";"|")0:hsym`$path,fp,proc.i.files sn}
+proc.i.txtparse:{[sn;fp]ffparse[fp;proc.i.files sn;key]}
 
 // Extract the appropriate ordering of output scores to allow the best model to be chosen
 // these are defined in "scoring.txt"

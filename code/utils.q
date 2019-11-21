@@ -119,7 +119,7 @@ i.models:{[ptyp;tgt;p]
 // Update models available for use based on the number of rows in the data set
 /. r    > model table with appropriate models removed if needed and model removal highlighted
 i.updmodels:{[mdls;tgt]
- $[100000<count tgt;
+ $[10000<count tgt;
    [-1"\nLimiting the models being applied due to number targets>100,000";
     -1"No longer running neural nets or svms\n";
     select from mdls where(lib<>`keras),not fnc in`neural_network`svm];mdls]}
@@ -180,7 +180,7 @@ i.normalproc:{[t;p]
 /. r > table with feature creation and encodings applied appropriately
 i.freshproc:{[t;p]
   t:prep.i.autotype[t;p`typ;p];
-  agg:p`aggcols;
+  agg:p`aggcols;pfeat:p`features;
   // extract relevant functions based on the significant features determined by the model
   funcs:raze `$distinct{("_" vs string x)1}each p`features;
   // ensures that many calculations that are irrelevant are not run
@@ -192,10 +192,10 @@ i.freshproc:{[t;p]
   t:.ml.infreplace t;
   // It is not guaranteed that new feature creation will produce the all requisite features 
   // if this is not the case dummy features are added to the data
-  if[not all ftc:p[`features]in cols t;
-    newcols:p[`features]where not ftc;
-    t:p[`features] xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
-  flip value flip p[`features]#"f"$0^t}
+  if[not all ftc:pfeat in cols t;
+    newcols:pfeat where not ftc;
+    t:pfeat  xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
+  flip value flip pfeat #"f"$0^t}
 
 
 // Create the folders that are required for the saving of the config,models, images and reports
@@ -233,7 +233,7 @@ i.kerascheck:{[mdls;tts;tgt]
   tgtcheck:(count distinct tgt)>min{count distinct x}each tts`ytrain`ytest;
   $[mkcheck&tgtcheck;i.errtgt;]mdls}
 
-// Used throughout the library to convert windows/mac file names to windows equivalent
+// Used throughout the library to convert linux/mac file names to windows equivalent
 /* path = the linux 'like' path
 /. r    > the path modified to be suitable for windows systems
 i.ssrwin:{[path]$[.z.o like "w*";ssr[path;"/";"\\"];path]}

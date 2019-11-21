@@ -10,9 +10,8 @@
 /. r     > all relevant information about the running of the sets of models
 proc.runmodels:{[t;tgt;mdls;p;dt;fpath]
   system"S ",string s:p`seed;
-  c:cols t;t:flip value flip t;
   // Apply train test split to keep holdout for feature impact plot and testing of vanilla best model
-  tt:p[`tts][t;tgt;p`hld];
+  tt:p[`tts][flip value flip t;tgt;p`hld];
   mdls:i.kerascheck[mdls;tt;tgt];
   xv_tstart:.z.T;
   // Complete a seeded cross validation on training sets producing the predictions with associated 
@@ -22,7 +21,7 @@ proc.runmodels:{[t;tgt;mdls;p;dt;fpath]
   ord:proc.i.ord scf;
   -1"\nScores for all models, using ",string scf;
   // Score the models based on user denoted scf and ordered appropriately to find best model
-  show s1:ord mdls[`model]!{first avg x}each scf .''p1;
+  show s1:ord mdls[`model]!avg each scf .''p1;
   xv_tend:.z.T-xv_tstart;
   -1"\nBest scoring model = ",string bs:first key s1;
   // Extract the best model, fit on entire training set and predict/score on test set
@@ -34,7 +33,7 @@ proc.runmodels:{[t;tgt;mdls;p;dt;fpath]
   -1"Score for validation predictions using best model = ",string[s2],"\n";
   bm_tend:.z.T-bm_tstart;
   // Feature impact graph produced on holdout data if setting is appropriate
-  if[2=p[`saveopt];post.featureimpact[bs;bm;(xtst;ytst);c;scf;ord;dt;fpath]];
+  if[2=p[`saveopt];post.featureimpact[bs;bm;(xtst;ytst);cols t;scf;ord;dt;fpath]];
   // Outputs from run models. These are used in the generation of a pdf report
   // or are used within later sections of the pipeline.
   (s1;bs;s2;xv_tend;bm_tend;scf;bm)}
