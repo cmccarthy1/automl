@@ -11,6 +11,7 @@
 /* p     = parameters (::) produces default other changes are user dependent
 
 runexample:{[tb;tgt;ftype;ptype;p]
+  if[ftype~`fresh;tb:(`$ssr[;"_";""]each string cols tb)xcol tb];
   dtdict:`stdate`sttime!(.z.D;.z.T);
   // Extract & update the dictionary used to define the workflow
   dict:i.updparam[tb;p;ftype],enlist[`typ]!enlist ftype;

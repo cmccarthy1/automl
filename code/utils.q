@@ -179,16 +179,17 @@ i.normalproc:{[t;p]
 // Apply feature creation and encoding procedures for FRESH on new data
 /. r > table with feature creation and encodings applied appropriately
 i.freshproc:{[t;p]
+  t:(`$ssr[;"_";""]each string cols t) xcol t;
   t:prep.i.autotype[t;p`typ;p];
   agg:p`aggcols;
-  // extract relevant functions based on the significant features determined by the model
-  funcs:raze `$distinct{("_" vs string x)1}each p`features;
-  // ensures that many calculations that are irrelevant are not run
-  appfns:1!select from 0!.ml.fresh.params where f in funcs;
   // apply symbol encoding based on a previous run of automl
   t:prep.i.symencode[t;10;0;p;p`symencode];
   cols2use:k where not (k:cols t)in agg;
-  t:prep.i.nullencode[value .ml.fresh.createfeatures[t;agg;cols2use;appfns];med];
+  // extract relevant functions based on the significant features determined by the model
+  appfncs:`coln xgroup distinct colextract[;cols t]each p`features;
+  t:prep.i.nullencode[value agg xkey p[`features]xcols 0!
+     (uj/){[t;agg;coln;paramtab].ml.fresh.createfeatures[t;agg;coln;`f xkey flip paramtab]
+     }[t;agg]'[(0!appfncs)`coln;value appfncs];med];
   t:.ml.infreplace t;
   // It is not guaranteed that new feature creation will produce the all requisite features 
   // if this is not the case dummy features are added to the data
