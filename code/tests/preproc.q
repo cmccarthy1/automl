@@ -13,7 +13,8 @@ sym_tab_f:([]`a`b`c;5 4 3;3 2 1)
 sym_tab_o:([]`a`a`b;5 4 3;3 2 1)
 
 // table containing positive and negative infinities
-inf_tab:([]neg[0w],"f"$til 4;00011b;("t"$til 4),0w;0W,til 4)
+inf_tab_basic:([]neg[0w],"f"$til 4;0W,til[3],0N)
+inf_tab_time:([]neg[0w],"f"$til 4;00011b;("t"$til 4),0w;0W,til 4)
 
 // Table for bulk transform 
 bulk_tab:([]til 5;desc til 5;3 2 1 2 3f;"t"$til 5)
@@ -34,7 +35,8 @@ prep.i.symencode[sym_tab_o;2;0b;enlist[`typ]!enlist`normal;`freq`ohe!(`x,();`sym
 prep.i.symencode[sym_tab_f;2;0b;enlist[`typ]!enlist`normal;`freq`ohe!(`symbol$();`x,())]~([]x1:5 4 3;x2:3 2 1;x_a:1 0 0f;x_b:0 1 0f;x_c:0 0 1f)
 
 // Infinity encoding functionality
-.ml.infreplace[inf_tab] ~ ([]"f"$0,til 4;00011b;("t"$til 4),0w;3,til 4)
+.ml.infreplace[inf_tab_time] ~ ([]"f"$0,til 4;00011b;("t"$til 4),0w;3,til 4)
+.ml.infreplace[inf_tab_basic] ~ ([]"f"$0,til 4;2,til[3],0N)
 
 // Description functionality
 desc_columns:`count`unique`mean`std`min`max`type
