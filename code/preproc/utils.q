@@ -20,7 +20,7 @@ prep.i.autotype:{[t;typ;p]
       prep.i.errcol[cols t;cls;typ]];
     typ=`fresh;
     // ignore the aggregating colums for FRESH as these can be of any type
-    [aprcls:flip l:p[`aggcols] _ flip t;
+    [aprcls:flip (l:p[`aggcols])_ flip t;
       cls:.ml.i.fndcols[aprcls;"sfiehjb"];
       // restore the aggregating columns 
       tb:flip (l!t l,:()),cls!t cls;

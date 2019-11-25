@@ -9,7 +9,7 @@
 /* dt   = dictionary denoting the start time and date of a run
 /* fp   = file path dictionaries with the full save path and subsection for printinga
 post.featureimpact:{[bm;mdl;data;cnm;scf;dt;fp;p]
-  r:post.i.predshuff[mdl;bm;data;scf;p`seed]each til count cnm;
+  r:post.i.predshuff[mdl;bm;data;scf;;p`seed]each til count cnm;
   ord:proc.i.ord scf;
   im:post.i.impact[r;cnm;ord];
   post.i.impactplot[im;bm;dt;fp];

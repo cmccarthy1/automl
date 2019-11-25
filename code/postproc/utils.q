@@ -29,10 +29,8 @@ post.i.shuffle:{[tm;c]
 /* p    = parameter set
 /. r    > score of the model with one column/row shuffled 
 post.i.predshuff:{[mdl;bm;data;scf;cr;p]
-  xtest:$[1<count first data 2;post.i.shuffle[;cr];]data 2;
-  scf[;data 3]$[bm in i.keraslist;
-    mdl[((data 0;data 1);(xtest;data 3));p];
-    mdl[`:predict][xtest]`]
+  xtest:post.i.shuffle[data 2;cr];
+  scf[;data 3]$[bm in i.keraslist;mdl[((data 0;data 1);(xtest;data 3));p];mdl[`:predict][xtest]`]
   }
 
 // Calculation of impact score for each column/row of the table/matrix

@@ -47,7 +47,7 @@ runexample:{[tb;tgt;ftype;ptype;p]
   if[1~checkimport[];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
   -1 i.runout`sig;-1 i.runout`slct;-1 i.runout[`tot],string[ctb:count cols tab];
   // Run all appropriate models on the training set
-  bm:proc.runmodels[xtrn;ytrn;mdls;cols tb 0;dict;dtdict;spaths];
+  bm:proc.runmodels[xtrn;ytrn;mdls;cols tts`xtrain;dict;dtdict;spaths];
   fn:i.scfn[dict;mdls];
   // Do not run grid search on deterministic models returning score on the test set and model
   if[a:bm[1]in i.excludelist;

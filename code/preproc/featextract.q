@@ -11,7 +11,7 @@
 prep.freshcreate:{[t;p]
   agg:p`aggcols;prm:get p`params;
   // Feature extraction should be performed on all columns that are non aggregate
-  cols2use:k where not k:cols[t]in agg;
+  cols2use:k where not (k:cols[t])in agg;
   fe_start:.z.T;
   t:"f"$prep.i.nullencode[value .ml.fresh.createfeatures[t;agg;cols2use;prm];med];
   fe_end:.z.T-fe_start;
