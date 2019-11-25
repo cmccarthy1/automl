@@ -59,7 +59,7 @@ proc.gs.psearch:{[xtrn;ytrn;xtst;ytst;bm;p;typ;mdls]
   // Extract the best hyperparameter set based on scoring function 
   hyp:first key first gsprms;
   bmdl:epymdl[pykwargs hyp][`:fit][xtrn;ytrn];
-  score:fn[;ytst]bmdl[`:predict][flip value flip xtst]`;
+  score:fn[;ytst]bmdl[`:predict][xtst]`;
   (score;hyp;bmdl)
   }
 

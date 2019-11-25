@@ -77,9 +77,14 @@ i.normaldefault:{`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
 /* xtst = test data
 /* ytst = test target
 /* mdl  = fitted embedPy model object
+/* bmn  = best model name (symbol)
 /* scf  = scoring function which determines best model
 /. r    > score for the model based on the predictions on test data
-i.scorepred:{[xtst;ytst;mdl;scf]scf[;ytst]mdl[`:predict][xtst]`}
+i.scorepred:{[data;bmn;mdl;scf;p]
+  scf[;data 3]$[bmn in i.keraslist;
+              mdl[((data 0;data 1);(data 2;data 3));p];
+              mdl[`:predict][data 2]`
+             ]}
 
 /  save down the best model
 /* dt = date-time of model start (dict)
@@ -92,9 +97,12 @@ i.savemdl:{[bmn;bmo;mdls;nms]
   joblib:.p.import[`joblib];
   $[(`sklearn=?[mdls;enlist(=;`model;bmn,());();`lib])0;
       (joblib[`:dump][bmo;fname,"/",string[bmn]];-1"Saving down ",string[bmn]," model to ",mo);
-    (`keras=?[mdls;enlist(=;`model;bmn,());();`lib])0;
-      (bmo[`:save][fname,"/",string[bmn],".h5"];-1"Saving down ",string[bmn]," model to ",mo);
-   -1"Saving of non keras/sklearn models types is not currently supported"];
+// The lines commented below are excluded for now, work on saving Keras models is currently
+// experimental it will be added in the future, this requires major changes to the functions
+// currently implemented;
+// (`keras=?[mdls;enlist(=;`model;bmn,());();`lib])0;
+// (bmo[`:save][fname,"/",string[bmn],".h5"];-1"Saving down ",string[bmn]," model to ",mo);
+   -1"Saving of non sklearn models types is not currently supported"];
  }
 
 // Table of models appropriate for the problem type being solved
@@ -127,7 +135,8 @@ i.updmodels:{[mdls;tgt]
 // These are a list of models which are deterministic and thus which do not need to be grid-searched 
 // at present this should include the Keras models as a sufficient tuning method
 // has yet to be implemented
-i.excludelist:`GaussianNB`LinearRegression`RegKeras`MultiKeras`BinKeras;
+i.keraslist:`RegKeras`MultiKeras`BinaryKeras
+i.excludelist:i.keraslist,`GaussianNB`LinearRegression;
 
 // Dictionary with mappings for console printing to reduce clutter in .aml.runexample
 i.runout:`col`pre`sig`slct`tot`ex`gs`sco`save!

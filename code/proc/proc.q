@@ -8,15 +8,16 @@
 /* tgt   = target data
 /* p     = parameter dictionary passed as default or modified by user
 /. r     > all relevant information about the running of the sets of models
-proc.runmodels:{[t;tgt;mdls;p;dt;fpath]
+proc.runmodels:{[data;tgt;mdls;cnms;p;dt;fpath]
   system"S ",string s:p`seed;
   // Apply train test split to keep holdout for feature impact plot and testing of vanilla best model
-  tt:p[`tts][flip value flip t;tgt;p`hld];
+  tt:p[`tts][data;tgt;p`hld];
+  xtrn:tt`xtrain;ytrn:tt`ytrain;xtst:tt`xtest;ytst:tt`ytest;
   mdls:i.kerascheck[mdls;tt;tgt];
   xv_tstart:.z.T;
   // Complete a seeded cross validation on training sets producing the predictions with associated 
   // real values. This allows the best models to be chosen based on relevant user defined metric 
-  p1:proc.xv.seed[tt`xtrain;tt`ytrain;p]'[mdls];
+  p1:proc.xv.seed[xtrn;ytrn;p]'[mdls];
   scf:i.scfn[p;mdls];
   ord:proc.i.ord scf;
   -1"\nScores for all models, using ",string scf;
@@ -26,14 +27,18 @@ proc.runmodels:{[t;tgt;mdls;p;dt;fpath]
   -1"\nBest scoring model = ",string bs:first key s1;
   // Extract the best model, fit on entire training set and predict/score on test set
   // for the appropriate scoring function
-  bm:(first exec minit from mdls where model=bs)[][];
   bm_tstart:.z.T;
-  bm[`:fit][tt`xtrain;tt`ytrain];
-  s2:scf[;ytst:tt`ytest]bm[`:predict][xtst:tt`xtest]`;
+  $[bs in i.keraslist;
+    [bm:first exec minit from mdls where model=bs;
+     s2:scf[;ytst]bm[((xtrn;ytrn);(xtst;ytst));p`seed]];
+    [bm:(first exec minit from mdls where model=bs)[][];
+     bm[`:fit][xtrn;ytrn];
+     s2:scf[;ytst]bm[`:predict][xtst]`]
+    ];
   -1"Score for validation predictions using best model = ",string[s2],"\n";
   bm_tend:.z.T-bm_tstart;
   // Feature impact graph produced on holdout data if setting is appropriate
-  if[2=p[`saveopt];post.featureimpact[bs;bm;(xtst;ytst);cols t;scf;ord;dt;fpath]];
+  if[2=p[`saveopt];post.featureimpact[bs;bm;value tt;cnms;scf;dt;fpath;p]];
   // Outputs from run models. These are used in the generation of a pdf report
   // or are used within later sections of the pipeline.
   (s1;bs;s2;xv_tend;bm_tend;scf;bm)}

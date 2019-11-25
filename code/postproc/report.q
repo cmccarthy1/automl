@@ -94,7 +94,7 @@ post.report:{[dict;dt;fname]
   cell[pdf;bmtime];
   line[pdf;7];
 
-  if[not (first key[dict`dict])in `LinearRegression`GaussianNB;
+  if[not (first key[dict`dict])in i.excludelist;
     font[pdf;13;`B];
     gstitle:"Grid search for a ",(string first key[dict`dict])," model.";
     cell[pdf;gstitle];
