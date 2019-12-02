@@ -48,7 +48,6 @@ runexample:{[tb;tgt;ftype;ptype;p]
   -1 i.runout`sig;-1 i.runout`slct;-1 i.runout[`tot],string[ctb:count cols tab];
   // Run all appropriate models on the training set
   bm:proc.runmodels[xtrn;ytrn;mdls;cols tts`xtrain;dict;dtdict;spaths];
-  `e+1;
   fn:i.scfn[dict;mdls];
   // Do not run grid search on deterministic models returning score on the test set and model
   if[a:bm[1]in i.excludelist;
