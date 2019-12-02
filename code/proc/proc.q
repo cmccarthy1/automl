@@ -29,8 +29,11 @@ proc.runmodels:{[data;tgt;mdls;cnms;p;dt;fpath]
   // for the appropriate scoring function
   bm_tstart:.z.T;
   $[bs in i.keraslist;
-    [bm:first exec minit from mdls where model=bs;
-     s2:scf[;ytst]bm[((xtrn;ytrn);(xtst;ytst));p`seed]];
+    [data:((xtrn;ytrn);(xtst;ytst));
+     funcnm:neg[8]_string first exec fnc from mdls where model=bs;
+     kermdl:get[".aml.",funcnm,"mdl"][data;p`seed];
+     bm:get[".aml.",funcnm,"fit"][data;kermdl];
+     s2:scf[;ytst]get[".aml.",funcnm,"predict"][data;bm]];
     [bm:(first exec minit from mdls where model=bs)[][];
      bm[`:fit][xtrn;ytrn];
      s2:scf[;ytst]bm[`:predict][xtst]`]
@@ -38,7 +41,7 @@ proc.runmodels:{[data;tgt;mdls;cnms;p;dt;fpath]
   -1"Score for validation predictions using best model = ",string[s2],"\n";
   bm_tend:.z.T-bm_tstart;
   // Feature impact graph produced on holdout data if setting is appropriate
-  if[2=p[`saveopt];post.featureimpact[bs;bm;value tt;cnms;scf;dt;fpath;p]];
+  if[2=p[`saveopt];post.featureimpact[bs;(bm;mdls);value tt;cnms;scf;dt;fpath;p]];
   // Outputs from run models. These are used in the generation of a pdf report
   // or are used within later sections of the pipeline.
   (s1;bs;s2;xv_tend;bm_tend;scf;bm)}

@@ -48,11 +48,13 @@ runexample:{[tb;tgt;ftype;ptype;p]
   -1 i.runout`sig;-1 i.runout`slct;-1 i.runout[`tot],string[ctb:count cols tab];
   // Run all appropriate models on the training set
   bm:proc.runmodels[xtrn;ytrn;mdls;cols tts`xtrain;dict;dtdict;spaths];
+  `e+1;
   fn:i.scfn[dict;mdls];
   // Do not run grid search on deterministic models returning score on the test set and model
   if[a:bm[1]in i.excludelist;
     data:(xtrn;ytrn;xtst;ytst);
-    -1 i.runout`ex;score:i.scorepred[data;bm[1];last bm;fn;dict`seed];expmdl:last bm];
+    funcnm:neg[8]_string first exec fnc from mdls where model=bm[1];
+    -1 i.runout`ex;score:i.scorepred[data;bm[1];expmdl:last bm;fn;funcnm]];
   // Run grid search on the best model for the parameter sets defined in hyperparams.txt
   if[b:not a;
     -1 i.runout`gs;
@@ -96,8 +98,11 @@ newproc:{[t;fp]
   $[(mp:metadata[`pylib])in `sklearn`keras;
     // Apply the relevant saved down model to new data
     [fp_upd:i.ssrwin[path,"/outputs/",fp,"/models/",string metadata[`best_model]];
+     if[bool:(mdl:metadata[`best_model])in i.keraslist;fp_upd,:".h5"];
      model:$[mp~`sklearn;skload;krload]fp_upd;
-     model[`:predict;<]data];
+     $[bool;
+       [fnm:neg[5]_string lower mdl;get[".aml.",fnm,"predict"][(0n;(data;0n));model]];
+       model[`:predict;<]data]];
     '`$"The current model type you are attempting to apply is not currently supported"]
   }
 

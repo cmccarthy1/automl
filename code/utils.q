@@ -76,15 +76,18 @@ i.normaldefault:{`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
 // Apply an appropriate scoring function to predictions from a model
 /* xtst = test data
 /* ytst = test target
-/* mdl  = fitted embedPy model object
+/* mdl  = fitted embedPy model object/function to be applied
 /* bmn  = best model name (symbol)
 /* scf  = scoring function which determines best model
+/* fnm  = name of the base representation of the function to be applied (reg/multi/bin)
 /. r    > score for the model based on the predictions on test data
-i.scorepred:{[data;bmn;mdl;scf;p]
-  scf[;data 3]$[bmn in i.keraslist;
-              mdl[((data 0;data 1);(data 2;data 3));p];
-              mdl[`:predict][data 2]`
-             ]}
+i.scorepred:{[data;bmn;mdl;scf;fnm]
+  pred:$[bmn in i.keraslist;
+         // Formatting of first param is a result of previous implementation choices
+         get[".aml.",fnm,"predict"][(0n;(data 2;0n));mdl];
+         mdl[`:predict][data 2]`];
+  scf[;data 3]pred
+  }
 
 /  save down the best model
 /* dt = date-time of model start (dict)
@@ -97,13 +100,10 @@ i.savemdl:{[bmn;bmo;mdls;nms]
   joblib:.p.import[`joblib];
   $[(`sklearn=?[mdls;enlist(=;`model;bmn,());();`lib])0;
       (joblib[`:dump][bmo;fname,"/",string[bmn]];-1"Saving down ",string[bmn]," model to ",mo);
-// The lines commented below are excluded for now, work on saving Keras models is currently
-// experimental it will be added in the future, this requires major changes to the functions
-// currently implemented;
-// (`keras=?[mdls;enlist(=;`model;bmn,());();`lib])0;
-// (bmo[`:save][fname,"/",string[bmn],".h5"];-1"Saving down ",string[bmn]," model to ",mo);
-   -1"Saving of non sklearn models types is not currently supported"];
- }
+    (`keras=?[mdls;enlist(=;`model;bmn,());();`lib])0;
+      (bmo[`:save][fname,"/",string[bmn],".h5"];-1"Saving down ",string[bmn]," model to ",mo);
+    -1"Saving of non keras/sklearn models types is not currently supported"];
+  }
 
 // Table of models appropriate for the problem type being solved
 /* ptyp = problem type as a symbol, either `class or `reg
@@ -135,7 +135,7 @@ i.updmodels:{[mdls;tgt]
 // These are a list of models which are deterministic and thus which do not need to be grid-searched 
 // at present this should include the Keras models as a sufficient tuning method
 // has yet to be implemented
-i.keraslist:`RegKeras`MultiKeras`BinaryKeras
+i.keraslist:`RegKeras`MultiKeras`BinKeras
 i.excludelist:i.keraslist,`GaussianNB`LinearRegression;
 
 // Dictionary with mappings for console printing to reduce clutter in .aml.runexample
