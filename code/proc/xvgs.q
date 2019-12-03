@@ -75,7 +75,6 @@ proc.gs.psearch:{[xtrn;ytrn;xtst;ytst;bm;p;typ;mdls]
 /. r > The value predicted on the validation set and the true value
 xv.fitpredict:{[f;hp;d]($[0h~type hp;f[d;hp[0];hp[1]];@[.[f[][hp]`:fit;d 0]`:predict;d[1]0]`];d[1]1)}
 
-
 /* fn = The scoring function which is to be used for evaluating the performance of the grid search
 /. r  > The score achieved for each cross validation set based on the user defined scoring function
 gs.fitpredict:{[fn;f;hp;d]fn . xv.fitpredict[f;hp;d]}

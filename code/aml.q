@@ -41,7 +41,6 @@ runexample:{[tb;tgt;ftype;ptype;p]
   // repetition of this task which can be computationally expensive
   xtrn:flip value flip tts`xtrain;xtst:flip value flip tts`xtest;
   ytrn:tts`ytrain;ytst:tts`ytest;
-  
   mdls:i.kerascheck[mdls;tts;tgt];
   // Check if Tensorflow/Keras not available for use, NN models removed
   if[1~checkimport[];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
