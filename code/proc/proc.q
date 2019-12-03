@@ -30,7 +30,7 @@ proc.runmodels:{[data;tgt;mdls;cnms;p;dt;fpath]
   bm_tstart:.z.T;
   $[bs in i.keraslist;
     [data:((xtrn;ytrn);(xtst;ytst));
-     funcnm:neg[8]_string first exec fnc from mdls where model=bs;
+     funcnm:string first exec fnc from mdls where model=bs;
      if[funcnm~"multi";data[;1]:npa@'reverse flip@'./:[;((::;0);(::;1))](0,count ytst)_/:
        value .ml.i.onehot1(,/)(ytrn;ytst)];
      kermdl:mdl[data;p`seed;`$funcnm];
