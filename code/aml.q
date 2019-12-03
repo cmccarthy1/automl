@@ -41,7 +41,6 @@ runexample:{[tb;tgt;ftype;ptype;p]
   // repetition of this task which can be computationally expensive
   xtrn:flip value flip tts`xtrain;xtst:flip value flip tts`xtest;
   ytrn:tts`ytrain;ytst:tts`ytest;
-
   mdls:i.kerascheck[mdls;tts;tgt];
   // Check if Tensorflow/Keras not available for use, NN models removed
   if[1~checkimport[];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
@@ -52,7 +51,7 @@ runexample:{[tb;tgt;ftype;ptype;p]
   // Do not run grid search on deterministic models returning score on the test set and model
   if[a:bm[1]in i.excludelist;
     data:(xtrn;ytrn;xtst;ytst);
-    funcnm:neg[8]_string first exec fnc from mdls where model=bm[1];
+    funcnm:string first exec fnc from mdls where model=bm[1];
     -1 i.runout`ex;score:i.scorepred[data;bm[1];expmdl:last bm;fn;funcnm]];
   // Run grid search on the best model for the parameter sets defined in hyperparams.txt
   if[b:not a;
