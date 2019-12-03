@@ -17,7 +17,7 @@ proc.i.files:`class`reg`score!("classmodels.txt";"regmodels.txt";"scoring.txt")
 proc.i.mdlfunc:{[lib;fnc;mdl]
   $[`keras~lib;
     // retrieve keras model from the .aml namespace eg '.aml.regfitscore'
-    get` sv``aml,fnc;
+    get` sv``aml,`fitscore;
     // construct the projection used for sklearn models eg '.p.import[`sklearn.svm][`:SVC]'
     {[x;y;z].p.import[x]y}[` sv lib,fnc;hsym mdl]]}
 
@@ -26,7 +26,7 @@ proc.i.mdlfunc:{[lib;fnc;mdl]
 /* tgt  = target vector
 /. r    > model table with appropriate models removed if needed and model removal highlighted
 proc.i.updmodels:{[mdls;tgt]
- $[100000<count tgt;
+ $[10000<count tgt;
    [-1"\nLimiting the models being applied due as the number targets exceeds 100,000";
     -1"No longer running neural nets or svms\n";
     select from mdls where(lib<>`keras),not fnc in`neural_network`svm];mdls]}
@@ -56,4 +56,3 @@ proc.i.txtparse:{[sn;fp]{key(!).("S=;")0:x}each(!).("S*";"|")0:hsym`$path,fp,pro
 /* scf = scoring function
 /. r   > the function to order the dictionary output from cross validation search (asc/desc)
 proc.i.ord:{[scf]get string first proc.i.txtparse[`score;"/code/mdldef/"]scf}
-

@@ -20,7 +20,7 @@ prep.i.autotype:{[t;typ;p]
       prep.i.errcol[cols t;cls;typ]];
     typ=`fresh;
     // ignore the aggregating colums for FRESH as these can be of any type
-    [aprcls:flip (l:p[`aggcols]) _ flip t;
+    [aprcls:flip (l:p[`aggcols])_ flip t;
       cls:.ml.i.fndcols[aprcls;"sfiehjb"];
       // restore the aggregating columns 
       tb:flip (l!t l,:()),cls!t cls;
@@ -47,7 +47,6 @@ prep.i.describe:{[t]
 // Length checking to ensure that the table and target are appropriate for the task being performed
 /. r > on successful execution returns null, will return error if execution unsuccessful
 prep.i.lencheck:{[t;tgt;typ;p]
-  if[typ~(::);typ:`normal];
   $[-11h=type typ;
     $[`fresh=typ;
       // Check that the number of unique aggregating sets is the same as number of targets
@@ -56,20 +55,20 @@ prep.i.lencheck:{[t;tgt;typ;p]
       typ in`tseries`normal;
       if[count[tgt]<>count t;
          '`$"Must have the same number of targets as values in table"];
-    '`$"Input for typ must be a supported symbol or ::"];
+    '`$"Input for typ must be a supported type"];
     '`$"Input for typ must be a supported symbol or ::"]}
 
 // Null encoding of table
 /* fn = function to be applied to column from which the value to fill nulls is derived (med/min/max)
 /. r  > the table will null values filled if required
 prep.i.nullencode:{[t;fn]
-  vals:l k:where 0<sum each l:null each flip t;
+  vals:l k:where 0<sum each l:flip null t;
   nms:`$string[k],\:"_null";
   // 0 filling needed if return value also null (encoding maintained through added columns)
   $[0=count k;t;flip 0^(fn each flip t)^flip[t],nms!vals]}
 
 //  Symbol encoding function allowing encoding scheme to be persisted or encoding to be applied
-/* n   = number of distinct values in a column after which we symbol encode
+/* n   = number of distinct values in a column after which we frequency encode
 /* b   = boolean flag indicating if table is to be returned (0) or encoding type returned (1)
 /* enc = how encoding is to be applied, if dictionary outlining encoding perform encoding accordingly
 /*       otherwise, return a table with symbols encoded appropriately on all relevant columns
@@ -87,12 +86,13 @@ prep.i.symencode:{[t;n;b;p;enc]
           ` in enc`ohe;raze .ml.freqencode[;enc`freq]each flip each 0!p[`aggcols]xgroup t;
           t];
         `normal~p`typ;
-        $[all {not ` in x}each value enc;.ml.onehot[.ml.freqencode[t;enc`freq];enc`ohe];
+        $[all {not ` in x}each value enc;
+          .ml.onehot[.ml.freqencode[t;enc`freq];enc`ohe];
           ` in enc`freq;.ml.onehot[t;enc`ohe];
           ` in enc`ohe;raze .ml.freqencode[t;enc`fc];
           t];
-        '`$"This form of encoding has yet to be implemented for the specified column encoding type"];
-    [sc:.ml.i.fndcols[t;"s"]except $[tp:`fresh~p`typ;acol:p`aggcols;`];
+        '`$"This form of encoding has yet to be implemented for the specified type of automl"];
+    [sc:.ml.i.fndcols[t;"s"]except $[tp:`fresh~p`typ;acol:p`aggcols;(::)];
       if[0=count sc;r:$[b=1;`freq`ohe!``;t]];
       if[0<count sc;
         fc:where n<count each distinct each sc!flip[t]sc;

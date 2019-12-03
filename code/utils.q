@@ -76,10 +76,18 @@ i.normaldefault:{`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
 // Apply an appropriate scoring function to predictions from a model
 /* xtst = test data
 /* ytst = test target
-/* mdl  = fitted embedPy model object
+/* mdl  = fitted embedPy model object/function to be applied
+/* bmn  = best model name (symbol)
 /* scf  = scoring function which determines best model
+/* fnm  = name of the base representation of the function to be applied (reg/multi/bin)
 /. r    > score for the model based on the predictions on test data
-i.scorepred:{[xtst;ytst;mdl;scf]scf[;ytst]mdl[`:predict][xtst]`}
+i.scorepred:{[data;bmn;mdl;scf;fnm]
+  pred:$[bmn in i.keraslist;
+         // Formatting of first param is a result of previous implementation choices
+         get[".aml.",fnm,"predict"][(0n;(data 2;0n));mdl];
+         mdl[`:predict][data 2]`];
+  scf[;data 3]pred
+  }
 
 /  save down the best model
 /* dt = date-time of model start (dict)
@@ -94,8 +102,8 @@ i.savemdl:{[bmn;bmo;mdls;nms]
       (joblib[`:dump][bmo;fname,"/",string[bmn]];-1"Saving down ",string[bmn]," model to ",mo);
     (`keras=?[mdls;enlist(=;`model;bmn,());();`lib])0;
       (bmo[`:save][fname,"/",string[bmn],".h5"];-1"Saving down ",string[bmn]," model to ",mo);
-   -1"Saving of non keras/sklearn models types is not currently supported"];
- }
+    -1"Saving of non keras/sklearn models types is not currently supported"];
+  }
 
 // Table of models appropriate for the problem type being solved
 /* ptyp = problem type as a symbol, either `class or `reg
@@ -119,7 +127,7 @@ i.models:{[ptyp;tgt;p]
 // Update models available for use based on the number of rows in the data set
 /. r    > model table with appropriate models removed if needed and model removal highlighted
 i.updmodels:{[mdls;tgt]
- $[100000<count tgt;
+ $[10000<count tgt;
    [-1"\nLimiting the models being applied due to number targets>100,000";
     -1"No longer running neural nets or svms\n";
     select from mdls where(lib<>`keras),not fnc in`neural_network`svm];mdls]}
@@ -127,7 +135,8 @@ i.updmodels:{[mdls;tgt]
 // These are a list of models which are deterministic and thus which do not need to be grid-searched 
 // at present this should include the Keras models as a sufficient tuning method
 // has yet to be implemented
-i.excludelist:`GaussianNB`LinearRegression`RegKeras`MultiKeras`BinKeras;
+i.keraslist:`RegKeras`MultiKeras`BinaryKeras
+i.excludelist:i.keraslist,`GaussianNB`LinearRegression;
 
 // Dictionary with mappings for console printing to reduce clutter in .aml.runexample
 i.runout:`col`pre`sig`slct`tot`ex`gs`sco`save!
@@ -180,7 +189,7 @@ i.normalproc:{[t;p]
 /. r > table with feature creation and encodings applied appropriately
 i.freshproc:{[t;p]
   t:prep.i.autotype[t;p`typ;p];
-  agg:p`aggcols;
+  agg:p`aggcols;pfeat:p`features;
   // extract relevant functions based on the significant features determined by the model
   funcs:raze `$distinct{("_" vs string x)1}each p`features;
   // ensures that many calculations that are irrelevant are not run
@@ -192,10 +201,10 @@ i.freshproc:{[t;p]
   t:.ml.infreplace t;
   // It is not guaranteed that new feature creation will produce the all requisite features 
   // if this is not the case dummy features are added to the data
-  if[not all ftc:p[`features]in cols t;
-    newcols:p[`features]where not ftc;
-    t:p[`features] xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
-  flip value flip p[`features]#"f"$0^t}
+  if[not all ftc:pfeat in cols t;
+    newcols:pfeat where not ftc;
+    t:pfeat  xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
+  flip value flip pfeat #"f"$0^t}
 
 
 // Create the folders that are required for the saving of the config,models, images and reports
@@ -233,7 +242,7 @@ i.kerascheck:{[mdls;tts;tgt]
   tgtcheck:(count distinct tgt)>min{count distinct x}each tts`ytrain`ytest;
   $[mkcheck&tgtcheck;i.errtgt;]mdls}
 
-// Used throughout the library to convert windows/mac file names to windows equivalent
+// Used throughout the library to convert linux/mac file names to windows equivalent
 /* path = the linux 'like' path
 /. r    > the path modified to be suitable for windows systems
 i.ssrwin:{[path]$[.z.o like "w*";ssr[path;"/";"\\"];path]}

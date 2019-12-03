@@ -22,15 +22,25 @@ post.i.shuffle:{[tm;c]
   $[98h~type tm;tm:@[tm;c;@;idx];tm[;c]:tm[;c]idx];:tm}
 
 // Predict output from models after shuffling
-/* bm   = fitted best model to be used for prediction 
-/* xtst = test data 
-/* ytst = tgt data for prediction 
+// this function should be improved, limitations are arising due to the
+// number of available arguments to .aml.post.featureimpact 
+/* bs   = name of the best mode
+/* mdl   = mixed list containing as first element the name of the best model
+/*        and second element the table of all possible models
+/* data = mixed list of (xtrn;ytrn;xtst;ytst)
 /* scf  = scoring function
 /* cr   = column/row number depending on table/matrix
+/* p    = parameter set
 /. r    > score of the model with one column/row shuffled 
-post.i.predshuff:{[bm;xtst;ytst;scf;cr]
-  pred:bm[`:predict][post.i.shuffle[xtst;cr]]`;
-  scf[pred;ytst]}
+post.i.predshuff:{[bs;mdl;data;scf;cr;p]
+  epymdl:mdl[0];mdltb:mdl[1];
+  xtest:post.i.shuffle[data 2;cr];
+  funcnm:string first exec fnc from mdltb where model=bs;
+  preds:$[bs in i.keraslist;
+        get[".aml.",funcnm,"predict"][((data 0;data 1);(xtest;data 3));epymdl];
+        epymdl[`:predict][xtest]`];
+  scf[;data 3]preds
+  }
 
 // Calculation of impact score for each column/row of the table/matrix
 /* ps  = output from prediction/shuffle set

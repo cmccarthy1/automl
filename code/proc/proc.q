@@ -8,33 +8,42 @@
 /* tgt   = target data
 /* p     = parameter dictionary passed as default or modified by user
 /. r     > all relevant information about the running of the sets of models
-proc.runmodels:{[t;tgt;mdls;p;dt;fpath]
+proc.runmodels:{[data;tgt;mdls;cnms;p;dt;fpath]
   system"S ",string s:p`seed;
-  c:cols t;t:flip value flip t;
   // Apply train test split to keep holdout for feature impact plot and testing of vanilla best model
-  tt:p[`tts][t;tgt;p`hld];
+  tt:p[`tts][data;tgt;p`hld];
+  xtrn:tt`xtrain;ytrn:tt`ytrain;xtst:tt`xtest;ytst:tt`ytest;
   mdls:i.kerascheck[mdls;tt;tgt];
   xv_tstart:.z.T;
   // Complete a seeded cross validation on training sets producing the predictions with associated 
   // real values. This allows the best models to be chosen based on relevant user defined metric 
-  p1:proc.xv.seed[tt`xtrain;tt`ytrain;p]'[mdls];
+  p1:proc.xv.seed[xtrn;ytrn;p]'[mdls];
   scf:i.scfn[p;mdls];
   ord:proc.i.ord scf;
   -1"\nScores for all models, using ",string scf;
   // Score the models based on user denoted scf and ordered appropriately to find best model
-  show s1:ord mdls[`model]!{first avg x}each scf .''p1;
+  show s1:ord mdls[`model]!avg each scf .''p1;
   xv_tend:.z.T-xv_tstart;
   -1"\nBest scoring model = ",string bs:first key s1;
   // Extract the best model, fit on entire training set and predict/score on test set
   // for the appropriate scoring function
-  bm:(first exec minit from mdls where model=bs)[][];
   bm_tstart:.z.T;
-  bm[`:fit][tt`xtrain;tt`ytrain];
-  s2:scf[;ytst:tt`ytest]bm[`:predict][xtst:tt`xtest]`;
+  $[bs in i.keraslist;
+    [data:((xtrn;ytrn);(xtst;ytst));
+     funcnm:string first exec fnc from mdls where model=bs;
+     if[funcnm~"multi";data[;1]:npa@'reverse flip@'./:[;((::;0);(::;1))](0,count ytst)_/:
+       value .ml.i.onehot1(,/)(ytrn;ytst)];
+     kermdl:mdl[data;p`seed;`$funcnm];
+     bm:fit[data;kermdl];
+     s2:scf[;ytst]get[".aml.",funcnm,"predict"][data;bm]];
+    [bm:(first exec minit from mdls where model=bs)[][];
+     bm[`:fit][xtrn;ytrn];
+     s2:scf[;ytst]bm[`:predict][xtst]`]
+    ];
   -1"Score for validation predictions using best model = ",string[s2],"\n";
   bm_tend:.z.T-bm_tstart;
   // Feature impact graph produced on holdout data if setting is appropriate
-  if[2=p[`saveopt];post.featureimpact[bs;bm;(xtst;ytst);c;scf;ord;dt;fpath]];
+  if[2=p[`saveopt];post.featureimpact[bs;(bm;mdls);value tt;cnms;scf;dt;fpath;p]];
   // Outputs from run models. These are used in the generation of a pdf report
   // or are used within later sections of the pipeline.
   (s1;bs;s2;xv_tend;bm_tend;scf;bm)}
