@@ -17,7 +17,7 @@ proc.i.files:`class`reg`score!("classmodels.txt";"regmodels.txt";"scoring.txt")
 proc.i.mdlfunc:{[lib;fnc;mdl]
   $[`keras~lib;
     // retrieve keras model from the .aml namespace eg '.aml.regfitscore'
-    get` sv``aml,fnc;
+    get` sv``aml,`fitscore;
     // construct the projection used for sklearn models eg '.p.import[`sklearn.svm][`:SVC]'
     {[x;y;z].p.import[x]y}[` sv lib,fnc;hsym mdl]]}
 

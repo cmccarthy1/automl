@@ -31,8 +31,10 @@ proc.runmodels:{[data;tgt;mdls;cnms;p;dt;fpath]
   $[bs in i.keraslist;
     [data:((xtrn;ytrn);(xtst;ytst));
      funcnm:neg[8]_string first exec fnc from mdls where model=bs;
-     kermdl:get[".aml.",funcnm,"mdl"][data;p`seed];
-     bm:get[".aml.",funcnm,"fit"][data;kermdl];
+     if[funcnm~"multi";data[;1]:npa@'reverse flip@'./:[;((::;0);(::;1))](0,count ytst)_/:
+       value .ml.i.onehot1(,/)(ytrn;ytst)];
+     kermdl:mdl[data;p`seed;`$funcnm];
+     bm:fit[data;kermdl];
      s2:scf[;ytst]get[".aml.",funcnm,"predict"][data;bm]];
     [bm:(first exec minit from mdls where model=bs)[][];
      bm[`:fit][xtrn;ytrn];
