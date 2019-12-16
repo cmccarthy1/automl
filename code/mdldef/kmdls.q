@@ -1,41 +1,40 @@
 \d .aml
 
-binfitscore:{
- npa:.p.import[`numpy]`:array;
- seq:.p.import[`keras.models]`:Sequential;
- dns:.p.import[`keras.layers]`:Dense;
- nps:.p.import[`numpy.random][`:seed];
- m:seq[];
- nps[y];
- m[`:add]dns[32;`activation pykw"relu";`input_dim pykw count first x[0]0];
- m[`:add]dns[1;`activation pykw"sigmoid"];
- m[`:compile][`loss pykw"binary_crossentropy";`optimizer pykw"rmsprop"];
- m[`:fit][npa x[0]0;x[0]1;`batch_size pykw 32;`verbose pykw 0];
- .5<raze m[`:predict][npa x[1]0]`}
+// The following is a naming convention used in this file
+/* d = data as a mixed list containing training and testing data ((xtrn;ytrn);(xtst;ytst))
+/* s = seed used for initialising the same model
+/* o = one-hot encoding for multi-classification example
+/* m = model object being passed through the system
 
-multifitscore:{
- npa:.p.import[`numpy]`:array;
- seq:.p.import[`keras.models]`:Sequential;
- dns:.p.import[`keras.layers]`:Dense;
- nps:.p.import[`numpy.random][`:seed];
- l:`ytrn`ytst!flip@'./:[;((::;0);(::;1))](0,count x[0]1)_/:value .ml.i.onehot1(,/)x[;1];
- m:seq[];
- nps[y];
- m[`:add]dns[32;`activation pykw"relu";`input_dim pykw count first x[0]0];
- m[`:add]dns[count distinct x[0]1;`activation pykw"softmax"];
- m[`:compile][`loss pykw"categorical_crossentropy";`optimizer pykw"rmsprop"];
- m[`:fit][npa x[0]0;npa l`ytrn;`batch_size pykw 32;`verbose pykw 0];
- m[`:predict_classes][npa x[1]0]`}
+fitscore:{[d;s;mtype]
+  if[mtype~`multi;d[;1]:npa@'flip@'./:[;((::;0);(::;1))](0,count d[0]1)_/:value .ml.i.onehot1(,/)d[;1]];
+  m:mdl[d;s;mtype];
+  m:fit[d;m];
+  get[".aml.",string[mtype],"predict"][d;m]}
 
-regfitscore:{
- npa:.p.import[`numpy]`:array;
- seq:.p.import[`keras.models]`:Sequential;
- dns:.p.import[`keras.layers]`:Dense;
- nps:.p.import[`numpy.random][`:seed];
+
+actdict:`binary`reg`multi!("sigmoid";"relu";"softmax")
+lossdict:`binary`reg`multi!("binary_crossentropy";"mse";"categorical_crossentropy")
+
+mdl:{[d;s;mtype]
  m:seq[];
- nps[y];
- m[`:add]dns[32;`activation pykw"relu";`input_dim pykw count first x[0]0];
- m[`:add]dns[1;`activation pykw"relu"];
- m[`:compile][`optimizer pykw"rmsprop";`loss pykw"mse"];
- m[`:fit][npa x[0]0;x[0]1;`batch_size pykw 32;`verbose pykw 0];
- raze m[`:predict][npa x[1]0]`}
+ nps[s];
+ m[`:add]dns[32;`activation pykw"relu";`input_dim pykw count first d[0]0];
+ m[`:add]dns[$[mtype~`multi;count distinct (d[0]1)`;1];`activation pykw actdict[mtype]];
+ m[`:compile][`loss pykw lossdict[mtype];`optimizer pykw "rmsprop"];m}
+
+fit:{[d;m]m[`:fit][npa d[0]0;d[0]1;`batch_size pykw 32;`verbose pykw 0];m}
+
+// Prediction functions for each of the keras models
+/* d = Data from which prediction is to be made
+/* m = Fitted Keras model
+/. r > predicted value
+binarypredict  :{[d;m].5<raze m[`:predict][npa d[1]0]`}
+multipredict:{[d;m]m[`:predict_classes][npa d[1]0]`}
+regpredict  :{[d;m]raze m[`:predict][npa d[1]0]`}
+
+npa:.p.import[`numpy]`:array;
+seq:.p.import[`keras.models]`:Sequential;
+dns:.p.import[`keras.layers]`:Dense;
+nps:.p.import[`numpy.random][`:seed];
+

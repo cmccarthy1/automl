@@ -94,7 +94,7 @@ post.report:{[dict;dt;fname]
   cell[pdf;bmtime];
   line[pdf;7];
 
-  if[not (first key[dict`dict])in `LinearRegression`GaussianNB;
+  if[not (first key[dict`dict])in i.excludelist;
     font[pdf;13;`B];
     gstitle:"Grid search for a ",(string first key[dict`dict])," model.";
     cell[pdf;gstitle];
@@ -104,7 +104,7 @@ post.report:{[dict;dt;fname]
     gscfg:$[(dict[`gscfg]0)in `mcsplit`pcsplit;
             "The grid search was completed using .ml.gs.",string[dict[`gscfg]0],
               " with a percentage of ",string[dict[`gscfg]1],"% of training data used for validation";
-            ". A ",string[dict[`gscfg]1],"-fold grid-search was performed on the training set",
+            "A ",string[dict[`gscfg]1],"-fold grid-search was performed on the training set",
               " to find the best model using, ",string[dict[`gscfg]0],"."];
     cell[pdf;gscfg];
     line[pdf;7];
@@ -123,7 +123,8 @@ post.report:{[dict;dt;fname]
   cell[pdf;fin];
   line[pdf;7];
   
-  pdf[`:output][ssr[fname,"/q_automl_report_",sv["_";string(dict`mdl;dt`sttime)],".pdf";":";"."];`F];}
+  pdf[`:output][ssr[fname,"/q_automl_report_",sv["_";string(dict`mdl;dt`sttime)],".pdf";":";"."];`F];
+  }
 
 // Utilities for the report generation functionality
 font :{x[`:set_font][`Arial;`size pykw y;`style pykw z]}

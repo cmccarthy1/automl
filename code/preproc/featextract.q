@@ -7,7 +7,7 @@
 /* tgt = target data
 
 // Create features using the FRESH algorithm
-/. r > table of fresh created features and the time taken to complete extraction
+/. r > table of fresh created features and the time taken to complete extraction as a mixed list
 prep.freshcreate:{[t;p]
   agg:p`aggcols;prm:get p`params;
   // Feature extraction should be performed on all columns that are non aggregate
@@ -16,7 +16,7 @@ prep.freshcreate:{[t;p]
   t:"f"$prep.i.nullencode[value .ml.fresh.createfeatures[t;agg;cols2use;prm];med];
   fe_end:.z.T-fe_start;
   t:.ml.infreplace t;
-  ("f"$0^.ml.dropconstant t;fe_end)}
+  (0^.ml.dropconstant t;fe_end)}
 
 
 // In all cases feature significance currently returns the top 25% of important features

@@ -33,25 +33,31 @@ runexample:{[tb;tgt;ftype;ptype;p]
   feats:prep.freshsignificance[tb 0;tgt];
   // Encode target data if target is a symbol vector
   if[11h~type tgt;tgt:.ml.labelencode tgt];
+
   // Apply the appropriate train/test split to the data
   // the following currently runs differently if the parameters are defined
   // in a file or through the more traditional dictionary/(::) format
   tts:($[-11h=type dict`tts;get;]dict[`tts])[;tgt;dict`sz]tab:feats#tb 0;
+  // Centralizing the table to matrix conversion makes it easier to avoid
+  // repetition of this task which can be computationally expensive
+  xtrn:flip value flip tts`xtrain;xtst:flip value flip tts`xtest;
+  ytrn:tts`ytrain;ytst:tts`ytest;
   mdls:i.kerascheck[mdls;tts;tgt];
   // Check if Tensorflow/Keras not available for use, NN models removed
   if[1~checkimport[];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
   -1 i.runout`sig;-1 i.runout`slct;-1 i.runout[`tot],string[ctb:count cols tab];
   // Run all appropriate models on the training set
-  bm:proc.runmodels[tts`xtrain;tts`ytrain;mdls;dict;dtdict;spaths];
+  bm:proc.runmodels[xtrn;ytrn;mdls;cols tts`xtrain;dict;dtdict;spaths];
   fn:i.scfn[dict;mdls];
   // Do not run grid search on deterministic models returning score on the test set and model
   if[a:bm[1]in i.excludelist;
-    -1 i.runout`ex;score:i.scorepred[flip value flip tts`xtest;tts`ytest;last bm;fn];expmdl:last bm];
+    data:(xtrn;ytrn;xtst;ytst);
+    funcnm:string first exec fnc from mdls where model=bm[1];
+    -1 i.runout`ex;score:i.scorepred[data;bm[1];expmdl:last bm;fn;funcnm]];
   // Run grid search on the best model for the parameter sets defined in hyperparams.txt
   if[b:not a;
     -1 i.runout`gs;
-    prms:proc.gs.psearch[flip value flip tts`xtrain;tts`ytrain;
-                         tts`xtest;tts`ytest;bm 1;dict;ptype;mdls];
+    prms:proc.gs.psearch[xtrn;ytrn;xtst;ytst;bm 1;dict;ptype;mdls];
     score:first prms;expmdl:last prms];
   -1 i.runout[`sco],string[score],"\n";
   // Save down a pdf report summarizing the running of the pipeline
@@ -91,8 +97,11 @@ newproc:{[t;fp]
   $[(mp:metadata[`pylib])in `sklearn`keras;
     // Apply the relevant saved down model to new data
     [fp_upd:i.ssrwin[path,"/outputs/",fp,"/models/",string metadata[`best_model]];
+     if[bool:(mdl:metadata[`best_model])in i.keraslist;fp_upd,:".h5"];
      model:$[mp~`sklearn;skload;krload]fp_upd;
-     model[`:predict;<]data];
+     $[bool;
+       [fnm:neg[5]_string lower mdl;get[".aml.",fnm,"predict"][(0n;(data;0n));model]];
+       model[`:predict;<]data]];
     '`$"The current model type you are attempting to apply is not currently supported"]
   }
 
