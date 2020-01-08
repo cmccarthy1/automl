@@ -1,10 +1,10 @@
 if "%APPVEYOR_REPO_TAG%"=="true" (
- set autoML_VERSION=%APPVEYOR_REPO_TAG_NAME%
+ set AUTOML_VERSION=%APPVEYOR_REPO_TAG_NAME%
 ) else (
  set autoML_VERSION=%APPVEYOR_REPO_BRANCH%_%APPVEYOR_REPO_COMMIT%
 )
 set PATH=C:\Perl;%PATH%
-perl -p -i.bak -e s/AUTOMLVERSION/`\$\"%AUTOML_VERSION%\"/g ml.q
+perl -p -i.bak -e s/AUTOMLVERSION/`\$\"%AUTOML_VERSION%\"/g automl.q
 
 
 if not defined QLIC_KC (
