@@ -21,7 +21,7 @@ LABEL	org.label-schema.schema-version="0.1" \
 	org.label-schema.license="Apache-2.0" \
 	org.label-schema.url="https://code.kx.com/q/ml/automl/" \
 	org.label-schema.version="${VERSION:-dev}" \
-	org.label-schema.vcs-url="https://github.com/KxSystems/automl.git" \
+	org.label-schema.vcs-url="https://github.com/Dianeod/automl.git" \
 	org.label-schema.vcs-ref="$VCS_REF" \
 	org.label-schema.build-date="$BUILD_DATE" \
 	org.label-schema.docker.cmd="docker run kxsys/automl"
@@ -35,7 +35,7 @@ USER kx
 
 RUN . /opt/conda/etc/profile.d/conda.sh \
 	&& conda activate kx \
-	&& conda install --file /opt/kx/automl/requirements.txt \
+	&& conda-forge install --file /opt/kx/automl/requirements.txt \
 	&& conda clean -y --all \
 
 USER root
