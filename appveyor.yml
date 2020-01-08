@@ -11,11 +11,15 @@ platform: x64
 
 build_script:
 - cmd: >-
+
     build\buildscript.bat
+
     build\test.bat
+
 after_build:
 - cmd: >-
     build\package.bat
+
 deploy:
  release: $(appveyor_repo_tag_name)
  provider: GitHub
