@@ -106,18 +106,6 @@ prep.i.symencode:{[t;n;b;p;enc]
 
 // Utilities for feat_extract.q
 
-// Calculate the credibility score symbol columns based on target distribution in regression tasks
-/. r > the estimated credibility score appended as additional columns 
-prep.i.credibility:{[t;c;tgt]
-  if[(::)~c;c:.ml.i.fndcols[t;"s"]];
-  avgtot:avg tgt;
-  counts:{(count each group x)x}each t c,:();
-  // average target value for the each group
-  avggroup:{(key[k]!avg each y@value k:group x)x}[;tgt]each t c,:();
-  scores:{z*(x-y)}[avgtot]'[avggroup;counts];
-  names:(`$string[c],\:"_credibility_estimate");
-  x^flip names!scores}
-
 // Perform bulk transformations of hij columns for all unique linear combinations of such columns
 /. r > table with bulk transformtions applied appropriately
 prep.i.bulktransform:{[t;c]
@@ -129,9 +117,10 @@ prep.i.bulktransform:{[t;c]
 
 // Perform a truncated single value decomposition on unique linear combinations of float columns
 // https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html
-prep.i.truncsvd:{[t;c;p]
+/* n  = number of columns to be combined
+prep.i.truncsvd:{[t;c;n]
   if[(::)~c;c:.ml.i.fndcols[t;"f"]];
-  c@:.ml.combs[count c,:();p];
+  c@:.ml.combs[count c,:();n];
   svd:.p.import[`sklearn.decomposition;`:TruncatedSVD;`n_components pykw 1];
   flip flip[t],(`$(raze each string c),\:"_trsvd")!{raze x[`:fit_transform][flip y]`}[svd]each t c}
 

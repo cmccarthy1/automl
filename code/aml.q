@@ -10,8 +10,7 @@
 /* ptype = type of problem regression/class (`reg/`class)
 /* p     = parameters (::) produces default other changes are user dependent
 
-runexample:{[tb;tgt;ftype;ptype;p]
-  if[ftype~`fresh;tb:(`$ssr[;"_";""]each string cols tb)xcol tb];
+run:{[tb;tgt;ftype;ptype;p]
   dtdict:`stdate`sttime!(.z.D;.z.T);
   // Extract & update the dictionary used to define the workflow
   dict:i.updparam[tb;p;ftype],enlist[`typ]!enlist ftype;
@@ -81,7 +80,7 @@ runexample:{[tb;tgt;ftype;ptype;p]
 /* t = table of new data to be predicted
 /* fp = the path to the folder which the /Config and /Models folders are
 
-newproc:{[t;fp]
+new:{[t;fp]
   // Relevant python functionality for loading of models
   skload:.p.import[`joblib][`:load];
   krload:.p.import[`keras.models][`:load_model];
