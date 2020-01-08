@@ -16,10 +16,8 @@ p:i.normaldefault[]
 // Compile sklearn and keras mdls
 
 minitsk:proc.i.mdlfunc[`sklearn;`ensemble;`RandomForestClassifier]
-minitk:proc.i.mdlfunc[`keras;`binary;`BinaryKeras]
 
 raze[first value get[`.ml.gs.kfsplit][5;1;data 0;data 1;p[`prf]minitsk;enlist[`random_state]!enlist 123;enlist[`val]!enlist 0]]~enlist each 0110011001b
-raze[get[`.ml.xv.kfsplit][5;1;data 0;data 1;p[`prf][minitk;(123,`binary)]]]~enlist each 1110110011b
 
 // Map scoring function to appropriate ordering metric
 proc.i.ord[`.ml.accuracy]~desc
