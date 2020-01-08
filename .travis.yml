@@ -63,11 +63,11 @@ jobs:
       install: skip
       script:
         - docker build -t kxsys/automl:latest -f docker/Dockerfile .
-        - docker tag kxsys/ml:latest kxsys/automl:$TRAVIS_BRANCH
+        - docker tag kxsys/automl:latest kxsys/automl:$TRAVIS_BRANCH
       deploy:
         provider: script
         script:
-          - echo $DOCKER_PASSWORD|docker login --username $DOCKER_USERNAME --password-stdin && docker push kxsys/automl:latest && docker push automl/ml:$TRAVIS_BRANCH
+          - echo $DOCKER_PASSWORD|docker login --username $DOCKER_USERNAME --password-stdin && docker push kxsys/automl:latest && docker push kxsys/automl:$TRAVIS_BRANCH
         skip_cleanup: true
         on:
           tags: true
