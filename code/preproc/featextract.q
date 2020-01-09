@@ -37,8 +37,7 @@ prep.normalcreate:{[t;p]
   // but are not transformed according to remaining procedures
   tcols:.ml.i.fndcols[t;"dmntvupz"];
   tb:(cols[t]except tcols)#t;
-  tb:prep.i.truncsvd[tb;::;2];
-  tb:prep.i.bulktransform[tb;::];
+  tb:prep.i.applyfn/[tb;p`funcs];
   tb:.ml.dropconstant prep.i.nullencode[.ml.infreplace tb;med];
   // Apply the transform of time specific columns as appropriate
   if[0<count tcols;tb^:.ml.timesplit[tcols#t;::]];
