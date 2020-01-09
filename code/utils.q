@@ -53,8 +53,10 @@ i.getdict:{[nm]
     $[`scf in k;`scf;()];
     $[`seed in k:key d;`seed;()]);
   fnc:(key;
-       {get string first x};{(x 0;get string x 1)};
-       {key[x]!`$value x};{$[`rand_val~first x;first x;get string first x]});
+    {get string first x};
+    {(x 0;get string x 1)};
+    {key[x]!`$value x};
+    {$[`rand_val~first x;first x;get string first x]});
   // Addition of empty dictionary entry needed as parsing 
   // of file behaves oddly if only a single entry is given to the system
   if[sgl:1=count d;d:(enlist[`]!enlist""),d];
@@ -69,9 +71,9 @@ i.getdict:{[nm]
 i.freshdefault:{`aggcols`params`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
   ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;
    `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.ttsnonshuff;0.2)}
-i.normaldefault:{`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
-  ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;`class`reg!(`.ml.accuracy;`.ml.mse);
-   `rand_val;2;0.2;`.ml.traintestsplit;0.2)}
+i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz!
+  ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.prep.i.default;`.aml.xv.fitpredict;
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.traintestsplit;0.2)}
 
 // Apply an appropriate scoring function to predictions from a model
 /* xtst = test data
@@ -182,7 +184,7 @@ i.normalproc:{[t;p]
   t:prep.i.symencode[t;10;0;p;p`symencode];
   t:prep.i.nullencode[t;med];
   t:.ml.infreplace[t];
-  t:first prep.normalcreate[t;::];
+  t:first prep.normalcreate[t;p];
   flip value flip p[`features]#t}
 
 // Apply feature creation and encoding procedures for FRESH on new data

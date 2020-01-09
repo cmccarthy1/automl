@@ -15,3 +15,4 @@
 .ml.smape        | desc
 .ml.mape         | desc
 .ml.r2score      | desc
+.ml.rocaucscore  | desc
