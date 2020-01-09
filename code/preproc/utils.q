@@ -1,4 +1,4 @@
-\d .aml
+ml
 
 // For the following code the parameter naming convention holds
 // defined here is applied to avoid repetition throughout the file
@@ -106,17 +106,17 @@ prep.i.symencode:{[t;n;b;p;enc]
 
 // Utilities for feat_extract.q
 
-// Calculate the credibility score symbol columns based on target distribution in regression tasks		
-/. r > the estimated credibility score appended as additional columns 		
-prep.i.credibility:{[t;c;tgt]		
-  if[(::)~c;c:.ml.i.fndcols[t;"s"]];		
-  avgtot:avg tgt;		
-  counts:{(count each group x)x}each t c,:();		
-  // average target value for the each group		
-  avggroup:{(key[k]!avg each y@value k:group x)x}[;tgt]each t c,:();		
-  scores:{z*(x-y)}[avgtot]'[avggroup;counts];		
-  names:(`$string[c],\:"_credibility_estimate");		
-  x^flip names!scores}		
+// Calculate the credibility score symbol columns based on target distribution in regression tasks
+/. r > the estimated credibility score appended as additional columns 
+prep.i.credibility:{[t;c;tgt]
+  if[(::)~c;c:.ml.i.fndcols[t;"s"]];
+  avgtot:avg tgt;
+  counts:{(count each group x)x}each t c,:();
+  // average target value for the each group
+  avggroup:{(key[k]!avg each y@value k:group x)x}[;tgt]each t c,:();
+  scores:{z*(x-y)}[avgtot]'[avggroup;counts];
+  names:(`$string[c],\:"_credibility_estimate");
+  x^flip names!scores}
 
 // Perform bulk transformations of hij columns for all unique linear combinations of such columns
 /. r > table with bulk transformtions applied appropriately
@@ -170,3 +170,4 @@ prep.i.metafn:{[t;sl;fl]$[0<count sl;fl@\:/:flip(sl)#t;()]}
 
 // List of functions to be applied in metadata function for non-numeric data
 prep.i.nonnumeric:{[t](count;{count distinct x};{};{};{};{};t)}
+
