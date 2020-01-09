@@ -35,7 +35,7 @@ USER kx
 
 RUN . /opt/conda/etc/profile.d/conda.sh \
 	&& conda activate kx \
-	&& conda-forge install --file /opt/kx/automl/requirements.txt \
+	&& conda install --file /opt/kx/automl/requirements.txt \
 	&& conda clean -y --all \
 
 USER root
