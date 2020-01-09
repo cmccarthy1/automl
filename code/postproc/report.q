@@ -18,7 +18,7 @@ post.report:{[dict;dt;fname]
         "this run started at ";
  fline2:string[dt`stdate]," at ",string[dt`sttime];
  cell[pdf;f-:30;fline1];
- cell[pdf;f-:30;fline2];
+ cell[pdf;f-:10;fline2];
 
  font[pdf;"Helvetica-Bold";13];
  cell[pdf;f-:30;"Breakdown of Pre-Processing"];
@@ -58,10 +58,10 @@ post.report:{[dict;dt;fname]
 
  metric:"The metric that is being used for scoring and optimizing the models was: ",
          string[dict`metric],".";
- cell[pdf;f-:30metric];
+ cell[pdf;f-:30;metric];
 
   // Take in a kdb dictionary for printing line by line to the pdf file.
-  {[m;i;h;s]cell[m;i;h;s]}[pdf]'[cntf:f-10*1_til[1+count dd];dd:{(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}dict`dict];
+  {[m;h;s]cell[m;h;s]}[pdf]'[cntf:f-15*1_til[1+count dd];dd:{(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}dict`dict];
   f:last cntf;
 
  pdf[`:showPage][]; 
