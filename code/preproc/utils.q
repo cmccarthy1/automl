@@ -1,4 +1,4 @@
-ml
+\d .aml
 
 // For the following code the parameter naming convention holds
 // defined here is applied to avoid repetition throughout the file
@@ -170,4 +170,3 @@ prep.i.metafn:{[t;sl;fl]$[0<count sl;fl@\:/:flip(sl)#t;()]}
 
 // List of functions to be applied in metadata function for non-numeric data
 prep.i.nonnumeric:{[t](count;{count distinct x};{};{};{};{};t)}
-
