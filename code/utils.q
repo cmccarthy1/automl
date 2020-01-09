@@ -200,6 +200,7 @@ i.freshproc:{[t;p]
   t:prep.i.symencode[t;10;0;p;p`symencode];
   cols2use:k where not (k:cols t)in agg;
   t:prep.i.nullencode[value .ml.fresh.createfeatures[t;agg;cols2use;appfns];med];
+  t:.ml.infreplace t;
   // It is not guaranteed that new feature creation will produce the all requisite features 
   // if this is not the case dummy features are added to the data
   if[not all ftc:pfeat in cols t;
