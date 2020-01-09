@@ -20,9 +20,8 @@ lossdict:`binary`reg`multi!("binary_crossentropy";"mse";"categorical_crossentrop
 
 /. r > the compiled keras model
 mdl:{[d;s;mtype]
- nps[s];
- if[not 1~checkimport[];tfs[s]];
  m:seq[];
+ nps[s];
  m[`:add]dns[32;`activation pykw"relu";`input_dim pykw count first d[0]0];
  m[`:add]dns[$[mtype~`multi;count distinct (d[0]1)`;1];`activation pykw actdict[mtype]];
  m[`:compile][`loss pykw lossdict[mtype];`optimizer pykw "rmsprop"];m}
@@ -42,4 +41,3 @@ npa:.p.import[`numpy]`:array;
 seq:.p.import[`keras.models]`:Sequential;
 dns:.p.import[`keras.layers]`:Dense;
 nps:.p.import[`numpy.random][`:seed];
-if[not 1~checkimport[];tfs:.p.import[`tensorflow][`:random.set_random_seed]]
