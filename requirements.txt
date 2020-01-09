@@ -1,3 +1,4 @@
+fpdf
 joblib
 matplotlib
 numpy
