@@ -1,4 +1,4 @@
-fpdf
+reportlab
 joblib
 matplotlib
 numpy
