@@ -18,7 +18,7 @@ post.report:{[dict;dt;fname]
         "this run started at ";
  fline2:string[dt`stdate]," at ",string[dt`sttime];
  cell[pdf;f-:30;fline1];
- cell[pdf;f-:30;fline2];
+ cell[pdf;f-:15;fline2];
 
  font[pdf;"Helvetica-Bold";13];
  cell[pdf;f-:30;"Breakdown of Pre-Processing"];
@@ -54,14 +54,14 @@ post.report:{[dict;dt;fname]
  xvtime2:string[dict`xvtime],".";
 
  cell[pdf;f-:30;xvtime1];
- cell[pdf;f-:10;xvtime2];
+ cell[pdf;f-:20;xvtime2];
 
  metric:"The metric that is being used for scoring and optimizing the models was: ",
          string[dict`metric],".";
- cell[pdf;f-:30metric];
+ cell[pdf;f-:30;metric];
 
   // Take in a kdb dictionary for printing line by line to the pdf file.
-  {[m;i;h;s]cell[m;i;h;s]}[pdf]'[cntf:f-10*1_til[1+count dd];dd:{(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}dict`dict];
+  {[m;h;s]cell[m;h;s]}[pdf]'[cntf:(f-20)-15*1_til[1+count dd];dd:{(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}dict`dict];
   f:last cntf;
 
  pdf[`:showPage][]; 
@@ -114,13 +114,16 @@ post.report:{[dict;dt;fname]
  }
 
 
-/* m = pdf gen module used
-/* i = how far indented is the text
-/* h = the placement height from the bottom of the page 
-/* f = font size
-/* s = font size
+// Utilities for the report generation functionality
+/* m =   pdf gen module used
+/* i =   how far indented is the text
+/* h =   the placement height from the bottom of the page 
+/* f =   font size
+/* s =   font size
 /* txt = text to include
-/* fp = filepath
+/* fp =  filepath
+/* wi =  image width
+/* hi =  image height
 font:{[m;f;s]m[`:setFont][f;s]}
 cell:{[m;h;txt]m[`:drawString][30;h;txt]}
 title:{[m;h;txt]m[`:drawString][150;h;txt]}
