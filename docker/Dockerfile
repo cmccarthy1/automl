@@ -29,13 +29,13 @@ LABEL	org.label-schema.schema-version="0.1" \
 RUN chown -R kx:kx /opt/kx/automl
 RUN mkdir /opt/kx/q/automl
 RUN find /opt/kx/automl -maxdepth 1 -type f -name '*.q' | xargs ln -s -t /opt/kx/q/automl \
-	&& ln -s -t /opt/kx/q/automl /opt/kx/nl/code 
+	&& ln -s -t /opt/kx/q/automl /opt/kx/automl/code 
 
 USER kx
 
 RUN . /opt/conda/etc/profile.d/conda.sh \
 	&& conda activate kx \
-	&& conda install --file /opt/kx/automl/requirements.txt \
+	&& conda install --file /opt/kx/automl/requirements.txt
 	&& conda clean -y --all \
 
 USER root
