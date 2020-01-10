@@ -9,7 +9,7 @@
 // Create features using the FRESH algorithm
 /. r > table of fresh created features and the time taken to complete extraction as a mixed list
 prep.freshcreate:{[t;p]
-  agg:p`aggcols;prm:get p`params;
+  agg:p`aggcols;prm:get p`funcs;
   // Feature extraction should be performed on all columns that are non aggregate
   cols2use:k where not (k:cols[t])in agg;
   fe_start:.z.T;

@@ -68,7 +68,7 @@ i.getdict:{[nm]
 // or in the creation of a new initialisation parameter flat file
 /* Neither of these function take a parameter as input
 /. r > default dictionaries which will be used by the automl
-i.freshdefault:{`aggcols`params`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
+i.freshdefault:{`aggcols`funcs`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
   ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;
    `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.ttsnonshuff;0.2)}
 i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz!

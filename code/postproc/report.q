@@ -10,15 +10,16 @@ pdfimage:.p.import[`reportlab.platypus]`:Image
 /. r     > a pdf report saved to disk
 post.report:{[dict;dt;fname]
  pdf:canvas[`:Canvas][ssr[fname,"/q_automl_report_",sv["_";string(dict`mdl;dt`sttime)],".pdf";":";"."]];
+
  font[pdf;"Helvetica-BoldOblique";15];  
- title[pdf;f:800;"kdb+/q AutoML model generated report"];
+ title[pdf;f:775;"kdb+/q AutoML model generated report"];
 
  font[pdf;"Helvetica";11];
  fline1:"This report outlines the results achieved through the running of kdb+/q autoML, ",
         "this run started at ";
  fline2:string[dt`stdate]," at ",string[dt`sttime];
- cell[pdf;f-:30;fline1];
- cell[pdf;f-:30;fline2];
+ cell[pdf;f-:40;fline1];
+ cell[pdf;f-:15;fline2];
 
  font[pdf;"Helvetica-Bold";13];
  cell[pdf;f-:30;"Breakdown of Pre-Processing"];
@@ -43,10 +44,10 @@ post.report:{[dict;dt;fname]
  cell[pdf;f-:30;xval];
  
  image[pdf;path,"/code/postproc/images/train_test_validate.png";f-:90;500;70];
- font[pdf;"Helvetica";8];
+ font[pdf;"Helvetica";10];
  fig_1:"Figure 1: This is representative image showing the data split into training,",
         "validation and testing sets.";
- cell[pdf;f-:10;fig_1];
+ cell[pdf;f-:25;fig_1];
 
  font[pdf;"Helvetica";11];
  xvtime1:"The total time to complete the running of cross validation",
@@ -54,24 +55,24 @@ post.report:{[dict;dt;fname]
  xvtime2:string[dict`xvtime],".";
 
  cell[pdf;f-:30;xvtime1];
- cell[pdf;f-:10;xvtime2];
+ cell[pdf;f-:15;xvtime2];
 
  metric:"The metric that is being used for scoring and optimizing the models was: ",
          string[dict`metric],".";
- cell[pdf;f-:30metric];
+ cell[pdf;f-:30;metric];
 
   // Take in a kdb dictionary for printing line by line to the pdf file.
-  {[m;i;h;s]cell[m;i;h;s]}[pdf]'[cntf:f-10*1_til[1+count dd];dd:{(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}dict`dict];
+  {[m;h;s]cell[m;h;s]}[pdf]'[cntf:(f-20)-15*1_til[1+count dd];dd:{(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}dict`dict];
   f:last cntf;
 
  pdf[`:showPage][]; 
 
  
  image[pdf;dict`impact;f:500;400;300];
- font[pdf;"Helvetica";8];
+ font[pdf;"Helvetica";10];
  fig_2:"Figure 2: This is the feature impact for a number of the most significant",
         " features as determined on the training set";
- cell[pdf;f-:30;fig_2];
+ cell[pdf;f-:25;fig_2];
 
  font[pdf;"Helvetica-Bold";13];
  cell[pdf;f-:30;"Model selection summary"];
@@ -87,7 +88,7 @@ post.report:{[dict;dt;fname]
  cell[pdf;f-:30;bmtime];
 
  if[not (first key[dict`dict])in i.excludelist;
-   font[pdf;"Helvetica";13];
+   font[pdf;"Helvetica-Bold";13];
    gstitle:"Grid search for a ",(string first key[dict`dict])," model.";
    cell[pdf;f-:30;gstitle];
    
@@ -103,7 +104,7 @@ post.report:{[dict;dt;fname]
    gsp:"The following are the hyperparameters which have been deemed optimal for the model";
    cell[pdf;f-:30;gsp];
    
-   {[m;i;h;s]cell[m;i;h;s]}[pdf]'[cntf:f-10*1_til[1+count dgs];dgs:{(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}dict`gs];
+   {[m;h;s]cell[m;h;s]}[pdf]'[cntf:(f-20)-15*1_til[1+count dgs];dgs:{(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}dict`gs];
    f:last cntf;
    ]
   
@@ -114,13 +115,16 @@ post.report:{[dict;dt;fname]
  }
 
 
-/* m = pdf gen module used
-/* i = how far indented is the text
-/* h = the placement height from the bottom of the page 
-/* f = font size
-/* s = font size
+// Utilities for the report generation functionality
+/* m =   pdf gen module used
+/* i =   how far indented is the text
+/* h =   the placement height from the bottom of the page 
+/* f =   font size
+/* s =   font size
 /* txt = text to include
-/* fp = filepath
+/* fp =  filepath
+/* wi =  image width
+/* hi =  image height
 font:{[m;f;s]m[`:setFont][f;s]}
 cell:{[m;h;txt]m[`:drawString][30;h;txt]}
 title:{[m;h;txt]m[`:drawString][150;h;txt]}
