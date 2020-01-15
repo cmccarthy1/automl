@@ -14,4 +14,4 @@ post.featureimpact:{[bs;mdl;data;cnm;scf;dt;fp;p]
   im:post.i.impact[r;cnm;ord];
   post.i.impactplot[im;bs;dt;fp];
   -1"\nFeature impact calculated for features associated with ",string[bs]," model";
-  -1 "Plots saved in ",fp[1][`images],"\n";}
+  -1 "Plots saved in ",i.ssrsv[fp[1][`images]],"\n";}

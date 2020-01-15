@@ -97,7 +97,7 @@ i.scorepred:{[data;bmn;mdl;scf;fnm]
 /* bmo = best model object (embedPy)
 /* r = all applied models (table)
 i.savemdl:{[bmn;bmo;mdls;nms]
-  fname:nms[0]`models;mo:nms[1]`models;
+  fname:nms[0]`models;mo:i.ssrsv[nms[1]`models];
   system"mkdir -p ",fname;
   joblib:.p.import[`joblib];
   $[(`sklearn=?[mdls;enlist(=;`model;bmn,());();`lib])0;
@@ -165,7 +165,7 @@ i.savemeta:{[d;dt;fpath]
   $[first[string .z.o]in "lm";
     system"mv metadata ",;
     system"move metadata ",]fpath[0]`config;
-  -1"Saving down model parameters to ",fpath[1]`config;}
+  -1"Saving down model parameters to ",i.ssrsv[fpath[1]`config];}
 
 // Retrieve the metadata information from a specified path
 /* fp = full file path denoting the location of the metadata to be retrieved
@@ -218,7 +218,7 @@ i.pathconstruct:{[dt;svo]
   if[svo=2;names:names,`images`report]
   pname:{"/",ssr["outputs/",string[x`stdate],"/run_",string[x`sttime],"/",y,"/";":";"."]};
   paths:path,/:pname[dt]each string names;
-  paths:i.ssrwin[paths];
+  paths:i.ssrwin each paths;
   {[fnm]system"mkdir",$[.z.o like "w*";" ";" -p "],fnm}each paths;
   (names!paths;names!{count[path]_x}each paths)
   }
@@ -248,3 +248,7 @@ i.kerascheck:{[mdls;tts;tgt]
 /* path = the linux 'like' path
 /. r    > the path modified to be suitable for windows systems
 i.ssrwin:{[path]$[.z.o like "w*";ssr[path;"/";"\\"];path]}
+
+// Used throughout when printing directory of saved objects.
+// this is to keep linux/windows consistent
+i.ssrsv:{[path] ssr[path;"\\";"/"]}

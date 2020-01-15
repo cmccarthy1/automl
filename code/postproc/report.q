@@ -9,7 +9,7 @@ pdfimage:.p.import[`reportlab.platypus]`:Image
 /* fname = This is a file path which denotes a save location for the generated report.
 /. r     > a pdf report saved to disk
 post.report:{[dict;dt;fname]
- pdf:canvas[`:Canvas][ssr[fname,"/q_automl_report_",sv["_";string(dict`mdl;dt`sttime)],".pdf";":";"."]];
+ pdf:canvas[`:Canvas][fname,"q_automl_report_",ssr[sv["_";string(first[key[dict`dict]];dt`sttime)],".pdf";":";"."]];
 
  font[pdf;"Helvetica-BoldOblique";15];  
  title[pdf;f:775;"kdb+/q AutoML model generated report"];
