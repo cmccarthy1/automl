@@ -14,7 +14,7 @@
 // default behaviour with are valid, this can be expanded as required
 i.checkfuncs:{[dict]
   fns:raze dict[`funcs`prf`tts`sigfeats],value[dict`scf],first each dict`xv`gs;
-  if[0<cnt:sum locs:@[{$[not type[get[x]]in(100h;104h);'err;0b]};;{[err]err;1b}]each fns;
+  if[0<cnt:sum locs:@[{$[not type[get[x]]in(99h;100h;104h);'err;0b]};;{[err]err;1b}]each fns;
      funclst:{$[2<x;" ",y;"s ",sv[", ";y]]}[cnt]string fns where locs;
     '"The function",/funclst," are not defined in your process\n"]
  }
