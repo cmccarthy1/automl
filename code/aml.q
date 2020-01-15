@@ -14,6 +14,8 @@ run:{[tb;tgt;ftype;ptype;p]
   dtdict:`stdate`sttime!(.z.D;.z.T);
   // Extract & update the dictionary used to define the workflow
   dict:i.updparam[tb;p;ftype],enlist[`typ]!enlist ftype;
+  // Check that the functions to overwrite default behaviour exist in process
+  i.checkfuncs[dict];
   // update the seed randomly if user does not specify the seed in p
   if[`rand_val~dict[`seed];dict[`seed]:"j"$.z.t];
   // if required to save data construct the appropriate folders
@@ -29,10 +31,9 @@ run:{[tb;tgt;ftype;ptype;p]
   tb:$[ftype=`fresh;prep.freshcreate[tb;dict];
        ftype=`normal;prep.normalcreate[tb;dict];
        '`$"Feature extraction type is not currently supported"];
-  feats:prep.freshsignificance[tb 0;tgt];
+  feats:get[dict[`sigfeats]][tb 0;tgt];
   // Encode target data if target is a symbol vector
   if[11h~type tgt;tgt:.ml.labelencode tgt];
-
   // Apply the appropriate train/test split to the data
   // the following currently runs differently if the parameters are defined
   // in a file or through the more traditional dictionary/(::) format
@@ -83,7 +84,7 @@ run:{[tb;tgt;ftype;ptype;p]
 new:{[t;fp]
   // Relevant python functionality for loading of models
   skload:.p.import[`joblib][`:load];
-  krload:.p.import[`keras.models][`:load_model];
+  if[0~checkimport[];krload:.p.import[`keras.models][`:load_model]];
   // Retrieve the metadata from a file path based on the run date/time
   metadata:i.getmeta[i.ssrwin[path,"/outputs/",fp,"/config/metadata"]];
   typ:metadata`typ;

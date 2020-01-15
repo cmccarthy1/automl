@@ -10,6 +10,15 @@
 
 // Utilities for run.q
 
+// This function checks that functions a user is attempting to overwrite
+// default behaviour with are valid, this can be expanded as required
+i.checkfuncs:{[dict]
+  fns:raze dict[`funcs`prf`tts`sigfeats],value[dict`scf],first each dict`xv`gs;
+  if[0<cnt:sum locs:@[{$[not type[get[x]]in(100h;104h);'err;0b]};;{[err]err;1b}]each fns;
+     funclst:{$[2<x;" ",y;"s ",sv[", ";y]]}[cnt]string fns where locs;
+    '"The function",/funclst," are not defined in your process\n"]
+ }
+
 //  This function sets or updates the default parameter dictionary as appropriate
 i.updparam:{[t;p;typ]
   dict:
@@ -68,12 +77,12 @@ i.getdict:{[nm]
 // or in the creation of a new initialisation parameter flat file
 /* Neither of these function take a parameter as input
 /. r > default dictionaries which will be used by the automl
-i.freshdefault:{`aggcols`funcs`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
+i.freshdefault:{`aggcols`funcs`xv`gs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
   ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;
-   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.ttsnonshuff;0.2)}
-i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz!
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.ttsnonshuff;0.2;`.aml.prep.freshsignificance)}
+i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
   ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.prep.i.default;`.aml.xv.fitpredict;
-   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.traintestsplit;0.2)}
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.traintestsplit;0.2;`.aml.prep.freshsignificance)}
 
 // Apply an appropriate scoring function to predictions from a model
 /* xtst = test data
