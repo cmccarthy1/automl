@@ -61,7 +61,7 @@ run:{[tb;tgt;ftype;ptype;p]
   -1 i.runout[`sco],string[score],"\n";
   // Save down a pdf report summarizing the running of the pipeline
   if[2=dict`saveopt;
-    -1 i.runout[`save],spaths[1]`report;
+    -1 i.runout[`save],i.ssrsv[spaths[1]`report];
     report_param:post.i.reportdict[ctb;bm;tb;dtdict;path;(prms 1;score;dict`xv;dict`gs);spaths];
     post.report[report_param;dtdict;spaths[0]`report]];
   if[dict[`saveopt]in 1 2;
