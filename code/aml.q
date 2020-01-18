@@ -17,7 +17,11 @@ run:{[tb;tgt;ftype;ptype;p]
   // Check that the functions to overwrite default behaviour exist in process
   i.checkfuncs[dict];
   // update the seed randomly if user does not specify the seed in p
-  if[`rand_val~dict[`seed];dict[`seed]:"j"$.z.t];
+  dict[`seed]:$[`rand_val~dict[`seed];
+      "j"$.z.t;
+    -11h=type dict`seed;
+      get string dict`seed;
+    dict`seed];
   // if required to save data construct the appropriate folders
   if[dict[`saveopt]in 1 2;spaths:i.pathconstruct[dtdict;dict`saveopt]];
   mdls:i.models[ptype;tgt;dict];
