@@ -51,20 +51,31 @@ Size of the training set to be set aside for the validation score for the best m
 Default - 20% of the training set following holdout separation.
 
 .TP
-.BR \-tts = train-test-split
-Name of the function to be used to split the dataset into its training and testing(holdout) sets.
-
-Default - 
-
-    FRESH  -> .ml.ttsnonshuff (non shuffled sequential train-test split)
-
-    normal -> .ml.traintestsplit (randomly shuffled train-test split)
-
-.TP
 .BR \-type = problem-type
 Form of problem being solved (FRESH/Normal)
 
 Note - This input is required if a user wishes to modify \-funcs or \-tts as the default behaviour for solving these problems is different in each case as outlined in their relevant descriptions.
+
+.TP
+.BR \-tts = train-test-split
+Name of the function to be used to split the dataset into its training and testing(holdout) sets.
+
+Default -
+
+  FRESH -> .ml.ttsnonshuff (non shuffled sequential train-test split)
+
+  normal-> .ml.traintestsplit (randomly shuffled train-test split)
+
+.TP
+.BR \-funcs = applied-functionality
+Names of the function/functions to be applied to tablular data in the feature extraction phase of the machine learning pipeline
+
+Default -
+
+  FRESH -> .ml.fresh.params (all functions that can be applied using the FRESH feature extraction procedure)    
+  normal-> .aml.prep.i.default (Do not apply any feature extraction)
+
+Note - If applying multiple functions within the normal use case please ensure that functions are comma separated. In all cases the functionality being applied must exist within the central process and in the distributed use case, must also be available on all slave processes
 
 .SH ISSUES
 There are currently no known issues within the repository, an up to date log of any issues is made available at https://github.com/KxSystems/automl
