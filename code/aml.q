@@ -31,6 +31,7 @@ run:{[tb;tgt;ftype;ptype;p]
   tb:$[ftype=`fresh;prep.freshcreate[tb;dict];
        ftype=`normal;prep.normalcreate[tb;dict];
        '`$"Feature extraction type is not currently supported"];
+  if[dict[`featextract]~0;:tb 0];
   feats:get[dict[`sigfeats]][tb 0;tgt];
   // Encode target data if target is a symbol vector
   if[11h~type tgt;tgt:.ml.labelencode tgt];
@@ -78,6 +79,10 @@ run:{[tb;tgt;ftype;ptype;p]
     i.savemeta[metadict;dtdict;spaths]];
   }
 
+features:{[tab;tgt;ftype;ptype;p]
+  dict:$[p~(::);;p,]enlist[`featextract]!enlist 0;
+  .aml.run[tab;tgt;ftype;ptype;dict]
+  }
 
 // Function for the processing of new data based on a previous run and return of predicted target 
 /* t = table of new data to be predicted
