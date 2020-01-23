@@ -26,7 +26,7 @@ proc.xv.seed:{[xtrn;ytrn;p;mdls]
     get[p[`xv]0][p[`xv]1;1;xtrn;ytrn;p[`prf][mdls`minit;s]]]}
 
 
-// Grid search over the set of all hyperparameters outlined in code/mdldef/hyperparams.txt
+// Grid search over the set of all hyperparameters outlined in code/models/hyperparams.txt
 /* xtst = Testing features (matrix)
 /* ytst = Testing target (vector)
 /* bm   = name of the best model as on which a grid search should be completed as a symbol
@@ -37,7 +37,7 @@ proc.xv.seed:{[xtrn;ytrn;p;mdls]
 proc.gs.psearch:{[xtrn;ytrn;xtst;ytst;bm;p;typ;mdls]
   dict:proc.i.extractdict[bm];
   // Extract the required sklearn module name
-  module:` sv 2#proc.i.txtparse[typ;"/code/mdldef/"]bm;
+  module:` sv 2#proc.i.txtparse[typ;"/code/models/"]bm;
   fn:i.scfn[p;mdls];
   o :proc.i.ord fn;
   // Import the required embedPy module

@@ -33,8 +33,8 @@ proc.runmodels:{[data;tgt;mdls;cnms;p;dt;fpath]
      funcnm:string first exec fnc from mdls where model=bs;
      if[funcnm~"multi";data[;1]:npa@'reverse flip@'./:[;((::;0);(::;1))](0,count ytst)_/:
        value .ml.i.onehot1(,/)(ytrn;ytst)];
-     kermdl:mdl[data;p`seed;`$funcnm];
-     bm:fit[data;kermdl];
+     kermdl:get[".aml.",funcnm,"mdl"][data;p`seed;`$funcnm];
+     bm:get[".aml.",funcnm,"fit"][data;kermdl];
      s2:scf[;ytst]get[".aml.",funcnm,"predict"][data;bm]];
     [bm:(first exec minit from mdls where model=bs)[][];
      bm[`:fit][xtrn;ytrn];

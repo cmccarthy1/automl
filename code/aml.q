@@ -118,7 +118,7 @@ savedefault:{[fn;ftype]
       -11h~typf;$[":"~first strf;1_;]strf:string typf;
       '`$"filename must be string, symbol or hsym"];
   // Open handle to file fn
-  h:hopen hsym`$i.ssrwin[raze[path],"/code/mdldef/",fn];
+  h:hopen hsym`$i.ssrwin[raze[path],"/code/models/",fn];
   // Set d to default dictionary for feat_typ
   d:$[`fresh ~ftype;.aml.i.freshdefault[];
       `normal~ftype;.aml.i.normaldefault[];

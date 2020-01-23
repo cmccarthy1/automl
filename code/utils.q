@@ -53,9 +53,9 @@ i.updparam:{[t;p;typ]
 
 //  Function takes in a string which is the name of a parameter flatfile
 /* nm = name of the file from which the dictionary is being extracted
-/. r  > the dictionary as defined in a float file in mdldef
+/. r  > the dictionary as defined in a float file in models
 i.getdict:{[nm]
-  d:proc.i.paramparse[nm;"/code/mdldef/"];
+  d:proc.i.paramparse[nm;"/code/models/"];
   idx:(k except`scf;
     k except`xv`gs`scf`seed;
     $[`xv in k;`xv;()],$[`gs in k;`gs;()];
@@ -121,7 +121,7 @@ i.savemdl:{[bmn;bmo;mdls;nms]
 /. r   > table with all information needed for appropriate models to be applied to data
 i.models:{[ptyp;tgt;p]
   if[not ptyp in key proc.i.files;'`$"text file not found"];
-  d:proc.i.txtparse[ptyp;"/code/mdldef/"];
+  d:proc.i.txtparse[ptyp;"/code/models/"];
   if[1b~p`tf;
     d:l!d l:key[d]where not `keras=first each value d];
   m:flip`model`lib`fnc`seed`typ!flip key[d],'value d;
@@ -146,7 +146,7 @@ i.updmodels:{[mdls;tgt]
 // These are a list of models which are deterministic and thus which do not need to be grid-searched 
 // at present this should include the Keras models as a sufficient tuning method
 // has yet to be implemented
-i.keraslist:`RegKeras`MultiKeras`BinaryKeras
+if[1~checkimport[];i.keraslist:`null];
 i.excludelist:i.keraslist,`GaussianNB`LinearRegression;
 
 // Dictionary with mappings for console printing to reduce clutter in .aml.runexample
