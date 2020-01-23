@@ -7,7 +7,7 @@
 
 // Utilities for proc.q
 
-// Text files that can be parsed from within the mdldef folder
+// Text files that can be parsed from within the models folder
 proc.i.files:`class`reg`score!("classmodels.txt";"regmodels.txt";"scoring.txt")
 
 // Build up the model to be applied based on naming convention
@@ -42,7 +42,7 @@ proc.i.paramparse:{[fn;fp]key[k]!(value@){(!).("S=;")0:x}each k:(!).("S*";"|")0:
 // based on the applied model
 /. r   > the hyperparameters appropriate for the model being used
 proc.i.edict:{[fn;fp;mdl]key[k]!value each value k:proc.i.paramparse[fn;fp]mdl}
-proc.i.extractdict:proc.i.edict["hyperparams.txt";"/code/mdldef/";]
+proc.i.extractdict:proc.i.edict["hyperparams.txt";"/code/models/";]
 
 
 // Utilities for both scripts
@@ -55,4 +55,4 @@ proc.i.txtparse:{[sn;fp]{key(!).("S=;")0:x}each(!).("S*";"|")0:hsym`$path,fp,pro
 // these are defined in "scoring.txt"
 /* scf = scoring function
 /. r   > the function to order the dictionary output from cross validation search (asc/desc)
-proc.i.ord:{[scf]get string first proc.i.txtparse[`score;"/code/mdldef/"]scf}
+proc.i.ord:{[scf]get string first proc.i.txtparse[`score;"/code/models/"]scf}
