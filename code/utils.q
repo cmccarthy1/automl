@@ -129,7 +129,7 @@ i.models:{[ptyp;tgt;p]
     // For classification tasks remove inappropriate classification models
     m:$[2<count distinct tgt;
         delete from m where typ=`binary;
-        delete from m where model=`MultiKeras]];
+        delete from m where model=`multikeras]];
   // Add a column with appropriate initialized models for each row
   m:update minit:.aml.proc.i.mdlfunc .'flip(lib;fnc;model)from m;
   // Threshold models used based on unique target values
@@ -215,7 +215,7 @@ i.freshproc:{[t;p]
   if[not all ftc:pfeat in cols t;
     newcols:pfeat where not ftc;
     t:pfeat  xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
-  flip value flip pfeat #"f"$0^t}
+  flip value flip pfeat#"f"$0^t}
 
 
 // Create the folders that are required for the saving of the config,models, images and reports
@@ -235,21 +235,21 @@ i.pathconstruct:{[dt;svo]
 
 // Util functions used in multiple util files
 
-// Error flag if test set is not appropriate for multiKeras model
-/. r    > the models table with the MultiKeras model removed
+// Error flag if test set is not appropriate for multikeras model
+/. r    > the models table with the multikeras model removed
 i.errtgt:{[mdls]
-  -1 "\n Test set does not contain examples of each class. Removed MultiKeras from models";
-  delete from mdls where model=`MultiKeras}
+  -1 "\n Test set does not contain examples of each class. Removed multikeras from models";
+  delete from mdls where model=`multikeras}
 
 // Extract the scoring function to be applied for model selection
 /. r    > the scoring function appropriate to the problem being solved
 i.scfn:{[p;mdls]p[`scf]$[`reg in distinct mdls`typ;`reg;`class]}
 
-// Check if MultiKeras model is to be applied and each target exists in both training and testing sets
+// Check if multikeras model is to be applied and each target exists in both training and testing sets
 /* tts  = train-test split dataset
 /. r    > table with multi-class keras model removed if it is not to be applied
 i.kerascheck:{[mdls;tts;tgt]
-  mkcheck :(`MultiKeras in mdls`model);
+  mkcheck :`multikeras in mdls`model;
   tgtcheck:(count distinct tgt)>min{count distinct x}each tts`ytrain`ytest;
   $[mkcheck&tgtcheck;i.errtgt;]mdls}
 
