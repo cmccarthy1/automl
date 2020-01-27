@@ -1,6 +1,6 @@
-keras
-numpy
-scikit-learn
+reportlab
+joblib
 matplotlib
-sklearn
-fdpf
+numpy
+statsmodels
+scikit-learn

@@ -1,55 +1,49 @@
-\l ml/ml.q
-.ml.loadfile`:init.q
-
 \d .aml
 
-/  table of models
-/* x = symbol, either `class or `reg
-/* y = target
-/* z = dictionary of parameters 
-models:{
- if[not x in key i.files;'`$"text file not found"];
- d:i.txtparse[x;"/code/mdl_def/"];
- if[0b~z`tf;d:l!d l:key[d]where not `keras=first each value d];
- m:flip`model`lib`fnc`seed`typ!flip key[d],'value d;
- if[x=`class;
-    m:$[2<count distinct y;
-        delete from m where typ=`binary;
-        delete from m where model=`MultiKeras]];
- m:update minit:.aml.i.mdlfunc .'flip(lib;fnc;model)from m;
- i.updmodels[m;y]}
-
-/  run multiple models
-/* x = table of features
-/* y = target
-/* m = models from `.aml.models`
-/* d = dictionary of populated parameters (defined earlier in the workflow)
-/* dt = date and time that the entire 
-runmodels:{[x;y;m;d;dt]
-  system"S ",string s:d`seed;
-  c:cols x;x:flip value flip x;
-  / keep holdout for feature impact
-  tt:d[`tts][x;y;d`hld];
-  m :i.kerascheck[m;tt;y];
-  / seeded cross validation returning predictions
+// Run cross validated machine learning models on training data and choose the best model.
+/* t     = table of features as output from preprocessing pipeline/feature extraction
+/* mdls  = appropriate models from `.aml.proc.models` above
+/* dt    = date and time that the run was initialized (this is used in the feature impact function) 
+/* fpath = file paths for saving down information
+/* tgt   = target data
+/* p     = parameter dictionary passed as default or modified by user
+/. r     > all relevant information about the running of the sets of models
+proc.runmodels:{[data;tgt;mdls;cnms;p;dt;fpath]
+  system"S ",string p`seed;
+  // Apply train test split to keep holdout for feature impact plot and testing of vanilla best model
+  tt:p[`tts][data;tgt;p`hld];
+  xtrn:tt`xtrain;ytrn:tt`ytrain;xtst:tt`xtest;ytst:tt`ytest;
+  mdls:i.kerascheck[mdls;tt;tgt];
   xv_tstart:.z.T;
-  p1:xv.seed[tt`xtrain;tt`ytrain;d]'[m];
-  / scoring functions for results and order asc/desc
-  fn:i.scfn[d;m];o:i.ord fn;
-  -1"\nScores for all models, using ",string fn;
-  show s1:o m[`model]!{first avg x}each fn .''p1;
+  // Complete a seeded cross validation on training sets producing the predictions with associated 
+  // real values. This allows the best models to be chosen based on relevant user defined metric 
+  p1:proc.xv.seed[xtrn;ytrn;p]'[mdls];
+  scf:i.scfn[p;mdls];
+  ord:proc.i.ord scf;
+  -1"\nScores for all models, using ",string scf;
+  // Score the models based on user denoted scf and ordered appropriately to find best model
+  show s1:ord mdls[`model]!avg each scf .''p1;
   xv_tend:.z.T-xv_tstart;
-  / score best model on holdout and save down model if appropriate
   -1"\nBest scoring model = ",string bs:first key s1;
-  bm:(first exec minit from m where model=bs)[][];
+  // Extract the best model, fit on entire training set and predict/score on test set
+  // for the appropriate scoring function
   bm_tstart:.z.T;
-  bm[`:fit][tt`xtrain;tt`ytrain];
-  s2:fn[;ytst:tt`ytest]bm[`:predict][xtst:tt`xtest]`;
+  $[bs in i.keraslist;
+    [data:((xtrn;ytrn);(xtst;ytst));
+     funcnm:string first exec fnc from mdls where model=bs;
+     if[funcnm~"multi";data[;1]:npa@'reverse flip@'./:[;((::;0);(::;1))](0,count ytst)_/:
+       value .ml.i.onehot1(,/)(ytrn;ytst)];
+     kermdl:get[".aml.",funcnm,"mdl"][data;p`seed;`$funcnm];
+     bm:get[".aml.",funcnm,"fit"][data;kermdl];
+     s2:scf[;ytst]get[".aml.",funcnm,"predict"][data;bm]];
+    [bm:(first exec minit from mdls where model=bs)[][];
+     bm[`:fit][xtrn;ytrn];
+     s2:scf[;ytst]bm[`:predict][xtst]`]
+    ];
   -1"Score for validation predictions using best model = ",string[s2],"\n";
   bm_tend:.z.T-bm_tstart;
-  / feature impact graph produced on holdout data if setting appropriate
-  if[2=d[`saveopt];i.featureimpact[bs;bm;xtst;ytst;c;fn;o;dt]];
-  / outputs from run models, used in report generation
-  (s1;bs;s2;xv_tend;bm_tend;fn;bm)}
-
-if[0>system"s";.ml.mproc.init[abs system"s"]enlist".ml.loadfile`:init.q"]
+  // Feature impact graph produced on holdout data if setting is appropriate
+  if[2=p[`saveopt];post.featureimpact[bs;(bm;mdls);value tt;cnms;scf;dt;fpath;p]];
+  // Outputs from run models. These are used in the generation of a pdf report
+  // or are used within later sections of the pipeline.
+  (s1;bs;s2;xv_tend;bm_tend;scf;bm)}
