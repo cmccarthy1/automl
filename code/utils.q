@@ -107,7 +107,6 @@ i.scorepred:{[data;bmn;mdl;scf;fnm]
 /* r = all applied models (table)
 i.savemdl:{[bmn;bmo;mdls;nms]
   fname:nms[0]`models;mo:i.ssrsv[nms[1]`models];
-  system"mkdir -p ",fname;
   joblib:.p.import[`joblib];
   $[(`sklearn=?[mdls;enlist(=;`model;bmn,());();`lib])0;
       (joblib[`:dump][bmo;fname,"/",string[bmn]];-1"Saving down ",string[bmn]," model to ",mo);
