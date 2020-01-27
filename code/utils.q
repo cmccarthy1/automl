@@ -10,6 +10,15 @@
 
 // Utilities for run.q
 
+// This function checks that functions a user is attempting to overwrite
+// default behaviour with are valid, this can be expanded as required
+i.checkfuncs:{[dict]
+  fns:raze dict[`funcs`prf`tts`sigfeats],value[dict`scf],first each dict`xv`gs;
+  if[0<cnt:sum locs:@[{$[not type[get[x]]in(99h;100h;104h);'err;0b]};;{[err]err;1b}]each fns;
+     funclst:{$[2<x;" ",y;"s ",sv[", ";y]]}[cnt]string fns where locs;
+    '"The function",/funclst," are not defined in your process\n"]
+ }
+
 //  This function sets or updates the default parameter dictionary as appropriate
 i.updparam:{[t;p;typ]
   dict:
@@ -44,9 +53,9 @@ i.updparam:{[t;p;typ]
 
 //  Function takes in a string which is the name of a parameter flatfile
 /* nm = name of the file from which the dictionary is being extracted
-/. r  > the dictionary as defined in a float file in mdldef
+/. r  > the dictionary as defined in a float file in models
 i.getdict:{[nm]
-  d:proc.i.paramparse[nm;"/code/mdldef/"];
+  d:proc.i.paramparse[nm;"/code/models/"];
   idx:(k except`scf;
     k except`xv`gs`scf`seed;
     $[`xv in k;`xv;()],$[`gs in k;`gs;()];
@@ -68,12 +77,12 @@ i.getdict:{[nm]
 // or in the creation of a new initialisation parameter flat file
 /* Neither of these function take a parameter as input
 /. r > default dictionaries which will be used by the automl
-i.freshdefault:{`aggcols`funcs`xv`gs`prf`scf`seed`saveopt`hld`tts`sz!
+i.freshdefault:{`aggcols`funcs`xv`gs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
   ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;
-   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.ttsnonshuff;0.2)}
-i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz!
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.ttsnonshuff;0.2;`.aml.prep.freshsignificance)}
+i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
   ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.prep.i.default;`.aml.xv.fitpredict;
-   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.traintestsplit;0.2)}
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.traintestsplit;0.2;`.aml.prep.freshsignificance)}
 
 // Apply an appropriate scoring function to predictions from a model
 /* xtst = test data
@@ -97,7 +106,7 @@ i.scorepred:{[data;bmn;mdl;scf;fnm]
 /* bmo = best model object (embedPy)
 /* r = all applied models (table)
 i.savemdl:{[bmn;bmo;mdls;nms]
-  fname:nms[0]`models;mo:nms[1]`models;
+  fname:nms[0]`models;mo:i.ssrsv[nms[1]`models];
   system"mkdir -p ",fname;
   joblib:.p.import[`joblib];
   $[(`sklearn=?[mdls;enlist(=;`model;bmn,());();`lib])0;
@@ -112,7 +121,7 @@ i.savemdl:{[bmn;bmo;mdls;nms]
 /. r   > table with all information needed for appropriate models to be applied to data
 i.models:{[ptyp;tgt;p]
   if[not ptyp in key proc.i.files;'`$"text file not found"];
-  d:proc.i.txtparse[ptyp;"/code/mdldef/"];
+  d:proc.i.txtparse[ptyp;"/code/models/"];
   if[1b~p`tf;
     d:l!d l:key[d]where not `keras=first each value d];
   m:flip`model`lib`fnc`seed`typ!flip key[d],'value d;
@@ -137,7 +146,7 @@ i.updmodels:{[mdls;tgt]
 // These are a list of models which are deterministic and thus which do not need to be grid-searched 
 // at present this should include the Keras models as a sufficient tuning method
 // has yet to be implemented
-i.keraslist:`RegKeras`MultiKeras`BinaryKeras
+if[1~checkimport[];i.keraslist:`null];
 i.excludelist:i.keraslist,`GaussianNB`LinearRegression;
 
 // Dictionary with mappings for console printing to reduce clutter in .aml.runexample
@@ -165,7 +174,7 @@ i.savemeta:{[d;dt;fpath]
   $[first[string .z.o]in "lm";
     system"mv metadata ",;
     system"move metadata ",]fpath[0]`config;
-  -1"Saving down model parameters to ",fpath[1]`config;}
+  -1"Saving down model parameters to ",i.ssrsv[fpath[1]`config];}
 
 // Retrieve the metadata information from a specified path
 /* fp = full file path denoting the location of the metadata to be retrieved
@@ -218,7 +227,7 @@ i.pathconstruct:{[dt;svo]
   if[svo=2;names:names,`images`report]
   pname:{"/",ssr["outputs/",string[x`stdate],"/run_",string[x`sttime],"/",y,"/";":";"."]};
   paths:path,/:pname[dt]each string names;
-  paths:i.ssrwin[paths];
+  paths:i.ssrwin each paths;
   {[fnm]system"mkdir",$[.z.o like "w*";" ";" -p "],fnm}each paths;
   (names!paths;names!{count[path]_x}each paths)
   }
@@ -248,3 +257,7 @@ i.kerascheck:{[mdls;tts;tgt]
 /* path = the linux 'like' path
 /. r    > the path modified to be suitable for windows systems
 i.ssrwin:{[path]$[.z.o like "w*";ssr[path;"/";"\\"];path]}
+
+// Used throughout when printing directory of saved objects.
+// this is to keep linux/windows consistent
+i.ssrsv:{[path] ssr[path;"\\";"/"]}

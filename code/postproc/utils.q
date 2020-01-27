@@ -89,7 +89,7 @@ post.i.gainliftplt:{[d;dt;fpath]
   plt[`:legend][`loc pykw "lower right"];
   plt[`:xlabel]["% of sample";`fontsize pykw 18];
   plt[`:ylabel]["Gain";`fontsize pykw 18];
-  plt[`:savefig][fpath[0][`images],"/Lift_Gain_Curve.jpeg"];
+  plt[`:savefig][fpath[0][`images],"/Lift_Gain_Curve.png"];
   plt[`:show][];}
 
 // This function will plot and save the feature impact plot to an appropriate location
@@ -111,7 +111,7 @@ post.i.impactplot:{[im;mdl;dt;fpath]
   ax[`:set_title]"Feature Impact: ",string mdl;
   ax[`:set_ylabel]"Columns";
   ax[`:set_xlabel]"Relative feature impact";
-  plt[`:savefig][fpath[0][`images],sv["_";string(`Impact_Plot;mdl)],".jpeg";`bbox_inches pykw"tight"];}
+  plt[`:savefig][fpath[0][`images],sv["_";string(`Impact_Plot;mdl)],".png";`bbox_inches pykw"tight"];}
 
 // This function will be used to produce an ROC plot, this however necessitates the need for
 // predicted probabilities to be returned from the models which is not at present implemented
@@ -130,7 +130,7 @@ post.i.roccurve:{[tgt;prob;dt;fpath]
   plt[`:legend][`loc pykw "upper left"];
   system"mkdir",$[.z.o like "w*";" ";" -p "],
     fname:ssr[path,"/Outputs/",string[dt`stdate],"/Images/Run_",string[dt`sttime];":";"."];
-  plt[`:savefig][fpath[0][`images],"/ROC_Curve.jpeg"];
+  plt[`:savefig][fpath[0][`images],"/ROC_Curve.png"];
   plt[`:show][];}
 
 
@@ -149,7 +149,7 @@ post.i.reportdict:{[cfeat;bm;tm;dt;path;xvgs;fpath]
   select
     feats    :cfeat,
     dict     :bm 0,
-    impact   :(fpath[0][`images],"Impact_Plot_",string[bm 1],".jpeg"),
+    impact   :(fpath[0][`images],"Impact_Plot_",string[bm 1],".png"),
     holdout  :bm 2,
     xvtime   :bm 3,
     bmtime   :bm 4,

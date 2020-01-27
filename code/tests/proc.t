@@ -8,7 +8,7 @@ mattrn:flip (til 5;01010b;asc til 5;7.6 1.2 9.5 8.3 2.4;11001b)
 mattst:flip (3 2 1 9 0;10101b;9 8 2 3 4;8.4 3.2 7.9 0.1 2.2;10110b)
 data:(mattrn;10101b;mattst;11001b)
 
-mdldict:flip`model`lib`fnc`seed`typ!flip key[d],'value d:proc.i.txtparse[`class;"/code/mdldef/"]
+mdldict:flip`model`lib`fnc`seed`typ!flip key[d],'value d:proc.i.txtparse[`class;"/code/models/"]
 
 scf:.ml.accuracy
 p:i.normaldefault[]

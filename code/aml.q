@@ -14,6 +14,8 @@ run:{[tb;tgt;ftype;ptype;p]
   dtdict:`stdate`sttime!(.z.D;.z.T);
   // Extract & update the dictionary used to define the workflow
   dict:i.updparam[tb;p;ftype],enlist[`typ]!enlist ftype;
+  // Check that the functions to overwrite default behaviour exist in process
+  i.checkfuncs[dict];
   // update the seed randomly if user does not specify the seed in p
   if[`rand_val~dict[`seed];dict[`seed]:"j"$.z.t];
   // if required to save data construct the appropriate folders
@@ -29,10 +31,9 @@ run:{[tb;tgt;ftype;ptype;p]
   tb:$[ftype=`fresh;prep.freshcreate[tb;dict];
        ftype=`normal;prep.normalcreate[tb;dict];
        '`$"Feature extraction type is not currently supported"];
-  feats:prep.freshsignificance[tb 0;tgt];
+  feats:get[dict[`sigfeats]][tb 0;tgt];
   // Encode target data if target is a symbol vector
   if[11h~type tgt;tgt:.ml.labelencode tgt];
-
   // Apply the appropriate train/test split to the data
   // the following currently runs differently if the parameters are defined
   // in a file or through the more traditional dictionary/(::) format
@@ -46,6 +47,8 @@ run:{[tb;tgt;ftype;ptype;p]
   if[1~checkimport[];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
   -1 i.runout`sig;-1 i.runout`slct;-1 i.runout[`tot],string[ctb:count cols tab];
   // Run all appropriate models on the training set
+  // Set numpy random seed if multiple prcoesses
+  if[0<abs[system "s"];.p.import[`numpy][`:random.seed][dict`seed]];
   bm:proc.runmodels[xtrn;ytrn;mdls;cols tts`xtrain;dict;dtdict;spaths];
   fn:i.scfn[dict;mdls];
   // Do not run grid search on deterministic models returning score on the test set and model
@@ -61,7 +64,7 @@ run:{[tb;tgt;ftype;ptype;p]
   -1 i.runout[`sco],string[score],"\n";
   // Save down a pdf report summarizing the running of the pipeline
   if[2=dict`saveopt;
-    -1 i.runout[`save],spaths[1]`report;
+    -1 i.runout[`save],i.ssrsv[spaths[1]`report];
     report_param:post.i.reportdict[ctb;bm;tb;dtdict;path;(prms 1;score;dict`xv;dict`gs);spaths];
     post.report[report_param;dtdict;spaths[0]`report]];
   if[dict[`saveopt]in 1 2;
@@ -83,7 +86,7 @@ run:{[tb;tgt;ftype;ptype;p]
 new:{[t;fp]
   // Relevant python functionality for loading of models
   skload:.p.import[`joblib][`:load];
-  krload:.p.import[`keras.models][`:load_model];
+  if[0~checkimport[];krload:.p.import[`keras.models][`:load_model]];
   // Retrieve the metadata from a file path based on the run date/time
   metadata:i.getmeta[i.ssrwin[path,"/outputs/",fp,"/config/metadata"]];
   typ:metadata`typ;
@@ -115,7 +118,7 @@ savedefault:{[fn;ftype]
       -11h~typf;$[":"~first strf;1_;]strf:string typf;
       '`$"filename must be string, symbol or hsym"];
   // Open handle to file fn
-  h:hopen hsym`$i.ssrwin[raze[path],"/code/mdldef/",fn];
+  h:hopen hsym`$i.ssrwin[raze[path],"/code/models/",fn];
   // Set d to default dictionary for feat_typ
   d:$[`fresh ~ftype;.aml.i.freshdefault[];
       `normal~ftype;.aml.i.normaldefault[];

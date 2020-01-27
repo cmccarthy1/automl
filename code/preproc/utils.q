@@ -119,7 +119,7 @@ prep.i.bulktransform:{[t]
 /* fn = function to be applied to the table
 /* t  = table
 /. table with the desired transform applied
-prep.i.applyfn:{[t;fn]@[;t]$[-11h=type fn;get[fn];fn]}
+prep.i.applyfn:{[t;fn]typ:type fn;@[;t]$[-11h=typ;get[fn];100h=typ;fn;.aml.prep.i.default]}
 
 // Perform a truncated single value decomposition on unique linear combinations of float columns
 // https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html
