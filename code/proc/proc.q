@@ -9,7 +9,7 @@
 /* p     = parameter dictionary passed as default or modified by user
 /. r     > all relevant information about the running of the sets of models
 proc.runmodels:{[data;tgt;mdls;cnms;p;dt;fpath]
-  system"S ",string s:p`seed;
+  system"S ",string p`seed;
   // Apply train test split to keep holdout for feature impact plot and testing of vanilla best model
   tt:p[`tts][data;tgt;p`hld];
   xtrn:tt`xtrain;ytrn:tt`ytrain;xtst:tt`xtest;ytst:tt`ytest;

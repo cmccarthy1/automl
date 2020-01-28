@@ -101,10 +101,8 @@ post.i.impactplot:{[im;mdl;dt;fpath]
   plt[`:figure][`figsize pykw 20 20];
   sub:plt[`:subplots][];
   fig:sub[@;0];ax:sub[@;1];
-  b:20<cr:count value im;
-  n:$[b;til 20;til cr];
-  v:$[b;20#;cr#]value im;
-  k:$[b;20#;cr#]key im;
+  num:20&count value im;
+  n:til num;v:num#value im;k:num#key im;
   ax[`:barh][n;v;`align pykw`center];
   ax[`:set_yticks]n;
   ax[`:set_yticklabels]k;

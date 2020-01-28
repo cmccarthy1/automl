@@ -36,7 +36,7 @@ ttsnonshuff:{[x;y;sz]`xtrain`ytrain`xtest`ytest!raze(x;y)@\:/:(0,floor n*1-sz)_t
 gs:1_{[gs;k;n;x;y;f;p;t]
  if[t[`val]=0;:gs[k;n;x;y;f;p]];
  i:(0,floor count[y]*1-abs t[`val])_$[t[`val]<0;xv.i.shuffle;til count@]y;
- (r;pr;[$[100h=type fn:get t`scf;
+ (r;pr;[$[type[fn:get t`scf]in(100h;104h);
           [pykwargs pr:first key t[`ord] fn[;].''];
           [pykwargs pr:first key desc avg each]] r:gs[k;n;x i 0;y i 0;f;p]](x;y)@\:/:i)
  }@'{[xv;k;n;x;y;f;p]p!(xv[k;n;x;y]f pykwargs@)@'p:key[p]!/:1_'(::)cross/value p}@'xv.j
