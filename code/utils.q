@@ -193,7 +193,11 @@ i.normalproc:{[t;p]
   t:prep.i.nullencode[t;med];
   t:.ml.infreplace[t];
   t:first prep.normalcreate[t;p];
-  flip value flip p[`features]#t}
+  pfeat:p`features;
+  if[not all ftc:pfeat in cols t;
+     newcols:pfeat where not ftc;
+     t:pfeat xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
+  flip value flip pfeat#"f"$0^t}
 
 // Apply feature creation and encoding procedures for FRESH on new data
 /. r > table with feature creation and encodings applied appropriately
@@ -213,7 +217,7 @@ i.freshproc:{[t;p]
   // if this is not the case dummy features are added to the data
   if[not all ftc:pfeat in cols t;
     newcols:pfeat where not ftc;
-    t:pfeat  xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
+    t:pfeat xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
   flip value flip pfeat#"f"$0^t}
 
 
