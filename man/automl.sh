@@ -17,7 +17,10 @@ q automl.q
 [\fB\-funcs\fR \fIapplied-functions\fR]
 
 .SH DESCRIPTION
-This framework provides users with the ability to automate machine learning tasks using a framework built and designed using kdb+/q technology. An emphasis has been placed on the flexibility and extensibility of the framework. 
+This framework provides users with the ability to automate machine learning tasks using a framework built and designed using kdb+/q technology. 
+
+This functionality is built largely on the tools available within the machine learning toolkit and open source Python libraries accessed via EmbedPy. An emphasis has been placed on the flexibility and extensibility of the framework. Particular care has been taken to ensure that the framework is accessible both to users who are new to both the worlds of q and machine learning and individuals who have expertise in either or both.
+
 .SH OPTIONS
 
 .TP
