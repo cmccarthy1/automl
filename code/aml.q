@@ -120,8 +120,8 @@ savedefault:{[fn;ftype]
   // Open handle to file fn
   h:hopen hsym`$i.ssrwin[raze[path],"/code/models/",fn];
   // Set d to default dictionary for feat_typ
-  d:$[`fresh ~ftype;.aml.i.freshdefault[];
-      `normal~ftype;.aml.i.normaldefault[];
+  d:$[`fresh ~ftype;i.freshdefault[];
+      `normal~ftype;i.normaldefault[];
       '`$"feature extraction type not supported"];
   // String values for file
   vals:{$[1=count x;
@@ -132,8 +132,10 @@ savedefault:{[fn;ftype]
             ";"sv{string[x],"=",string y}'[key x;value x];
           0h~typx;
             ";"sv string x;x]}each value d;
+  // Add ` to the beginning of functions
+  vals:@[vals;key[d]?`funcs`prf`seed`tts`sigfeats;{$[any[x in .Q.a]&not"{"in x;enlist["`"],;]x}];
   // Add key, pipe and newline indicator
-  strd:{(" |" sv x),"\n"}each flip(7#'string[key d],\:5#" ";vals);
+  strd:{(" |" sv x),"\n"}each flip(8#'string[key d],\:6#" ";vals);
   // Write dictionary entries to file
   {x y}[h]each strd;
   hclose h;}
