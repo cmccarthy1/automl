@@ -235,6 +235,18 @@ i.pathconstruct:{[dt;svo]
   (names!paths;names!{count[path]_x}each paths)
   }
 
+// Util for .aml.new
+
+// Convert date and time inputs to correct format for filepath
+/* dt = run date as date (yyyy.mm.dd) or string (format "yyyy.mm.dd")
+/* tm = run timestamp as timestamp (hh:mm:ss.xxx) or string (format "hh:mm:ss.xxx"/"hh.mm.ss.xxx")
+/. r  > string list with date and time of format ("2001.01.01";"12:00:00.000")
+i.new_datetime:{[dt;tm]
+  dt:$[-14h=td:type dt;string dt;(td=10h)&10=count dt;dt;
+    '"dt must be date or string with format yyyy.mm.dd"];
+  tm:ssr[;":";"."]$[-19h=tt:type tm;string tm;(tt=10h)&12=count tm;tm;
+    '"tm must be timestamp or string with format hh:mm:ss.xxx or hh.mm.ss.xxx"];
+  (dt;tm)}
 
 // Util functions used in multiple util files
 
