@@ -265,7 +265,7 @@ i.nlpproc:{[t;p]
   size:300&count raze distinct tokens;window:$[30<tk:avg count each tokens;10;10<tk;5;2];
   model:word2vec[`:load][i.ssrwin[path,"/",p[`spath],"/models/w2v.model"]];
   sentvec:{x[y;z]}[tokens]'[til count w2vind;w2vind:where each tokens in model[`:wv.index2word]`];
-  w2vtb:flip(`$"col",/:string til size)!flip avg each{x[`:wv.__getitem__][y]`}[model]each sentvec;
+  w2vtb:flip(`$"col",/:string til size)!flip avg each{$[()~y;0;x[`:wv.__getitem__][y]`]}[model]each sentvec;
   // Join tables
   tb:tpos,'sentt,'w2vtb,'tner;
   tb[`isStop]:{sum[x]%count x}each corpus`isStop;
