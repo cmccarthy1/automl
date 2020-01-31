@@ -9,7 +9,7 @@
 /* ftype = type of feature extraction being completed (`fresh/`normal)
 /* ptype = type of problem regression/class (`reg/`class)
 /* p     = parameters (::) produces default other changes are user dependent
-
+/. r     > returns date and time of run
 run:{[tb;tgt;ftype;ptype;p]
   dtdict:`stdate`sttime!(.z.D;.z.T);
   // Extract & update the dictionary used to define the workflow
@@ -78,14 +78,21 @@ run:{[tb;tgt;ftype;ptype;p]
     metadict:dict,hp,exmeta;
     i.savemdl[bm 1;expmdl;mdls;spaths];
     i.savemeta[metadict;dtdict;spaths]];
+  // return (date;time) for .aml.new
+  value dtdict
   }
 
 
 // Function for the processing of new data based on a previous run and return of predicted target 
 /* t = table of new data to be predicted
-/* fp = the path to the folder which the /Config and /Models folders are
-
-new:{[t;fp]
+/* dt = run date as date (yyyy.mm.dd) or string (format "yyyy.mm.dd")
+/* tm = run timestamp as timestamp (hh:mm:ss.xxx) or string (format "hh:mm:ss.xxx"/"hh.mm.ss.xxx")
+/. r  > returns new predictions
+new:{[t;dt;tm]
+  // check date and time input
+  dt_tm:i.new_datetime[dt;tm];
+  // get file path
+  fp:dt_tm[0],"/run_",dt_tm 1;
   // Relevant python functionality for loading of models
   skload:.p.import[`joblib][`:load];
   if[0~checkimport[];krload:.p.import[`keras.models][`:load_model]];
@@ -124,8 +131,8 @@ savedefault:{[fn;ftype]
   // Open handle to file fn
   h:hopen hsym`$i.ssrwin[raze[path],"/code/models/",fn];
   // Set d to default dictionary for feat_typ
-  d:$[`fresh ~ftype;.aml.i.freshdefault[];
-      `normal~ftype;.aml.i.normaldefault[];
+  d:$[`fresh ~ftype;i.freshdefault[];
+      `normal~ftype;i.normaldefault[];
       '`$"feature extraction type not supported"];
   // String values for file
   vals:{$[1=count x;
@@ -136,8 +143,10 @@ savedefault:{[fn;ftype]
             ";"sv{string[x],"=",string y}'[key x;value x];
           0h~typx;
             ";"sv string x;x]}each value d;
+  // Add ` to the beginning of functions
+  vals:@[vals;key[d]?`funcs`prf`seed`tts`sigfeats;{$[any[x in .Q.a]&not"{"in x;enlist["`"],;]x}];
   // Add key, pipe and newline indicator
-  strd:{(" |" sv x),"\n"}each flip(7#'string[key d],\:5#" ";vals);
+  strd:{(" |" sv x),"\n"}each flip(8#'string[key d],\:6#" ";vals);
   // Write dictionary entries to file
   {x y}[h]each strd;
   hclose h;}

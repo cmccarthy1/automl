@@ -121,7 +121,6 @@ i.scorepred:{[data;bmn;mdl;scf;fnm]
 /* r = all applied models (table)
 i.savemdl:{[bmn;bmo;mdls;nms]
   fname:nms[0]`models;mo:i.ssrsv[nms[1]`models];
-  system"mkdir -p ",fname;
   joblib:.p.import[`joblib];
   $[(`sklearn=?[mdls;enlist(=;`model;bmn,());();`lib])0;
       (joblib[`:dump][bmo;fname,"/",string[bmn]];-1"Saving down ",string[bmn]," model to ",mo);
@@ -208,7 +207,11 @@ i.normalproc:{[t;p]
   t:prep.i.nullencode[t;med];
   t:.ml.infreplace[t];
   t:first prep.normalcreate[t;p];
-  flip value flip p[`features]#t}
+  pfeat:p`features;
+  if[not all ftc:pfeat in cols t;
+     newcols:pfeat where not ftc;
+     t:pfeat xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
+  flip value flip pfeat#"f"$0^t}
 
 // Apply feature creation and encoding procedures for FRESH on new data
 /. r > table with feature creation and encodings applied appropriately
@@ -228,8 +231,8 @@ i.freshproc:{[t;p]
   // if this is not the case dummy features are added to the data
   if[not all ftc:pfeat in cols t;
     newcols:pfeat where not ftc;
-    t:pfeat  xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
-  flip value flip pfeat #"f"$0^t}
+    t:pfeat xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
+  flip value flip pfeat#"f"$0^t}
 
 
 // Apply feature creation and encoding procedures for nlp on new data
@@ -287,24 +290,36 @@ i.pathconstruct:{[dt;svo]
   (names!paths;names!{count[path]_x}each paths)
   }
 
+// Util for .aml.new
+
+// Convert date and time inputs to correct format for filepath
+/* dt = run date as date (yyyy.mm.dd) or string (format "yyyy.mm.dd")
+/* tm = run timestamp as timestamp (hh:mm:ss.xxx) or string (format "hh:mm:ss.xxx"/"hh.mm.ss.xxx")
+/. r  > string list with date and time of format ("2001.01.01";"12:00:00.000")
+i.new_datetime:{[dt;tm]
+  dt:$[-14h=td:type dt;string dt;(td=10h)&10=count dt;dt;
+    '"dt must be date or string with format yyyy.mm.dd"];
+  tm:ssr[;":";"."]$[-19h=tt:type tm;string tm;(tt=10h)&12=count tm;tm;
+    '"tm must be timestamp or string with format hh:mm:ss.xxx or hh.mm.ss.xxx"];
+  (dt;tm)}
 
 // Util functions used in multiple util files
 
-// Error flag if test set is not appropriate for multiKeras model
-/. r    > the models table with the MultiKeras model removed
+// Error flag if test set is not appropriate for multikeras model
+/. r    > the models table with the multikeras model removed
 i.errtgt:{[mdls]
-  -1 "\n Test set does not contain examples of each class. Removed MultiKeras from models";
-  delete from mdls where model=`MultiKeras}
+  -1 "\n Test set does not contain examples of each class. Removed multikeras from models";
+  delete from mdls where model=`multikeras}
 
 // Extract the scoring function to be applied for model selection
 /. r    > the scoring function appropriate to the problem being solved
 i.scfn:{[p;mdls]p[`scf]$[`reg in distinct mdls`typ;`reg;`class]}
 
-// Check if MultiKeras model is to be applied and each target exists in both training and testing sets
+// Check if multikeras model is to be applied and each target exists in both training and testing sets
 /* tts  = train-test split dataset
 /. r    > table with multi-class keras model removed if it is not to be applied
 i.kerascheck:{[mdls;tts;tgt]
-  mkcheck :(`MultiKeras in mdls`model);
+  mkcheck :`multikeras in mdls`model;
   tgtcheck:(count distinct tgt)>min{count distinct x}each tts`ytrain`ytest;
   $[mkcheck&tgtcheck;i.errtgt;]mdls}
 

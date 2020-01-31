@@ -48,7 +48,7 @@ proc.gs.psearch:{[xtrn;ytrn;xtst;ytst;bm;p;typ;mdls]
   // This is used to ensure that if a grid search is done on KNN that there are sufficient,
   // data points in the validation set for all hyperparameter nearest neighbour calculations.
   spltcnt:$[p[`gs;0]in`mcsplit`pcsplit;1-p[`gs]1;(p[`gs;1]-1)%p[`gs]1]*count[xtrn]*1-p`hld;
-  if[bm=`KNeighborsRegressor;
+  if[bm in `KNeighborsClassifier`KNeighborsRegressor;
     if[0<count where n:spltcnt<dict`n_neighbors;
       dict[`n_neighbors]@:where not n]];
   // Complete an appropriate grid search, returning scores for each validation fold
