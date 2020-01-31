@@ -1,4 +1,4 @@
-\d .aml
+\d .automl
 
 // The functions contained in this file are all those that are expected to be executable
 // by a user, this includes the function to run the full pipeline and one for running on new data
@@ -79,7 +79,7 @@ run:{[tb;tgt;ftype;ptype;p]
     metadict:dict,hp,exmeta;
     i.savemdl[bm 1;expmdl;mdls;spaths];
     i.savemeta[metadict;dtdict;spaths]];
-  // return (date;time) for .aml.new
+  // return (date;time) for .automl.new
   value dtdict
   }
 
@@ -112,7 +112,7 @@ new:{[t;dt;tm]
      if[bool:(mdl:metadata[`best_model])in i.keraslist;fp_upd,:".h5"];
      model:$[mp~`sklearn;skload;krload]fp_upd;
      $[bool;
-       [fnm:neg[5]_string lower mdl;get[".aml.",fnm,"predict"][(0n;(data;0n));model]];
+       [fnm:neg[5]_string lower mdl;get[".automl.",fnm,"predict"][(0n;(data;0n));model]];
        model[`:predict;<]data]];
     '`$"The current model type you are attempting to apply is not currently supported"]
   }

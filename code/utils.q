@@ -1,4 +1,4 @@
-\d .aml
+\d .automl
 
 // The following aspects of the naming parameter naming are used throughout this file
 /* t   = data as table
@@ -25,8 +25,8 @@ i.updparam:{[t;p;typ]
     $[typ=`fresh;
       {[t;p]d:i.freshdefault[];
        d:$[(ty:type p)in 10 -11 99h;
-	   [if[10h~ty;p:.aml.i.getdict p];
-	    if[-11h~ty;p:.aml.i.getdict$[":"~first p;1_;]p:string p];
+	   [if[10h~ty;p:.automl.i.getdict p];
+	    if[-11h~ty;p:.automl.i.getdict$[":"~first p;1_;]p:string p];
 	    $[min key[p]in key d;d,p;'`$"You can only pass appropriate keys to fresh"]];
            p~(::);d;
              '`$"p must be passed the identity `(::)`, a filepath to a parameter flatfile",
@@ -39,8 +39,8 @@ i.updparam:{[t;p;typ]
       typ=`normal;
       {[t;p]d:i.normaldefault[];
        d:$[(ty:type p)in 10 -11 99h;
-	   [if[10h~ty;p:.aml.i.getdict p];
-            if[-11h~ty;p:.aml.i.getdict$[":"~first p;1_;]p:string p];
+	   [if[10h~ty;p:.automl.i.getdict p];
+            if[-11h~ty;p:.automl.i.getdict$[":"~first p;1_;]p:string p];
             $[min key[p]in key d;d,p;
 	      '`$"You can only pass appropriate keys to normal"]];
            p~(::);d;
@@ -78,11 +78,11 @@ i.getdict:{[nm]
 /* Neither of these function take a parameter as input
 /. r > default dictionaries which will be used by the automl
 i.freshdefault:{`aggcols`funcs`xv`gs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
-  ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;
-   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.ttsnonshuff;0.2;`.aml.prep.freshsignificance)}
+  ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.automl.xv.fitpredict;
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.ttsnonshuff;0.2;`.automl.prep.freshsignificance)}
 i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
-  ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.prep.i.default;`.aml.xv.fitpredict;
-   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.traintestsplit;0.2;`.aml.prep.freshsignificance)}
+  ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.automl.prep.i.default;`.automl.xv.fitpredict;
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.traintestsplit;0.2;`.automl.prep.freshsignificance)}
 
 // Apply an appropriate scoring function to predictions from a model
 /* xtst = test data
@@ -95,7 +95,7 @@ i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
 i.scorepred:{[data;bmn;mdl;scf;fnm]
   pred:$[bmn in i.keraslist;
          // Formatting of first param is a result of previous implementation choices
-         get[".aml.",fnm,"predict"][(0n;(data 2;0n));mdl];
+         get[".automl.",fnm,"predict"][(0n;(data 2;0n));mdl];
          mdl[`:predict][data 2]`];
   (scf[;data 3]pred;pred)
   }
@@ -130,7 +130,7 @@ i.models:{[ptyp;tgt;p]
         delete from m where typ=`binary;
         delete from m where model=`multikeras]];
   // Add a column with appropriate initialized models for each row
-  m:update minit:.aml.proc.i.mdlfunc .'flip(lib;fnc;model)from m;
+  m:update minit:.automl.proc.i.mdlfunc .'flip(lib;fnc;model)from m;
   // Threshold models used based on unique target values
   i.updmodels[m;tgt]}
 
@@ -148,7 +148,7 @@ i.updmodels:{[mdls;tgt]
 if[1~checkimport[];i.keraslist:`null];
 i.excludelist:i.keraslist,`GaussianNB`LinearRegression;
 
-// Dictionary with mappings for console printing to reduce clutter in .aml.runexample
+// Dictionary with mappings for console printing to reduce clutter in .automl.runexample
 i.runout:`col`pre`sig`slct`tot`ex`gs`sco`cnf`save!
  ("\nThe following is a breakdown of information for each of the relevant columns in the dataset\n";
   "\nData preprocessing complete, starting feature creation";
@@ -236,7 +236,7 @@ i.pathconstruct:{[dt;svo]
   (names!paths;names!{count[path]_x}each paths)
   }
 
-// Util for .aml.new
+// Util for .automl.new
 
 // Convert date and time inputs to correct format for filepath
 /* dt = run date as date (yyyy.mm.dd) or string (format "yyyy.mm.dd")

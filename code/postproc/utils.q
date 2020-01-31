@@ -1,4 +1,4 @@
-\d .aml
+\d .automl
 
 // The following parameters are used in multiple locations and defined here for convenience
 /* cr = column/row number to be shuffled
@@ -23,7 +23,7 @@ post.i.shuffle:{[tm;c]
 
 // Predict output from models after shuffling
 // this function should be improved, limitations are arising due to the
-// number of available arguments to .aml.post.featureimpact 
+// number of available arguments to .automl.post.featureimpact 
 /* bs   = name of the best mode
 /* mdl   = mixed list containing as first element the name of the best model
 /*        and second element the table of all possible models
@@ -37,7 +37,7 @@ post.i.predshuff:{[bs;mdl;data;scf;cr;p]
   xtest:post.i.shuffle[data 2;cr];
   funcnm:string first exec fnc from mdltb where model=bs;
   preds:$[bs in i.keraslist;
-        get[".aml.",funcnm,"predict"][((data 0;data 1);(xtest;data 3));epymdl];
+        get[".automl.",funcnm,"predict"][((data 0;data 1);(xtest;data 3));epymdl];
         epymdl[`:predict][xtest]`];
   scf[;data 3]preds
   }
@@ -135,11 +135,11 @@ post.i.roccurve:{[tgt;prob;dt;fpath]
 
 // Utilities for report generation
 
-// The following dictionary is used to make report generation more seamless
+// The following dictionary is used to make report generation more seautomless
 /* cfeat = count of features
-/* bm    = information about the best model returned from `.aml.proc.runmodels`
-/* tm    = list with the time for feature extraction to take place returned from .aml.prep.*create
-/* path  = output from ".aml.path" for the system
+/* bm    = information about the best model returned from `.automl.proc.runmodels`
+/* tm    = list with the time for feature extraction to take place returned from .automl.prep.*create
+/* path  = output from ".automl.path" for the system
 /* xvgs  = list of information about the models used and scores achieved for xval and grid-search
 /. r     > dictionary with the appropriate information added
 post.i.reportdict:{[cfeat;bm;tm;dt;path;xvgs;fpath]
