@@ -1,10 +1,10 @@
-\d .aml
+\d .automl
 
 // The following parameters are used through this file and are outlined here to avoid duplication
 /* xtrn = Training features (matrix)
 /* ytrn = Training target (vector)
 /* p    = parameter dictionary passed as default or modified by user
-/* mdls = appropriate models as produced using `.aml.proc.models`
+/* mdls = appropriate models as produced using `.automl.proc.models`
 
 
 // Seeded cross-validation function, designed to ensure that models will be consistent
