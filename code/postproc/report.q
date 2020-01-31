@@ -1,4 +1,4 @@
-\d .aml
+\d .automl
 
 canvas:.p.import[`reportlab.pdfgen.canvas]
 pdfimage:.p.import[`reportlab.platypus]`:Image

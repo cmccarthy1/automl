@@ -1,15 +1,15 @@
-\d .aml
+\d .automl
 
 // Run cross validated machine learning models on training data and choose the best model.
 /* t     = table of features as output from preprocessing pipeline/feature extraction
-/* mdls  = appropriate models from `.aml.proc.models` above
+/* mdls  = appropriate models from `.automl.proc.models` above
 /* dt    = date and time that the run was initialized (this is used in the feature impact function) 
 /* fpath = file paths for saving down information
 /* tgt   = target data
 /* p     = parameter dictionary passed as default or modified by user
 /. r     > all relevant information about the running of the sets of models
 proc.runmodels:{[data;tgt;mdls;cnms;p;dt;fpath]
-  system"S ",string s:p`seed;
+  system"S ",string p`seed;
   // Apply train test split to keep holdout for feature impact plot and testing of vanilla best model
   tt:p[`tts][data;tgt;p`hld];
   xtrn:tt`xtrain;ytrn:tt`ytrain;xtst:tt`xtest;ytst:tt`ytest;
@@ -33,9 +33,9 @@ proc.runmodels:{[data;tgt;mdls;cnms;p;dt;fpath]
      funcnm:string first exec fnc from mdls where model=bs;
      if[funcnm~"multi";data[;1]:npa@'reverse flip@'./:[;((::;0);(::;1))](0,count ytst)_/:
        value .ml.i.onehot1(,/)(ytrn;ytst)];
-     kermdl:get[".aml.",funcnm,"mdl"][data;p`seed;`$funcnm];
-     bm:get[".aml.",funcnm,"fit"][data;kermdl];
-     s2:scf[;ytst]get[".aml.",funcnm,"predict"][data;bm]];
+     kermdl:get[".automl.",funcnm,"mdl"][data;p`seed;`$funcnm];
+     bm:get[".automl.",funcnm,"fit"][data;kermdl];
+     s2:scf[;ytst]get[".automl.",funcnm,"predict"][data;bm]];
     [bm:(first exec minit from mdls where model=bs)[][];
      bm[`:fit][xtrn;ytrn];
      s2:scf[;ytst]bm[`:predict][xtst]`]
