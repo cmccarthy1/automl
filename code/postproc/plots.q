@@ -1,4 +1,4 @@
-\d .aml
+\d .automl
 
 //  calculate impact of each feature and save plot of top 20
 /* bs   = best model name as a symbol
