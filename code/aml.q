@@ -1,4 +1,4 @@
-\d .aml
+\d .automl
 
 // The functions contained in this file are all those that are expected to be executable
 // by a user, this includes the function to run the full pipeline and one for running on new data
@@ -9,7 +9,7 @@
 /* ftype = type of feature extraction being completed (`fresh/`normal)
 /* ptype = type of problem regression/class (`reg/`class)
 /* p     = parameters (::) produces default other changes are user dependent
-
+/. r     > returns date and time of run
 run:{[tb;tgt;ftype;ptype;p]
   dtdict:`stdate`sttime!(.z.D;.z.T);
   // Extract & update the dictionary used to define the workflow
@@ -55,13 +55,16 @@ run:{[tb;tgt;ftype;ptype;p]
   if[a:bm[1]in i.excludelist;
     data:(xtrn;ytrn;xtst;ytst);
     funcnm:string first exec fnc from mdls where model=bm[1];
-    -1 i.runout`ex;score:i.scorepred[data;bm[1];expmdl:last bm;fn;funcnm]];
+    -1 i.runout`ex;r:i.scorepred[data;bm[1];expmdl:last bm;fn;funcnm];
+    score:r 0;pred:r 1];
   // Run grid search on the best model for the parameter sets defined in hyperparams.txt
   if[b:not a;
     -1 i.runout`gs;
     prms:proc.gs.psearch[xtrn;ytrn;xtst;ytst;bm 1;dict;ptype;mdls];
-    score:first prms;expmdl:last prms];
+    score:prms 0;expmdl:prms 2;pred:prms 3];
   -1 i.runout[`sco],string[score],"\n";
+  // Print confusion matrix for classification problems
+  if[ptype~`class;-1 i.runout[`cnf];show .ml.confmat[pred;tts`ytest]];
   // Save down a pdf report summarizing the running of the pipeline
   if[2=dict`saveopt;
     -1 i.runout[`save],i.ssrsv[spaths[1]`report];
@@ -76,14 +79,21 @@ run:{[tb;tgt;ftype;ptype;p]
     metadict:dict,hp,exmeta;
     i.savemdl[bm 1;expmdl;mdls;spaths];
     i.savemeta[metadict;dtdict;spaths]];
+  // return (date;time) for .automl.new
+  value dtdict
   }
 
 
-// Function for the processing of new data based on a previous run and return of predicted target 
+// Function for the processing of new data based on a previous run and return of predicted target
 /* t = table of new data to be predicted
-/* fp = the path to the folder which the /Config and /Models folders are
-
-new:{[t;fp]
+/* dt = run date as date (yyyy.mm.dd) or string (format "yyyy.mm.dd")
+/* tm = run timestamp as timestamp (hh:mm:ss.xxx) or string (format "hh:mm:ss.xxx"/"hh.mm.ss.xxx")
+/. r  > returns new predictions
+new:{[t;dt;tm]
+  // check date and time input
+  dt_tm:i.new_datetime[dt;tm];
+  // get file path
+  fp:dt_tm[0],"/run_",dt_tm 1;
   // Relevant python functionality for loading of models
   skload:.p.import[`joblib][`:load];
   if[0~checkimport[];krload:.p.import[`keras.models][`:load_model]];
@@ -102,7 +112,7 @@ new:{[t;fp]
      if[bool:(mdl:metadata[`best_model])in i.keraslist;fp_upd,:".h5"];
      model:$[mp~`sklearn;skload;krload]fp_upd;
      $[bool;
-       [fnm:neg[5]_string lower mdl;get[".aml.",fnm,"predict"][(0n;(data;0n));model]];
+       [fnm:neg[5]_string lower mdl;get[".automl.",fnm,"predict"][(0n;(data;0n));model]];
        model[`:predict;<]data]];
     '`$"The current model type you are attempting to apply is not currently supported"]
   }
@@ -120,8 +130,8 @@ savedefault:{[fn;ftype]
   // Open handle to file fn
   h:hopen hsym`$i.ssrwin[raze[path],"/code/models/",fn];
   // Set d to default dictionary for feat_typ
-  d:$[`fresh ~ftype;.aml.i.freshdefault[];
-      `normal~ftype;.aml.i.normaldefault[];
+  d:$[`fresh ~ftype;i.freshdefault[];
+      `normal~ftype;i.normaldefault[];
       '`$"feature extraction type not supported"];
   // String values for file
   vals:{$[1=count x;
@@ -132,9 +142,10 @@ savedefault:{[fn;ftype]
             ";"sv{string[x],"=",string y}'[key x;value x];
           0h~typx;
             ";"sv string x;x]}each value d;
+  // Add ` to the beginning of functions
+  vals:@[vals;key[d]?`funcs`prf`seed`tts`sigfeats;{$[any[x in .Q.a]&not"{"in x;enlist["`"],;]x}];
   // Add key, pipe and newline indicator
-  strd:{(" |" sv x),"\n"}each flip(7#'string[key d],\:5#" ";vals);
+  strd:{(" |" sv x),"\n"}each flip(8#'string[key d],\:6#" ";vals);
   // Write dictionary entries to file
   {x y}[h]each strd;
   hclose h;}
-

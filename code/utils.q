@@ -1,4 +1,4 @@
-\d .aml
+\d .automl
 
 // The following aspects of the naming parameter naming are used throughout this file
 /* t   = data as table
@@ -23,10 +23,10 @@ i.checkfuncs:{[dict]
 i.updparam:{[t;p;typ]
   dict:
     $[typ=`fresh;
-      {[t;p]d:i.freshdefault[];	   
+      {[t;p]d:i.freshdefault[];
        d:$[(ty:type p)in 10 -11 99h;
-	   [if[10h~ty;p:.aml.i.getdict p];
-	    if[-11h~ty;p:.aml.i.getdict$[":"~first p;1_;]p:string p];
+	   [if[10h~ty;p:.automl.i.getdict p];
+	    if[-11h~ty;p:.automl.i.getdict$[":"~first p;1_;]p:string p];
 	    $[min key[p]in key d;d,p;'`$"You can only pass appropriate keys to fresh"]];
            p~(::);d;
              '`$"p must be passed the identity `(::)`, a filepath to a parameter flatfile",
@@ -39,8 +39,8 @@ i.updparam:{[t;p;typ]
       typ=`normal;
       {[t;p]d:i.normaldefault[];
        d:$[(ty:type p)in 10 -11 99h;
-	   [if[10h~ty;p:.aml.i.getdict p];
-            if[-11h~ty;p:.aml.i.getdict$[":"~first p;1_;]p:string p];
+	   [if[10h~ty;p:.automl.i.getdict p];
+            if[-11h~ty;p:.automl.i.getdict$[":"~first p;1_;]p:string p];
             $[min key[p]in key d;d,p;
 	      '`$"You can only pass appropriate keys to normal"]];
            p~(::);d;
@@ -66,7 +66,7 @@ i.getdict:{[nm]
     {(x 0;get string x 1)};
     {key[x]!`$value x};
     {$[`rand_val~first x;first x;get string first x]});
-  // Addition of empty dictionary entry needed as parsing 
+  // Addition of empty dictionary entry needed as parsing
   // of file behaves oddly if only a single entry is given to the system
   if[sgl:1=count d;d:(enlist[`]!enlist""),d];
   d:{$[0<count y;@[x;y;z];x]}/[d;idx;fnc];
@@ -78,11 +78,11 @@ i.getdict:{[nm]
 /* Neither of these function take a parameter as input
 /. r > default dictionaries which will be used by the automl
 i.freshdefault:{`aggcols`funcs`xv`gs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
-  ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;
-   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.ttsnonshuff;0.2;`.aml.prep.freshsignificance)}
+  ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.automl.xv.fitpredict;
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.ttsnonshuff;0.2;`.automl.prep.freshsignificance)}
 i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
-  ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.prep.i.default;`.aml.xv.fitpredict;
-   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.traintestsplit;0.2;`.aml.prep.freshsignificance)}
+  ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.automl.prep.i.default;`.automl.xv.fitpredict;
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.traintestsplit;0.2;`.automl.prep.freshsignificance)}
 
 // Apply an appropriate scoring function to predictions from a model
 /* xtst = test data
@@ -95,9 +95,9 @@ i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
 i.scorepred:{[data;bmn;mdl;scf;fnm]
   pred:$[bmn in i.keraslist;
          // Formatting of first param is a result of previous implementation choices
-         get[".aml.",fnm,"predict"][(0n;(data 2;0n));mdl];
+         get[".automl.",fnm,"predict"][(0n;(data 2;0n));mdl];
          mdl[`:predict][data 2]`];
-  scf[;data 3]pred
+  (scf[;data 3]pred;pred)
   }
 
 /  save down the best model
@@ -130,7 +130,7 @@ i.models:{[ptyp;tgt;p]
         delete from m where typ=`binary;
         delete from m where model=`multikeras]];
   // Add a column with appropriate initialized models for each row
-  m:update minit:.aml.proc.i.mdlfunc .'flip(lib;fnc;model)from m;
+  m:update minit:.automl.proc.i.mdlfunc .'flip(lib;fnc;model)from m;
   // Threshold models used based on unique target values
   i.updmodels[m;tgt]}
 
@@ -142,14 +142,14 @@ i.updmodels:{[mdls;tgt]
     -1"No longer running neural nets or svms\n";
     select from mdls where(lib<>`keras),not fnc in`neural_network`svm];mdls]}
 
-// These are a list of models which are deterministic and thus which do not need to be grid-searched 
+// These are a list of models which are deterministic and thus which do not need to be grid-searched
 // at present this should include the Keras models as a sufficient tuning method
 // has yet to be implemented
 if[1~checkimport[];i.keraslist:`null];
 i.excludelist:i.keraslist,`GaussianNB`LinearRegression;
 
-// Dictionary with mappings for console printing to reduce clutter in .aml.runexample
-i.runout:`col`pre`sig`slct`tot`ex`gs`sco`save!
+// Dictionary with mappings for console printing to reduce clutter in .automl.runexample
+i.runout:`col`pre`sig`slct`tot`ex`gs`sco`cnf`save!
  ("\nThe following is a breakdown of information for each of the relevant columns in the dataset\n";
   "\nData preprocessing complete, starting feature creation";
   "\nFeature creation and significance testing complete";
@@ -158,13 +158,14 @@ i.runout:`col`pre`sig`slct`tot`ex`gs`sco`save!
   "Continuing to final model fitting on holdout set";
   "Continuing to grid-search and final model fitting on holdout set";
   "\nBest model fitting now complete - final score on test set = ";
-  "Saving down procedure report to ")
+  "Confusion matrix for test set:\n";
+  "\nSaving down procedure report to ")
 
 
 // Save down the metadata dictionary as a binary file which can be retrieved by a user or
 // is to be used in running of the models on new data
 /* d     = dictionary of parameters to be saved
-/* dt    = dictionary with the date and time that a run was started, required for naming of save path 
+/* dt    = dictionary with the date and time that a run was started, required for naming of save path
 /* fpath = dictionary of file paths for saving
 /. r     > the location that the metadata was saved to
 i.savemeta:{[d;dt;fpath]
@@ -213,7 +214,7 @@ i.freshproc:{[t;p]
   cols2use:k where not (k:cols t)in agg;
   t:prep.i.nullencode[value .ml.fresh.createfeatures[t;agg;cols2use;appfns];med];
   t:.ml.infreplace t;
-  // It is not guaranteed that new feature creation will produce the all requisite features 
+  // It is not guaranteed that new feature creation will produce the all requisite features
   // if this is not the case dummy features are added to the data
   if[not all ftc:pfeat in cols t;
     newcols:pfeat where not ftc;
@@ -235,6 +236,18 @@ i.pathconstruct:{[dt;svo]
   (names!paths;names!{count[path]_x}each paths)
   }
 
+// Util for .automl.new
+
+// Convert date and time inputs to correct format for filepath
+/* dt = run date as date (yyyy.mm.dd) or string (format "yyyy.mm.dd")
+/* tm = run timestamp as timestamp (hh:mm:ss.xxx) or string (format "hh:mm:ss.xxx"/"hh.mm.ss.xxx")
+/. r  > string list with date and time of format ("2001.01.01";"12:00:00.000")
+i.new_datetime:{[dt;tm]
+  dt:$[-14h=td:type dt;string dt;(td=10h)&10=count dt;dt;
+    '"dt must be date or string with format yyyy.mm.dd"];
+  tm:ssr[;":";"."]$[-19h=tt:type tm;string tm;(tt=10h)&12=count tm;tm;
+    '"tm must be timestamp or string with format hh:mm:ss.xxx or hh.mm.ss.xxx"];
+  (dt;tm)}
 
 // Util functions used in multiple util files
 

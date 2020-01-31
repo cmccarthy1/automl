@@ -47,7 +47,7 @@ Place the library file in `$QHOME` and load into a q instance using `automl/auto
 This will load all the functions contained within the `.ml` namespace  
 ```q
 $q automl/automl.q
-q).aml.loadfile`:init.q
+q).automl.loadfile`:init.q
 ```
 
 ## Documentation
