@@ -1,4 +1,4 @@
-\d .aml
+\d .automl
 
 // Load in the machine learning toolkit which should be located in $QHOME
 // also load in some updates to the toolkit to be integrated at a later date

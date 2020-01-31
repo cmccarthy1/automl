@@ -1,4 +1,4 @@
-\d .aml
+\d .automl
 
 // For the following code the parameter naming convention holds
 // defined here is applied to avoid repetition throughout the file

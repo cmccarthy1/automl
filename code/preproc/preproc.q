@@ -2,7 +2,7 @@
 // to the automated machine learning platform such that the user does not need to
 // deal with the preprocessing side only input the appropriate table and target.
 
-\d .aml
+\d .automl
 
 // This is the main wrapped function used for the preprocessing of input data
 // based on the type of problem being solved and the parameters supplied by the user
