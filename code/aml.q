@@ -20,6 +20,7 @@ run:{[tb;tgt;ftype;ptype;p]
   if[`rand_val~dict[`seed];dict[`seed]:"j"$.z.t];
   // if required to save data construct the appropriate folders
   if[dict[`saveopt]in 1 2;spaths:i.pathconstruct[dtdict;dict`saveopt]];
+  if[`nlp~ftype;dict[`spath]:1_-8_last spaths`config];
   mdls:i.models[ptype;tgt;dict];
   system"S ",string dict`seed;
   tb:prep.i.autotype[tb;ftype;dict];
@@ -30,6 +31,7 @@ run:{[tb;tgt;ftype;ptype;p]
   tb:preproc[tb;tgt;ftype;dict];-1 i.runout`pre;
   tb:$[ftype=`fresh;prep.freshcreate[tb;dict];
        ftype=`normal;prep.normalcreate[tb;dict];
+       ftype=`nlp;prep.nlpcreate[tb;dict];
        '`$"Feature extraction type is not currently supported"];
   feats:get[dict[`sigfeats]][tb 0;tgt];
   // Encode target data if target is a symbol vector
@@ -94,6 +96,8 @@ new:{[t;fp]
     i.normalproc[t;metadata];
     `fresh=typ;
     i.freshproc[t;metadata];
+     `nlp=typ;
+    i.nlpproc[t;metadata];
     '`$"This form of operation is not currently supported"
     ];
   $[(mp:metadata[`pylib])in `sklearn`keras;

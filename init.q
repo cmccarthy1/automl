@@ -22,3 +22,9 @@ loadfile`:code/postproc/report.q
 loadfile`:code/postproc/utils.q
 loadfile`:code/utils.q
 loadfile`:code/aml.q
+
+\d .
+
+if[(::)~@[{system"l ",x};"nlp/nlp.q";{[err]err;0b}];
+  system"l nlp/nlp.q"
+  .nlp.loadfile`:init.q]

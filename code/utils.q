@@ -47,6 +47,17 @@ i.updparam:{[t;p;typ]
 	   '`$"p must be passed the identity `(::)`, a filepath to a parameter flatfile",
               " or a dictionary with appropriate key/value pairs"];
 	   d,enlist[`tf]!enlist 1~checkimport[]}[t;p];
+      typ=`nlp;
+      {[t;p]d:i.nlpdefault[];
+       d:$[(ty:type p)in 10 -11 99h;
+           [if[10h~ty;p:.aml.i.getdict p];
+            if[-11h~ty;p:.aml.i.getdict$[":"~first p;1_;]p:string p];
+            $[min key[p]in key d;d,p;
+              '`$"You can only pass appropriate keys to nlp"]];
+           p~(::);d;
+           '`$"p must be passed the identity `(::)`, a filepath to a parameter flatfile",
+              " or a dictionary with appropriate key/value pairs"];
+           d,enlist[`tf]!enlist 1~checkimport[]}[t;p];
       typ=`tseries;
       '`$"This will need to be added once the time-series recipe is in place";
     '`$"Incorrect input type"]}
@@ -81,6 +92,9 @@ i.freshdefault:{`aggcols`funcs`xv`gs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
   ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.xv.fitpredict;
    `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.ttsnonshuff;0.2;`.aml.prep.freshsignificance)}
 i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
+  ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.prep.i.default;`.aml.xv.fitpredict;
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.traintestsplit;0.2;`.aml.prep.freshsignificance)}
+i.nlpdefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
   ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.aml.prep.i.default;`.aml.xv.fitpredict;
    `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.traintestsplit;0.2;`.aml.prep.freshsignificance)}
 
@@ -129,7 +143,7 @@ i.models:{[ptyp;tgt;p]
     // For classification tasks remove inappropriate classification models
     m:$[2<count distinct tgt;
         delete from m where typ=`binary;
-        delete from m where model=`MultiKeras]];
+        delete from m where model=`multikeras]];
   // Add a column with appropriate initialized models for each row
   m:update minit:.aml.proc.i.mdlfunc .'flip(lib;fnc;model)from m;
   // Threshold models used based on unique target values
@@ -216,6 +230,47 @@ i.freshproc:{[t;p]
     newcols:pfeat where not ftc;
     t:pfeat  xcols flip flip[t],newcols!((count newcols;count t)#0f),()];
   flip value flip pfeat #"f"$0^t}
+
+
+// Apply feature creation and encoding procedures for nlp on new data
+/. r > table with feature creation and encodings applied appropriately
+i.nlpproc:{[t;p]
+  // Find string columns to apply spacy word2vec
+  // If there is multiple string columns, join them together to be passed to the models later
+  strcol:.ml.i.fndcols[t;"C"];
+  sents:$[1<count strcol;raze each flip t[strcol];raze t[strcol]];
+  // Load in spacy and word2vec modules
+  system["export PYTHONHASHSEED=0"];
+  word2vec:.p.import[`gensim.models]`:Word2Vec;
+  sp:.p.import[`spacy];
+  dr:.p.import[`builtins][`:dir];
+  pos:dr[sp[`:parts_of_speech]]`;
+  nlpm:sp[`:load]["en_core_web_sm"];
+  // Add NER tagging
+  ents:nlpm each sents;
+  ners:`PERSON`NORP`FAC`ORG`GPE`LOC`PRODUCT`EVENT`WORK_OF_ART`LAW`LANGUAGE`DATE`TIME`PERCENT`MONEY`QUANTITY`ORDINAL`CARDINAL;
+  tner:prep.i.percdict[;ners]each{count each group `${(.p.wrap x)[`:label_]`}each x[`:ents]`}each ents;
+  // Apply parsing using spacy model
+  corpus:.nlp.newParser[`en;`isStop`tokens`uniPOS]sents;
+  // Add uniPOS tagging
+  unipos:`$pos[til (first where 0<count each pos ss\:"__")];
+  tpos:prep.i.percdict[;unipos]each group each corpus`uniPOS;
+  // Apply sentiment analysis
+  sentt:.nlp.sentiment each sents;
+  // Apply vectorisation using saved word2vec
+  tokens:string corpus[`tokens];
+  size:300&count raze distinct tokens;window:$[30<tk:avg count each tokens;10;10<tk;5;2];
+  model:word2vec[`:load][i.ssrwin[path,"/",p[`spath],"/models/w2v.model"]];
+  sentvec:{x[y;z]}[tokens]'[til count w2vind;w2vind:where each tokens in model[`:wv.index2word]`];
+  w2vtb:flip(`$"col",/:string til size)!flip avg each{x[`:wv.__getitem__][y]`}[model]each sentvec;
+  // Join tables
+  tb:tpos,'sentt,'w2vtb,'tner;
+  tb[`isStop]:{sum[x]%count x}each corpus`isStop;
+  tb:.ml.dropconstant prep.i.nullencode[.ml.infreplace tb;med];
+  if[0<count cols[t] except strcol;tb:tb,'(prep.normalcreate[(strcol)_t;p])[0]];
+  tt:tb[p`features];
+  flip tt
+  }
 
 
 // Create the folders that are required for the saving of the config,models, images and reports
