@@ -131,7 +131,26 @@ post.i.roccurve:{[tgt;prob;dt;fpath]
   plt[`:savefig][fpath[0][`images],"/ROC_Curve.png"];
   plt[`:show][];}
 
-
+post.i.displayCM:{[cm;classes;title;cmap;mdl;fpath]
+  if[cmap~();cmap:plt`:cm.Blues];
+  subplots:plt[`:subplots][`figsize pykw 5 5];
+  fig:subplots[`:__getitem__][0];
+  ax:subplots[`:__getitem__][1];
+  ax[`:imshow][cm;`interpolation pykw`nearest;`cmap pykw cmap];
+  ax[`:set_title][`label pykw title];
+  tickMarks:til count classes;
+  ax[`:xaxis.set_ticks]tickMarks;
+  ax[`:set_xticklabels]classes;
+  ax[`:yaxis.set_ticks]tickMarks;
+  ax[`:set_yticklabels]classes;
+  thresh:max[raze cm]%2;
+  shape:.ml.shape cm;
+  {[cm;thresh;i;j]
+    plt[`:text][j;i;string cm[i;j];`horizontalalignment pykw`center;`color pykw $[thresh<cm[i;j];`white;`black]]
+    }[cm;thresh;;]. 'cross[til shape 0;til shape 1];
+  plt[`:xlabel]["Predicted Label";`fontsize pykw 12];
+  plt[`:ylabel]["Actual label";`fontsize pykw 12];
+  plt[`:savefig][fpath[0][`images],sv["_";string(`Confusion_Matrix;mdl)],".png";`bbox_inches pykw"tight"];}
 
 // Utilities for report generation
 
@@ -156,6 +175,7 @@ post.i.reportdict:{[cfeat;bm;tm;dt;path;xvgs;fpath]
     gs       :xvgs 0,
     score    :xvgs 1,
     xv       :xvgs 2,
-    gscfg    :xvgs 3
+    gscfg    :xvgs 3,
+    confmat  :(fpath[0][`images],"Confusion_Matrix_",string[bm 1],".png")
   from dd}
 
