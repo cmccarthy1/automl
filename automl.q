@@ -1,3 +1,7 @@
+// Fix for windows argv matplotlib conflict
+\l p.q
+.p.import[`sys;:;`:argv;enlist""]
+
 \d .automl
 version:@[{AUTOMLVERSION};`;`development]
 path:{string`automl^`$@[{"/"sv -1_"/"vs ssr[;"\\";"/"](-3#get .z.s)0};`;""]}`
