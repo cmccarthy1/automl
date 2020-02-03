@@ -2,6 +2,8 @@
 
 canvas:.p.import[`reportlab.pdfgen.canvas]
 pdfimage:.p.import[`reportlab.platypus]`:Image
+table:.p.import[`reportlab.platypus]`:Table
+np:.p.import`numpy
 
 // Generate a report using FPDF outlining the results from a run of the automl pipeline
 /* dict  = dictionary with needed with values for the pdf
@@ -9,17 +11,31 @@ pdfimage:.p.import[`reportlab.platypus]`:Image
 /* fname = This is a file path which denotes a save location for the generated report.
 /. r     > a pdf report saved to disk
 post.report:{[dict;dt;fname;ptype]
+ 
  pdf:canvas[`:Canvas][fname,"q_automl_report_",ssr[sv["_";string(first[key[dict`dict]];dt`sttime)],".pdf";":";"."]];
 
  font[pdf;"Helvetica-BoldOblique";15];  
  title[pdf;f:775;"kdb+/q AutoML model generated report"];
 
  font[pdf;"Helvetica";11];
- fline1:"This report outlines the results achieved through the running of kdb+/q autoML, ",
-        "this run started at ";
- fline2:string[dt`stdate]," at ",string[dt`sttime];
+ fline1:"This report outlines the results for a ",ssr[string ptype;"_";" "]," problem achieved through the running ";
  cell[pdf;f-:40;fline1];
+
+ fline2:"of kdb+/q autoML. This run started at ",string[dt`stdate]," at ",string[dt`sttime],".";
  cell[pdf;f-:15;fline2];
+
+ font[pdf;"Helvetica-Bold";13];
+ cell[pdf;f-:30;"Description of Input Data"];
+
+ font[pdf;"Helvetica";11];
+ feats:"The following is a breakdown of information for each of the relevant columns in the dataset";
+ cell[pdf;f-:30;feats];
+
+ vd:.ml.df2tab .ml.tab2df[value d:dict`describe][`:round][3];
+ t:enlist[enlist[`col],cols vd],key[d],'flip value flip vd;
+ t:table np[`:array][t][`:tolist][];
+ t[`:wrapOn][pdf;10;10];
+ t[`:drawOn][pdf;30;f-:25*count dict`describe];
 
  font[pdf;"Helvetica-Bold";13];
  cell[pdf;f-:30;"Breakdown of Pre-Processing"];
@@ -57,18 +73,19 @@ post.report:{[dict;dt;fname;ptype]
  cell[pdf;f-:30;xvtime1];
  cell[pdf;f-:15;xvtime2];
 
+ $[fv:5<count dict`describe;[pdf[`:showPage][];f:775];f-:30];
+
  metric:"The metric that is being used for scoring and optimizing the models was: ",
          string[dict`metric],".";
- cell[pdf;f-:30;metric];
+ cell[pdf;f;metric];
 
   // Take in a kdb dictionary for printing line by line to the pdf file.
   {[m;h;s]cell[m;h;s]}[pdf]'[cntf:(f-20)-15*1_til[1+count dd];dd:{(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}dict`dict];
   f:last cntf;
 
- pdf[`:showPage][]; 
-
+ $[fv;f-:320;[pdf[`:showPage][];f:500]];
  
- image[pdf;dict`impact;f:500;400;300];
+ image[pdf;dict`impact;f;400;300];
  font[pdf;"Helvetica";10];
  fig_2:"Figure 2: This is the feature impact for a number of the most significant",
         " features as determined on the training set";
@@ -87,10 +104,14 @@ post.report:{[dict;dt;fname;ptype]
          string[dict`bmtime],".";
  cell[pdf;f-:30;bmtime];
 
+ $[fv&cls:string[ptype]like"*class*";[pdf[`:showPage][];f:775];
+   fv;[pdf[`:showPage][];f:775];
+   f-:30];
+
  if[not (first key[dict`dict])in i.excludelist;
    font[pdf;"Helvetica-Bold";13];
    gstitle:"Grid search for a ",(string first key[dict`dict])," model.";
-   cell[pdf;f-:30;gstitle];
+   cell[pdf;f;gstitle];
    
    font[pdf;"Helvetica";11];
    gscfg:$[(dict[`gscfg]0)in `mcsplit`pcsplit;
@@ -104,17 +125,18 @@ post.report:{[dict;dt;fname;ptype]
    gsp:"The following are the hyperparameters which have been deemed optimal for the model";
    cell[pdf;f-:30;gsp];
    
-   {[m;h;s]cell[m;h;s]}[pdf]'[cntf:(f-20)-15*1_til[1+count dgs];dgs:{(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}dict`gs];
-   f:last cntf;
-   ]
+   {[m;h;s]
+     cell[m;h;s]
+     }[pdf]'[cntf:(f-20)-15*1_til[1+count dgs];dgs:{(,'/)string(key x;count[x]#" ";count[x]#"=";count[x]#" ";value x)}dict`gs];
+   f:last cntf];
   
   fin:"The score for the best model fit on the entire training set and scored ",
       "on the test set was = ",string[dict`score];
   cell[pdf;f-30;fin];
 
-  if[`class=ptype;
-    pdf[`:showPage][];
-    image[pdf;dict`confmat;f:500;400;300];
+  if[cls;
+    $[not fv;[pdf[`:showPage][];f:500];f-:350];
+    image[pdf;dict`confmat;f;400;300];
     font[pdf;"Helvetica";10];
     fig_3:"Figure 3: This is the confusion matrix produced for predictions made on the testing set";
     cell[pdf;f-:25;fig_3]];
