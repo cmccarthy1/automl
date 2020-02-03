@@ -26,6 +26,8 @@ labelencode:{(asc distinct x)?x}
 // similar to be implemented for the time series/time aware recipes
 ttsnonshuff:{[x;y;sz]`xtrain`ytrain`xtest`ytest!raze(x;y)@\:/:(0,floor n*1-sz)_til n:count x}
 
+// update to confmat showing true and pred values
+conftab:{(`$"true_",/:sk)!flip(`$"pred_",/:sk:string key m)!flip value m:confmat[x;y]}
 
 // Updated cross validation functions necessary for the application of grid search ordering correctly.
 // Only change is expected input to the t variable of the function, previously this was a simple
@@ -49,4 +51,3 @@ i.inftyp:{
   typ:("5";"8";"9";"6";"7";"12";"16";"17";"18");
   rep:(0N -32767 32767;0N -0w 0w;0n -0w 0w),6#enlist 0N -0W 0W;
   typ!rep}
-
