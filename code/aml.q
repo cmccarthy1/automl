@@ -27,7 +27,7 @@ run:{[tb;tgt;ftype;ptype;p]
   // This provides an encoding map which can be used in reruns of automl even
   // if the data is no longer in the appropriate format for symbol encoding
   encoding:prep.i.symencode[tb;10;1;dict;::];
-  tb:preproc[tb;tgt;ftype;dict];-1 i.runout`pre;
+  prep:preproc[tb;tgt;ftype;dict];tb:prep 0;dscrb:prep 1;-1 i.runout`pre;
   tb:$[ftype=`fresh;prep.freshcreate[tb;dict];
        ftype=`normal;prep.normalcreate[tb;dict];
        '`$"Feature extraction type is not currently supported"];
@@ -64,12 +64,15 @@ run:{[tb;tgt;ftype;ptype;p]
     score:prms 0;expmdl:prms 2;pred:prms 3];
   -1 i.runout[`sco],string[score],"\n";
   // Print confusion matrix for classification problems
-  if[ptype~`class;-1 i.runout[`cnf];show .ml.confmat[pred;tts`ytest]];
+  if[ptype~`class;
+    -1 i.runout[`cnf];show .ml.conftab[pred;tts`ytest];
+    post.i.displayCM[value .ml.confmat[pred;tts`ytest];`$string asc distinct pred,tts`ytest;"";();bm 1;spaths]];
   // Save down a pdf report summarizing the running of the pipeline
   if[2=dict`saveopt;
     -1 i.runout[`save],i.ssrsv[spaths[1]`report];
-    report_param:post.i.reportdict[ctb;bm;tb;dtdict;path;(prms 1;score;dict`xv;dict`gs);spaths];
-    post.report[report_param;dtdict;spaths[0]`report]];
+    report_param:post.i.reportdict[ctb;bm;tb;path;(prms 1;score;dict`xv;dict`gs);spaths;dscrb];
+    if[ptype=`class;ptype:$[2<count distinct tgt;`multi_classification;`binary_classification]];
+    post.report[report_param;dtdict;spaths[0]`report;ptype]];
   if[dict[`saveopt]in 1 2;
     // Extract the Python library from which the best model was derived, used for model rerun
     pylib:?[mdls;enlist(=;`model;enlist bm 1);();`lib];
