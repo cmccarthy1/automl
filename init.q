@@ -25,6 +25,6 @@ loadfile`:code/aml.q
 
 \d .
 
-if[(::)~@[{system"l ",x};"nlp/nlp.q";{[err]err;0b}];
-  system"l nlp/nlp.q"
-  .nlp.loadfile`:init.q]
+$[(::)~@[{system"l ",x};"nlp/nlp.q";{[err]err;0b}];
+  .nlp.loadfile`:init.q;
+  [-1"Requirements for NLP not available, NLP models will not be run";]]

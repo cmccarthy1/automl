@@ -17,7 +17,16 @@ i.checkfuncs:{[dict]
   if[0<cnt:sum locs:@[{$[not type[get[x]]in(99h;100h;104h);'err;0b]};;{[err]err;1b}]each fns;
      funclst:{$[2<x;" ",y;"s ",sv[", ";y]]}[cnt]string fns where locs;
     '"The function",/funclst," are not defined in your process\n"]
- }
+  }
+
+// This function ensures that a user that is attempting to use the NLP
+// functionality is passing in appropriate data (i.e. the data contains a char based column)
+i.checknlp:{[t]
+  if[0~count .ml.i.fndcols[t;"C"];
+    '`$"User wishing to apply nlp functionality must pass a table containing a character column."];
+  if[not(::)~@[{system"l ",x};"nlp/nlp.q";{[err]err;0b}];
+    '`$"User does not have access to nlp library in $QHOME/%QHOME%, NLP models cannot be run."];
+  }
 
 //  This function sets or updates the default parameter dictionary as appropriate
 i.updparam:{[t;p;typ]
@@ -239,38 +248,8 @@ i.freshproc:{[t;p]
 // Apply feature creation and encoding procedures for nlp on new data
 /. r > table with feature creation and encodings applied appropriately
 i.nlpproc:{[t;p]
-  // Find string columns to apply spacy word2vec
-  // If there is multiple string columns, join them together to be passed to the models later
-  strcol:.ml.i.fndcols[t;"C"];
-  sents:$[1<count strcol;raze each flip t[strcol];raze t[strcol]];
-  // Load in spacy and word2vec modules
-  system["export PYTHONHASHSEED=0"];
-  word2vec:.p.import[`gensim.models]`:Word2Vec;
-  sp:.p.import[`spacy];
-  dr:.p.import[`builtins][`:dir];
-  pos:dr[sp[`:parts_of_speech]]`;
-  nlpm:sp[`:load]["en_core_web_sm"];
-  // Add NER tagging
-  ents:nlpm each sents;
-  ners:`PERSON`NORP`FAC`ORG`GPE`LOC`PRODUCT`EVENT`WORK_OF_ART`LAW`LANGUAGE`DATE`TIME`PERCENT`MONEY`QUANTITY`ORDINAL`CARDINAL;
-  tner:prep.i.percdict[;ners]each{count each group `${(.p.wrap x)[`:label_]`}each x[`:ents]`}each ents;
-  // Apply parsing using spacy model
-  corpus:.nlp.newParser[`en;`isStop`tokens`uniPOS]sents;
-  // Add uniPOS tagging
-  unipos:`$pos[til (first where 0<count each pos ss\:"__")];
-  tpos:prep.i.percdict[;unipos]each group each corpus`uniPOS;
-  // Apply sentiment analysis
-  sentt:.nlp.sentiment each sents;
-  // Apply vectorisation using saved word2vec
-  tokens:string corpus[`tokens];
-  size:300&count raze distinct tokens;window:$[30<tk:avg count each tokens;10;10<tk;5;2];
-  model:word2vec[`:load][i.ssrwin[path,"/",p[`spath],"/models/w2v.model"]];
-  sentvec:{x[y;z]}[tokens]'[til count w2vind;w2vind:where each tokens in model[`:wv.index2word]`];
-  w2vtb:flip(`$"col",/:string til size)!flip avg each{$[()~y;0;x[`:wv.__getitem__][y]`]}[model]each sentvec;
-  // Join tables
-  tb:tpos,'sentt,'w2vtb,'tner;
-  tb[`isStop]:{sum[x]%count x}each corpus`isStop;
-  tb:.ml.dropconstant prep.i.nullencode[.ml.infreplace tb;med];
+  r:i.nlp_proc[t;p;0b];
+  strcol:r 1;tb:r 0;
   if[0<count cols[t] except strcol;tb:tb,'(prep.normalcreate[(strcol)_t;p])[0]];
   tt:tb[p`features];
   flip tt
@@ -332,3 +311,45 @@ i.ssrwin:{[path]$[.z.o like "w*";ssr[path;"/";"\\"];path]}
 // Used throughout when printing directory of saved objects.
 // this is to keep linux/windows consistent
 i.ssrsv:{[path] ssr[path;"\\";"/"]}
+
+
+// Processing functions for NLP creation and rerunning
+
+i.nlp_proc:{[t;p;smdl]
+  // Find string columns to apply spacy word2vec
+  // If there is multiple string columns, join them together to be passed to the models later
+  strcol:.ml.i.fndcols[t;"C"];
+  sents:$[1<count strcol;raze each flip t[strcol];raze t[strcol]];
+  // Load in spacy and word2vec modules
+  system["export PYTHONHASHSEED=0"];
+  // Add NER tagging
+  ents:p.nlpm each sents;
+  ners:`PERSON`NORP`FAC`ORG`GPE`LOC`PRODUCT`EVENT`WORK_OF_ART`LAW,
+    `LANGUAGE`DATE`TIME`PERCENT`MONEY`QUANTITY`ORDINAL`CARDINAL;
+  tner:prep.i.percdict[;ners]each{count each group `${(.p.wrap x)[`:label_]`}each x[`:ents]`}each ents;
+  // Apply parsing using spacy model
+  corpus:.nlp.newParser[`en;`isStop`tokens`uniPOS]sents;
+  // Add uniPOS tagging
+  unipos:`$p.pos[til (first where 0<count each p.pos ss\:"__")];
+  tpos:prep.i.percdict[;unipos]each group each corpus`uniPOS;
+  // Apply sentiment analysis
+  sentt:.nlp.sentiment each sents;
+  // Apply vectorisation using saved word2vec
+  tokens:string corpus[`tokens];
+  size:300&count raze distinct tokens;window:$[30<tk:avg count each tokens;10;10<tk;5;2];
+  model:$[smdl;
+    p.word2vec[`:load][i.ssrwin[path,"/",p[`spath],"/models/w2v.model"]];
+    p.word2vec[`:Word2Vec][tokens;`size pykw size;`window pykw window;`seed pykw p[`seed];`workers pykw 1]];
+  sentvec:{x[y;z]}[tokens]'[til count w2vind;w2vind:where each tokens in model[`:wv.index2word]`];
+  w2vtb:flip(`$"col",/:string til size)!flip avg each{$[()~y;0;x[`:wv.__getitem__][y]`]}[model]each sentvec;
+  // Join tables
+  tb:tpos,'sentt,'w2vtb,'tner;
+  tb[`isStop]:{sum[x]%count x}each corpus`isStop;
+  (.ml.dropconstant prep.i.nullencode[.ml.infreplace tb;med];strcol;model)
+  }
+
+p.word2vec:.p.import[`gensim.models];
+p.sp:.p.import[`spacy];
+p.dr:.p.import[`builtins][`:dir];
+p.pos:p.dr[p.sp[`:parts_of_speech]]`;
+p.nlpm:p.sp[`:load]["en_core_web_sm"];

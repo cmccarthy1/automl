@@ -39,11 +39,12 @@ prep.i.describe:{[t]
   timecols:.ml.i.fndcols[t;"pmdznuvt"];
   boolcols:.ml.i.fndcols[t;"b"];
   catcols :.ml.i.fndcols[t;"s"];
-  textcols:.ml.i.fndcols[t;"cC"];
+  textcols:.ml.i.fndcols[t;"C"];
   num  :prep.i.metafn[t;numcols ;(count;{count distinct x};avg;sdev;min;max;{`numeric})];
   symb :prep.i.metafn[t;catcols ;prep.i.nonnumeric[{`categorical}]];
   times:prep.i.metafn[t;timecols;prep.i.nonnumeric[{`time}]];
   bool :prep.i.metafn[t;boolcols;prep.i.nonnumeric[{`boolean}]];
+  text :prep.i.metafn[t;textcols;prep.i.nonnumeric[{`text}]];
   flip columns!flip num,symb,times,bool
   }
 

@@ -21,8 +21,10 @@ preproc:{[t;tgt;typ;p]
   $[`fresh=typ;
     [sepdata:(p[`aggcols],())#flip t;tb:flip (cols[t]except p[`aggcols])#flip t];
     tb:t];
-  $[not`nlp=typ;tb:prep.i.nullencode[.ml.dropconstant tb;med];
-   count[cols tb]>count strcol:.ml.i.fndcols[tb;"C"];tb:?[tb;();0b;strcol!strcol],'prep.i.nullencode[.ml.dropconstant (strcol)_tb;med];tb];
+  $[not`nlp=typ;
+    tb:prep.i.nullencode[.ml.dropconstant tb;med];
+    count[cols tb]>count strcol:.ml.i.fndcols[tb;"C"];
+    tb:?[tb;();0b;strcol!strcol],'prep.i.nullencode[.ml.dropconstant (strcol)_tb;med];tb];
   // perform an infinity replace and rejoin the separated aggregate columns for FRESH
   $[`fresh=typ;flip sepdata,;flip]flip .ml.infreplace tb
   }

@@ -48,39 +48,9 @@ prep.normalcreate:{[t;p]
 /. r > table with features created in accordance with the nlp feature creation procedure
 prep.nlpcreate:{[t;p]
   fe_start:.z.T;
-  // Find string columns to apply spacy word2vec
-  // If there is multiple string columns, join them together to be passed to the models later
-  strcol:.ml.i.fndcols[t;"C"];
-  sents:$[1<count strcol;raze each flip t[strcol];raze t[strcol]];
-  // Load in spacy and word2vec modules
-  system["export PYTHONHASHSEED=0"];
-  word2vec:.p.import[`gensim.models]`:word2vec;
-  sp:.p.import[`spacy];
-  dr:.p.import[`builtins][`:dir];
-  pos:dr[sp[`:parts_of_speech]]`;
-  nlpmdl:sp[`:load]["en_core_web_sm"];
-  // Add NER tagging
-  ents:nlpmdl each sents;
-  ners:`PERSON`NORP`FAC`ORG`GPE`LOC`PRODUCT`EVENT`WORK_OF_ART`LAW`LANGUAGE`DATE`TIME`PERCENT`MONEY`QUANTITY`ORDINAL`CARDINAL;
-  tner:prep.i.percdict[;ners]each{group`${(.p.wrap x)[`:label_]`}each x[`:ents]`}each ents;
-  // Apply parsing using spacy module
-  corpus:.nlp.newParser[`en;`isStop`tokens`uniPOS]sents;
-  // Add uniPOS tagging
-  unipos:`$pos[til(first where 0<count each pos ss\:"__")];
-  tpos:prep.i.percdict[;unipos]each group each corpus`uniPOS;
-  // Apply sentiment analysis
-  sentt:.nlp.sentiment each sents;
-  // Apply vectorisation using word2vec
-  tokens:string corpus[`tokens];
-  size:300&count raze distinct tokens;window:$[30<tk:avg count each tokens;10;10<tk;5;2];
-  model:word2vec[`:Word2Vec][tokens;`size pykw size;`window pykw window;`seed pykw p[`seed];`workers pykw 1];
-  sentvec:{x[y;z]}[tokens]'[til count w2vind;w2vind:where each tokens in model[`:wv.index2word]`];
-  w2vtb:flip(`$"col",/:string til size)!flip avg each{$[()~y;0;x[`:wv.__getitem__][y]`]}[model]each sentvec;
-  // Join all tables
-  tb:tpos,'sentt,'w2vtb,'tner;
-  tb[`isStop]:{sum[x]%count x}each corpus`isStop;
-  tb:.ml.dropconstant prep.i.nullencode[.ml.infreplace tb;med];
+  r:i.nlp_proc[t;p;0b];
+  tb:r 0;strcol:r 1;model:r 2;
   if[0<count cols[t] except strcol;tb:tb,'(prep.normalcreate[(strcol)_t;p])[0]];
-  if[2~p`saveopt;model[`:save][i.ssrwin[path,"/",p[`spath],"/models/w2v.model"]]];
+  if[p[`saveopt]in 1 2;model[`:save][i.ssrwin[path,"/",p[`spath],"/models/w2v.model"]]];
   fe_end:.z.T-fe_start;
   (tb;fe_end)}
