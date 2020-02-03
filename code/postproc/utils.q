@@ -160,8 +160,10 @@ post.i.displayCM:{[cm;classes;title;cmap;mdl;fpath]
 /* tm    = list with the time for feature extraction to take place returned from .automl.prep.*create
 /* path  = output from ".automl.path" for the system
 /* xvgs  = list of information about the models used and scores achieved for xval and grid-search
+/* fpath = image file path
+/* dscrb = description of input table
 /. r     > dictionary with the appropriate information added
-post.i.reportdict:{[cfeat;bm;tm;dt;path;xvgs;fpath]
+post.i.reportdict:{[cfeat;bm;tm;path;xvgs;fpath;dscrb]
   dd:(0#`)!();
   select
     feats    :cfeat,
@@ -176,6 +178,7 @@ post.i.reportdict:{[cfeat;bm;tm;dt;path;xvgs;fpath]
     score    :xvgs 1,
     xv       :xvgs 2,
     gscfg    :xvgs 3,
-    confmat  :(fpath[0][`images],"Confusion_Matrix_",string[bm 1],".png")
+    confmat  :(fpath[0][`images],"Confusion_Matrix_",string[bm 1],".png"),
+    describe :dscrb
   from dd}
 
