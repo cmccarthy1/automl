@@ -8,7 +8,7 @@ pdfimage:.p.import[`reportlab.platypus]`:Image
 /* dt    = dictionary denoting the start and end time of an automl run
 /* fname = This is a file path which denotes a save location for the generated report.
 /. r     > a pdf report saved to disk
-post.report:{[dict;dt;fname]
+post.report:{[dict;dt;fname;ptype]
  pdf:canvas[`:Canvas][fname,"q_automl_report_",ssr[sv["_";string(first[key[dict`dict]];dt`sttime)],".pdf";":";"."]];
 
  font[pdf;"Helvetica-BoldOblique";15];  
@@ -111,6 +111,14 @@ post.report:{[dict;dt;fname]
   fin:"The score for the best model fit on the entire training set and scored ",
       "on the test set was = ",string[dict`score];
   cell[pdf;f-30;fin];
+
+  if[`class=ptype;
+    pdf[`:showPage][];
+    image[pdf;dict`confmat;f:500;400;300];
+    font[pdf;"Helvetica";10];
+    fig_3:"Figure 3: This is the confusion matrix produced for predictions made on the testing set";
+    cell[pdf;f-:25;fig_3]];
+
   pdf[`:save][];
  }
 
