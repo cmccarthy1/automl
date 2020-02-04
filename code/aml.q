@@ -66,7 +66,7 @@ run:{[tb;tgt;ftype;ptype;p]
   // Print confusion matrix for classification problems
   if[ptype~`class;
     -1 i.runout[`cnf];show .ml.conftab[pred;tts`ytest];
-    post.i.displayCM[value .ml.confmat[pred;tts`ytest];`$string asc distinct pred,tts`ytest;"";();bm 1;spaths]];
+    if[dict[`saveopt]in 1 2;post.i.displayCM[value .ml.confmat[pred;tts`ytest];`$string asc distinct pred,tts`ytest;"";();bm 1;spaths]]];
   // Save down a pdf report summarizing the running of the pipeline
   if[2=dict`saveopt;
     -1 i.runout[`save],i.ssrsv[spaths[1]`report];

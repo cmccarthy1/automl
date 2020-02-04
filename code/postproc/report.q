@@ -124,7 +124,7 @@ post.report:{[dict;dt;fname;ptype]
   f:cell[pdf;f;30;fin];
 
  if[string[ptype]like"*class*";
-    f:image[pdf;dict`confmat;f;350;400;300];
+    f:image[pdf;dict`confmat;f;350;350;350];
     font[pdf;"Helvetica";10];
     fig_3:"Figure 3: This is the confusion matrix produced for predictions made on the testing set";
     cell[pdf;f;25;fig_3]];
