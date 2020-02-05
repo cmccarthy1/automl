@@ -5,4 +5,4 @@ KNeighborsRegressor       | sklearn   ;   neighbors      ;  ::  ; reg
 MLPRegressor              | sklearn   ;   neural_network ; seed ; reg
 Lasso                     | sklearn   ;   linear_model   ; seed ; reg
 LinearRegression          | sklearn   ;   linear_model   ;  ::  ; reg
-RegKeras                  | keras     ;   reg            ; seed ; reg
+regkeras                  | keras     ;   reg            ; seed ; reg

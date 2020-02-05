@@ -1,4 +1,4 @@
-\d .aml
+\d .automl
 
 // Load in the machine learning toolkit which should be located in $QHOME
 // also load in some updates to the toolkit to be integrated at a later date
@@ -15,7 +15,7 @@ loadfile`:code/proc/utils.q
 loadfile`:code/proc/proc.q
 loadfile`:code/proc/xvgs.q
 $[0~checkimport[];
-  loadfile`:code/mdldef/kmdls.q;
+  loadfile`:code/models/kerasmdls.q;
   [-1"Requirements for deep learning models not available, these will not be run";]]
 loadfile`:code/postproc/plots.q
 loadfile`:code/postproc/report.q

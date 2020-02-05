@@ -1,7 +1,7 @@
 \l automl.q
-.aml.loadfile`:init.q
+.automl.loadfile`:init.q
 
-\d .aml
+\d .automl
 
 // Input Matrix
 mattrn:flip (til 5;01010b;asc til 5;7.6 1.2 9.5 8.3 2.4;11001b)
