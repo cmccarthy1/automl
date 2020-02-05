@@ -1,9 +1,9 @@
-\d .aml
+\d .automl
 
 // The following naming convention holds throughout this file
 /* mdl = the model being applied from within the module as a symbol
 /* fn  = name of a file as a string
-/* fp  = file path relative to .aml.path as a string
+/* fp  = file path relative to .automl.path as a string
 
 // Utilities for proc.q
 
@@ -16,8 +16,8 @@ proc.i.files:`class`reg`score!("classmodels.txt";"regmodels.txt";"scoring.txt")
 /. r   > the appropriate function or projection in the case of sklearn
 proc.i.mdlfunc:{[lib;fnc;mdl]
   $[`keras~lib;
-    // retrieve keras model from the .aml namespace eg '.aml.regfitscore'
-    get` sv``aml,`fitscore;
+    // retrieve keras model from the .automl namespace eg '.automl.regfitscore'
+    get` sv``automl,`fitscore;
     // construct the projection used for sklearn models eg '.p.import[`sklearn.svm][`:SVC]'
     {[x;y;z].p.import[x]y}[` sv lib,fnc;hsym mdl]]}
 
@@ -36,7 +36,7 @@ proc.i.updmodels:{[mdls;tgt]
 
 // parse the hyperparameter flatfile
 /. r  > dict mapping model name to possible hyper parameters
-proc.i.paramparse:{[fn;fp]key[k]!(value@){(!).("S=;")0:x}each k:(!).("S*";"|")0:hsym`$.aml.path,fp,fn}
+proc.i.paramparse:{[fn;fp]key[k]!(value@){(!).("S=;")0:x}each k:(!).("S*";"|")0:hsym`$.automl.path,fp,fn}
 
 // The following two functions together extract the hyperparameter dictionaries
 // based on the applied model

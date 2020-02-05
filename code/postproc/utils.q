@@ -1,4 +1,4 @@
-\d .aml
+\d .automl
 
 // The following parameters are used in multiple locations and defined here for convenience
 /* cr = column/row number to be shuffled
@@ -23,7 +23,7 @@ post.i.shuffle:{[tm;c]
 
 // Predict output from models after shuffling
 // this function should be improved, limitations are arising due to the
-// number of available arguments to .aml.post.featureimpact 
+// number of available arguments to .automl.post.featureimpact 
 /* bs   = name of the best mode
 /* mdl   = mixed list containing as first element the name of the best model
 /*        and second element the table of all possible models
@@ -37,7 +37,7 @@ post.i.predshuff:{[bs;mdl;data;scf;cr;p]
   xtest:post.i.shuffle[data 2;cr];
   funcnm:string first exec fnc from mdltb where model=bs;
   preds:$[bs in i.keraslist;
-        get[".aml.",funcnm,"predict"][((data 0;data 1);(xtest;data 3));epymdl];
+        get[".automl.",funcnm,"predict"][((data 0;data 1);(xtest;data 3));epymdl];
         epymdl[`:predict][xtest]`];
   scf[;data 3]preds
   }
@@ -131,18 +131,39 @@ post.i.roccurve:{[tgt;prob;dt;fpath]
   plt[`:savefig][fpath[0][`images],"/ROC_Curve.png"];
   plt[`:show][];}
 
-
+post.i.displayCM:{[cm;classes;title;cmap;mdl;fpath]
+  if[cmap~();cmap:plt`:cm.Blues];
+  subplots:plt[`:subplots][`figsize pykw 5 5];
+  fig:subplots[`:__getitem__][0];
+  ax:subplots[`:__getitem__][1];
+  ax[`:imshow][cm;`interpolation pykw`nearest;`cmap pykw cmap];
+  ax[`:set_title][`label pykw title];
+  tickMarks:til count classes;
+  ax[`:xaxis.set_ticks]tickMarks;
+  ax[`:set_xticklabels]classes;
+  ax[`:yaxis.set_ticks]tickMarks;
+  ax[`:set_yticklabels]classes;
+  thresh:max[raze cm]%2;
+  shape:.ml.shape cm;
+  {[cm;thresh;i;j]
+    plt[`:text][j;i;string cm[i;j];`horizontalalignment pykw`center;`color pykw $[thresh<cm[i;j];`white;`black]]
+    }[cm;thresh;;]. 'cross[til shape 0;til shape 1];
+  plt[`:xlabel]["Predicted Label";`fontsize pykw 12];
+  plt[`:ylabel]["Actual label";`fontsize pykw 12];
+  plt[`:savefig][fpath[0][`images],sv["_";string(`Confusion_Matrix;mdl)],".png";`bbox_inches pykw"tight"];}
 
 // Utilities for report generation
 
-// The following dictionary is used to make report generation more seamless
+// The following dictionary is used to make report generation more seautomless
 /* cfeat = count of features
-/* bm    = information about the best model returned from `.aml.proc.runmodels`
-/* tm    = list with the time for feature extraction to take place returned from .aml.prep.*create
-/* path  = output from ".aml.path" for the system
+/* bm    = information about the best model returned from `.automl.proc.runmodels`
+/* tm    = list with the time for feature extraction to take place returned from .automl.prep.*create
+/* path  = output from ".automl.path" for the system
 /* xvgs  = list of information about the models used and scores achieved for xval and grid-search
+/* fpath = image file path
+/* dscrb = description of input table
 /. r     > dictionary with the appropriate information added
-post.i.reportdict:{[cfeat;bm;tm;dt;path;xvgs;fpath]
+post.i.reportdict:{[cfeat;bm;tm;path;xvgs;fpath;dscrb]
   dd:(0#`)!();
   select
     feats    :cfeat,
@@ -156,6 +177,8 @@ post.i.reportdict:{[cfeat;bm;tm;dt;path;xvgs;fpath]
     gs       :xvgs 0,
     score    :xvgs 1,
     xv       :xvgs 2,
-    gscfg    :xvgs 3
+    gscfg    :xvgs 3,
+    confmat  :(fpath[0][`images],"Confusion_Matrix_",string[bm 1],".png"),
+    describe :dscrb
   from dd}
 

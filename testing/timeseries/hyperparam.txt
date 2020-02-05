@@ -1,9 +1,0 @@
-bulktransform|c=(::)
-countencode|c=(::)
-featurelag|c=(::);l=(::)
-movingavg|c=(::);l=(::)
-prodlag|c=(::);l1=(::);l2=(::)
-ratiolag|c=(::);l1=(::);l2=(::)
-sublag|c=(::);l1=(::);l2=(::)
-sumlag|c=(::);l1=(::);l2=(::)
-truncsvd|c=(::);d=2 3 4
