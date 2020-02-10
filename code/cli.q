@@ -24,7 +24,7 @@ cli.format:{[d]
   // if type not specified, user cannot use aggcols (fresh) or funcs (problem specific)
   dict_list:$[not`type in kd;
       [-1"must specify type to pass in aggcols or funcs, removing from dictionary";
-       {![y;();0b;x]}[cst_opts]each(i.normaldefault[];d)];
+       {![y;();0b;x]}[opts`cst]each(i.normaldefault[];d)];
     "normal"~typ:d`type;
       (i.normaldefault[];d);
     "fresh"~typ;
