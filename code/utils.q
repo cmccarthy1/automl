@@ -77,12 +77,12 @@ i.getdict:{[nm]
 // or in the creation of a new initialisation parameter flat file
 /* Neither of these function take a parameter as input
 /. r > default dictionaries which will be used by the automl
-i.freshdefault:{`aggcols`funcs`xv`gs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
+i.freshdefault:{`aggcols`funcs`xv`gs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats`exclude_mdl!
   ({first cols x};`.ml.fresh.params;(`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.automl.xv.fitpredict;
-   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.ttsnonshuff;0.2;`.automl.prep.freshsignificance)}
-i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.ttsnonshuff;0.2;`.automl.prep.freshsignificance;`none)}
+i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats`exclude_mdl!
   ((`.ml.xv.kfshuff;5);(`.ml.gs.kfshuff;5);`.automl.prep.i.default;`.automl.xv.fitpredict;
-   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.traintestsplit;0.2;`.automl.prep.freshsignificance)}
+   `class`reg!(`.ml.accuracy;`.ml.mse);`rand_val;2;0.2;`.ml.traintestsplit;0.2;`.automl.prep.freshsignificance;`none)}
 
 // Apply an appropriate scoring function to predictions from a model
 /* xtst = test data
@@ -131,6 +131,8 @@ i.models:{[ptyp;tgt;p]
         delete from m where model=`multikeras]];
   // Add a column with appropriate initialized models for each row
   m:update minit:.automl.proc.i.mdlfunc .'flip(lib;fnc;model)from m;
+  // Remove models that are to be ignored as defined by the user
+  m:select from m where not model in p`exclude_mdl;
   // Threshold models used based on unique target values
   i.updmodels[m;tgt]}
 

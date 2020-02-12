@@ -146,9 +146,11 @@ savedefault:{[fn;ftype]
           0h~typx;
             ";"sv string x;x]}each value d;
   // Add ` to the beginning of functions
-  vals:@[vals;key[d]?`funcs`prf`seed`tts`sigfeats;{$[any[x in .Q.a]&not"{"in x;enlist["`"],;]x}];
+  vals:@[vals;
+         key[d]?`exclude_mdl`funcs`prf`seed`tts`sigfeats;
+         {$[any[x in .Q.a]&not"{"in x;enlist["`"],;]x}];
   // Add key, pipe and newline indicator
-  strd:{(" |" sv x),"\n"}each flip(8#'string[key d],\:6#" ";vals);
+  strd:{(" |" sv x),"\n"}each flip(11#'string[key d],\:9#" ";vals);
   // Write dictionary entries to file
   {x y}[h]each strd;
   hclose h;}
