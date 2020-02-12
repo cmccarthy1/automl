@@ -31,6 +31,9 @@ run:{[tb;tgt;ftype;ptype;p]
   tb:$[ftype=`fresh;prep.freshcreate[tb;dict];
        ftype=`normal;prep.normalcreate[tb;dict];
        '`$"Feature extraction type is not currently supported"];
+  // Save down 5 rows of the dataset to allow a user to see all
+  // initial columns produced and look at a subset
+  if[dict[`saveopt]in 1 2;i.savesample[tb 0;spaths]];
   feats:get[dict[`sigfeats]][tb 0;tgt];
   // Encode target data if target is a symbol vector
   if[11h~type tgt;tgt:.ml.labelencode tgt];
@@ -152,3 +155,18 @@ savedefault:{[fn;ftype]
   // Write dictionary entries to file
   {x y}[h]each strd;
   hclose h;}
+
+getfeattab:{[dt;tm]
+  // check date and time input
+  dt_tm:i.new_datetime[dt;tm];
+  // get file path
+  fp:hsym `$i.ssrwin[path,"/outputs/",dt_tm[0],"/run_",dt_tm[1],"/sample/tab"];
+  get fp
+  }
+
+getsigtab:{[dt;tm]
+  t:getfeattab[dt;tm];
+  dt_tm:i.new_datetime[dt;tm];
+  fp:hsym `$i.ssrwin[path,"/outputs/",dt_tm[0],"/run_",dt_tm[1],"/config/metadata"];
+  (get[fp]`features)#t
+  }

@@ -162,6 +162,15 @@ i.runout:`col`pre`sig`slct`tot`ex`gs`sco`cnf`save!
   "\nSaving down procedure report to ")
 
 
+i.savesample:{[t;fpath]
+  // number of rows to save
+  `:tab set (5&count t)#t;
+  $[first[string .z.o]in"lm";
+   system"mv tab ",;
+   system"move tab "]fpath[0]`sample;
+  -1"Saved down a subsample of the dataset to ",i.ssrsv[fpath[1]`sample];
+  }
+
 // Save down the metadata dictionary as a binary file which can be retrieved by a user or
 // is to be used in running of the models on new data
 /* d     = dictionary of parameters to be saved
@@ -171,7 +180,7 @@ i.runout:`col`pre`sig`slct`tot`ex`gs`sco`cnf`save!
 i.savemeta:{[d;dt;fpath]
   `:metadata set d;
   // move the metadata information to the appropriate location based on OS
-  $[first[string .z.o]in "lm";
+  $[first[string .z.o]in"lm";
     system"mv metadata ",;
     system"move metadata ",]fpath[0]`config;
   -1"Saving down model parameters to ",i.ssrsv[fpath[1]`config];}
@@ -227,7 +236,7 @@ i.freshproc:{[t;p]
 /* svo = save option defined by the user, this can only be 1/2 in this case
 /. r   > the file paths in its full format or truncated for use in outputs to terminal
 i.pathconstruct:{[dt;svo]
-  names:`config`models;
+  names:`config`models`sample;
   if[svo=2;names:names,`images`report]
   pname:{"/",ssr["outputs/",string[x`stdate],"/run_",string[x`sttime],"/",y,"/";":";"."]};
   paths:path,/:pname[dt]each string names;
