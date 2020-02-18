@@ -21,7 +21,7 @@ i.checkfuncs:{[dict]
 
 //  This function sets or updates the default parameter dictionary as appropriate
 i.updparam:{[t;p;typ]
-  if[0<>count cli.dict;p:$[(::)~p;()!();p],cli.format cli.dict];
+  if[0<>count cli.dict;p:cli.format[cli.dict],$[(::)~p;()!();p]];
   dict:
     $[typ=`fresh;
       {[t;p]d:i.freshdefault[];
