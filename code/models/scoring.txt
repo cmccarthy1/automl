@@ -1,12 +1,5 @@
 .ml.accuracy     | desc
-.ml.precision    | desc
-.ml.sensitivity  | desc
-.ml.specificity  | desc
-.ml.fbscore      | desc
-.ml.f1score      | desc
 .ml.matcorr      | desc
-.ml.logloss      | asc
-.ml.crossentropy | asc
 .ml.mse          | asc
 .ml.sse          | asc
 .ml.rmse         | asc
@@ -15,4 +8,3 @@
 .ml.smape        | desc
 .ml.mape         | desc
 .ml.r2score      | desc
-.ml.rocaucscore  | desc

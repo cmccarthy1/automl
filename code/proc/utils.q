@@ -1,13 +1,13 @@
-\d .aml
+\d .automl
 
 // The following naming convention holds throughout this file
 /* mdl = the model being applied from within the module as a symbol
 /* fn  = name of a file as a string
-/* fp  = file path relative to .aml.path as a string
+/* fp  = file path relative to .automl.path as a string
 
 // Utilities for proc.q
 
-// Text files that can be parsed from within the mdldef folder
+// Text files that can be parsed from within the models folder
 proc.i.files:`class`reg`score!("classmodels.txt";"regmodels.txt";"scoring.txt")
 
 // Build up the model to be applied based on naming convention
@@ -16,8 +16,8 @@ proc.i.files:`class`reg`score!("classmodels.txt";"regmodels.txt";"scoring.txt")
 /. r   > the appropriate function or projection in the case of sklearn
 proc.i.mdlfunc:{[lib;fnc;mdl]
   $[`keras~lib;
-    // retrieve keras model from the .aml namespace eg '.aml.regfitscore'
-    get` sv``aml,`fitscore;
+    // retrieve keras model from the .automl namespace eg '.automl.regfitscore'
+    get` sv``automl,`fitscore;
     // construct the projection used for sklearn models eg '.p.import[`sklearn.svm][`:SVC]'
     {[x;y;z].p.import[x]y}[` sv lib,fnc;hsym mdl]]}
 
@@ -36,13 +36,13 @@ proc.i.updmodels:{[mdls;tgt]
 
 // parse the hyperparameter flatfile
 /. r  > dict mapping model name to possible hyper parameters
-proc.i.paramparse:{[fn;fp]key[k]!(value@){(!).("S=;")0:x}each k:(!).("S*";"|")0:hsym`$.aml.path,fp,fn}
+proc.i.paramparse:{[fn;fp]key[k]!(value@){(!).("S=;")0:x}each k:(!).("S*";"|")0:hsym`$.automl.path,fp,fn}
 
 // The following two functions together extract the hyperparameter dictionaries
 // based on the applied model
 /. r   > the hyperparameters appropriate for the model being used
 proc.i.edict:{[fn;fp;mdl]key[k]!value each value k:proc.i.paramparse[fn;fp]mdl}
-proc.i.extractdict:proc.i.edict["hyperparams.txt";"/code/mdldef/";]
+proc.i.extractdict:proc.i.edict["hyperparams.txt";"/code/models/";]
 
 
 // Utilities for both scripts
@@ -55,4 +55,4 @@ proc.i.txtparse:{[sn;fp]{key(!).("S=;")0:x}each(!).("S*";"|")0:hsym`$path,fp,pro
 // these are defined in "scoring.txt"
 /* scf = scoring function
 /. r   > the function to order the dictionary output from cross validation search (asc/desc)
-proc.i.ord:{[scf]get string first proc.i.txtparse[`score;"/code/mdldef/"]scf}
+proc.i.ord:{[scf]get string first proc.i.txtparse[`score;"/code/models/"]scf}

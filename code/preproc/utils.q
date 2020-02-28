@@ -1,4 +1,4 @@
-\d .aml
+\d .automl
 
 // For the following code the parameter naming convention holds
 // defined here is applied to avoid repetition throughout the file
@@ -119,7 +119,7 @@ prep.i.bulktransform:{[t]
 /* fn = function to be applied to the table
 /* t  = table
 /. table with the desired transform applied
-prep.i.applyfn:{[t;fn]typ:type fn;@[;t]$[-11h=typ;get[fn];100h=typ;fn;.aml.prep.i.default]}
+prep.i.applyfn:{[t;fn]typ:type fn;@[;t]$[-11h=typ;get[fn];100h=typ;fn;.automl.prep.i.default]}
 
 // Perform a truncated single value decomposition on unique linear combinations of float columns
 // https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html

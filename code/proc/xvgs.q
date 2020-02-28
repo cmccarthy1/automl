@@ -1,10 +1,10 @@
-\d .aml
+\d .automl
 
 // The following parameters are used through this file and are outlined here to avoid duplication
 /* xtrn = Training features (matrix)
 /* ytrn = Training target (vector)
 /* p    = parameter dictionary passed as default or modified by user
-/* mdls = appropriate models as produced using `.aml.proc.models`
+/* mdls = appropriate models as produced using `.automl.proc.models`
 
 
 // Seeded cross-validation function, designed to ensure that models will be consistent
@@ -26,18 +26,18 @@ proc.xv.seed:{[xtrn;ytrn;p;mdls]
     get[p[`xv]0][p[`xv]1;1;xtrn;ytrn;p[`prf][mdls`minit;s]]]}
 
 
-// Grid search over the set of all hyperparameters outlined in code/mdldef/hyperparams.txt
+// Grid search over the set of all hyperparameters outlined in code/models/hyperparams.txt
 /* xtst = Testing features (matrix)
 /* ytst = Testing target (vector)
 /* bm   = name of the best model as on which a grid search should be completed as a symbol
 /*        derived from initial cross validation
 /* typ  = type of the problem being solved, this can be either `class or `reg
-/. r    > a list containing the score achieved for the best model, 
+/. r    > a list containing the score achieved for the best model,
 /.        the hyperparameters from the best model, the fitted best model.
 proc.gs.psearch:{[xtrn;ytrn;xtst;ytst;bm;p;typ;mdls]
   dict:proc.i.extractdict[bm];
   // Extract the required sklearn module name
-  module:` sv 2#proc.i.txtparse[typ;"/code/mdldef/"]bm;
+  module:` sv 2#proc.i.txtparse[typ;"/code/models/"]bm;
   fn:i.scfn[p;mdls];
   o :proc.i.ord fn;
   // Import the required embedPy module
@@ -48,27 +48,28 @@ proc.gs.psearch:{[xtrn;ytrn;xtst;ytst;bm;p;typ;mdls]
   // This is used to ensure that if a grid search is done on KNN that there are sufficient,
   // data points in the validation set for all hyperparameter nearest neighbour calculations.
   spltcnt:$[p[`gs;0]in`mcsplit`pcsplit;1-p[`gs]1;(p[`gs;1]-1)%p[`gs]1]*count[xtrn]*1-p`hld;
-  if[bm=`KNeighborsRegressor;
+  if[bm in `KNeighborsClassifier`KNeighborsRegressor;
     if[0<count where n:spltcnt<dict`n_neighbors;
       dict[`n_neighbors]@:where not n]];
   // Complete an appropriate grid search, returning scores for each validation fold
   bm:first exec minit from mdls where model=bm;
-  // modification of final grid search parameter required to allow modified 
+  // modification of final grid search parameter required to allow modified
   // results ordering and function definition to take place
   gsprms:get[p[`gs]0][p[`gs]1;1;xtrn;ytrn;p[`prf]bm;dict;`val`ord`scf!(p`hld;o;fn)];
-  // Extract the best hyperparameter set based on scoring function 
+  // Extract the best hyperparameter set based on scoring function
   hyp:first key first gsprms;
   bmdl:epymdl[pykwargs hyp][`:fit][xtrn;ytrn];
-  score:fn[;ytst]bmdl[`:predict][xtst]`;
-  (score;hyp;bmdl)
+  pred:bmdl[`:predict][xtst]`;
+  score:fn[pred;ytst];
+  (score;hyp;bmdl;pred)
   }
 
 
-// Defaulted fitting and prediction functions for automl cross-validation and grid search, 
+// Defaulted fitting and prediction functions for automl cross-validation and grid search,
 // both models fit on a training set and return the predicted scores based on supplied
 // scoring function.
 /* f  = function taking in parameters and data as input, returns appropriate score
-/* hp = dictionary of hyperparameters on which to complete hyperparameter search 
+/* hp = dictionary of hyperparameters on which to complete hyperparameter search
 /* d  = data as a list of ((xtrn;ytrn);(xval;yval)), this structure is defined from the data
 /*      within the cross-validation/grid search procedures from the xtrain and ytrain data supplied
 

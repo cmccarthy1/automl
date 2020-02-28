@@ -26,6 +26,8 @@ labelencode:{(asc distinct x)?x}
 // similar to be implemented for the time series/time aware recipes
 ttsnonshuff:{[x;y;sz]`xtrain`ytrain`xtest`ytest!raze(x;y)@\:/:(0,floor n*1-sz)_til n:count x}
 
+// update to confmat showing true and pred values
+conftab:{(`$"true_",/:sk)!flip(`$"pred_",/:sk:string key m)!flip value m:confmat[x;y]}
 
 // Updated cross validation functions necessary for the application of grid search ordering correctly.
 // Only change is expected input to the t variable of the function, previously this was a simple
@@ -36,8 +38,8 @@ ttsnonshuff:{[x;y;sz]`xtrain`ytrain`xtest`ytest!raze(x;y)@\:/:(0,floor n*1-sz)_t
 gs:1_{[gs;k;n;x;y;f;p;t]
  if[t[`val]=0;:gs[k;n;x;y;f;p]];
  i:(0,floor count[y]*1-abs t[`val])_$[t[`val]<0;xv.i.shuffle;til count@]y;
- (r;pr;[$[100h=type fn:get t`scf;
-          [pykwargs pr:first key t[`ord] fn[;].''];
+ (r;pr;[$[type[fn:get t`scf]in(100h;104h);
+          [pykwargs pr:first key t[`ord] avg each fn[;].''];
           [pykwargs pr:first key desc avg each]] r:gs[k;n;x i 0;y i 0;f;p]](x;y)@\:/:i)
  }@'{[xv;k;n;x;y;f;p]p!(xv[k;n;x;y]f pykwargs@)@'p:key[p]!/:1_'(::)cross/value p}@'xv.j
 
@@ -49,4 +51,3 @@ i.inftyp:{
   typ:("5";"8";"9";"6";"7";"12";"16";"17";"18");
   rep:(0N -32767 32767;0N -0w 0w;0n -0w 0w),6#enlist 0N -0W 0W;
   typ!rep}
-
