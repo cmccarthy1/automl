@@ -9,7 +9,6 @@
 
 // Seeded cross-validation function, designed to ensure that models will be consistent
 // from run to run in order to accurately assess the benefit of updates to parameters
-/. r > predictions and associated actual values for each cross validation fold
 proc.xv.seed:{[xtrn;ytrn;p;mdls]
   sk:mdls[`lib]~`sklearn;
   system"S ",string p`seed;
@@ -33,9 +32,8 @@ proc.xv.seed:{[xtrn;ytrn;p;mdls]
 /* bm   = name of the best model as on which a grid search should be completed as a symbol
 /*        derived from initial cross validation
 /* typ  = type of the problem being solved, this can be either `class or `reg
-/. r    > a mixed list containing:
-/.        1. the score achieved for the best model; 2. the hyperparameters from the best model
-/.        3. the fitted best model; 4. predicted values based on testing set
+/. r    > a list containing the score achieved for the best model,
+/.        the hyperparameters from the best model, the fitted best model.
 proc.gs.psearch:{[xtrn;ytrn;xtst;ytst;bm;p;typ;mdls]
   dict:proc.i.extractdict[bm];
   // Extract the required sklearn module name
@@ -63,7 +61,7 @@ proc.gs.psearch:{[xtrn;ytrn;xtst;ytst;bm;p;typ;mdls]
   bmdl:epymdl[pykwargs hyp][`:fit][xtrn;ytrn];
   pred:bmdl[`:predict][xtst]`;
   score:fn[pred;ytst];
-  `gs_score`gs_hyp`gs_bmdl`gs_pred!(score;hyp;bmdl;pred)
+  (score;hyp;bmdl;pred)
   }
 
 
