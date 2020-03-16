@@ -8,7 +8,7 @@
 /* tgt   = target vector
 /* ftype = type of feature extraction being completed (`fresh/`normal)
 /* ptype = type of problem regression/class (`reg/`class)
-/* p     = parameters (::) produces default other changes are user dependent
+/* p     = parameters (::) produces default other changes are user dependent dict/flat-file
 /. r     > returns date and time of run
 run:{[tb;tgt;ftype;ptype;p]
   dtdict:`stdate`sttime!(.z.D;.z.T);
@@ -16,7 +16,7 @@ run:{[tb;tgt;ftype;ptype;p]
   dict:i.updparam[tb;p;ftype],enlist[`typ]!enlist ftype;
   // Check that the functions to overwrite default behaviour exist in process
   i.checkfuncs[dict];
-  // update the seed randomly if user does not specify the seed in p
+  // update the seed based on time of day if user does not specify the seed in p
   if[`rand_val~dict[`seed];dict[`seed]:"j"$.z.t];
   // if required to save data construct the appropriate folders
   if[dict[`saveopt]in 1 2;spaths:i.pathconstruct[dtdict;dict`saveopt]];
@@ -26,18 +26,23 @@ run:{[tb;tgt;ftype;ptype;p]
   -1 i.runout`col;
   // This provides an encoding map which can be used in reruns of automl even
   // if the data is no longer in the appropriate format for symbol encoding
-  encoding:prep.i.symencode[tb;10;1;dict;::];
-  prep:preproc[tb;tgt;ftype;dict];tb:prep 0;dscrb:prep 1;-1 i.runout`pre;
-  tb:$[ftype=`fresh;prep.freshcreate[tb;dict];
+  symencode:prep.i.symencode[tb;10;1;dict;::];
+  prep:preproc[tb;tgt;ftype;dict];
+  tb:prep`tab;dscrb:prep`describe;
+  -1 i.runout`pre;
+  featcreate:$[ftype=`fresh;prep.freshcreate[tb;dict];
        ftype=`normal;prep.normalcreate[tb;dict];
        '`$"Feature extraction type is not currently supported"];
-  feats:get[dict[`sigfeats]][tb 0;tgt];
-  // Encode target data if target is a symbol vector
-  if[11h~type tgt;tgt:.ml.labelencode tgt];
+  tb:featcreate`tab;feattime:featcreate`feattime;
+  feats:get[dict[`sigfeats]][tb;tgt];
+  // Encode target data if target is a symbol vector, create the schema for run on new data
+  $[11h~type tgt;
+    [tgtencode:.ml.targetencode tgt;tgt:.ml.labelencode tgt];
+    tgtencode:`null];
   // Apply the appropriate train/test split to the data
   // the following currently runs differently if the parameters are defined
   // in a file or through the more traditional dictionary/(::) format
-  tts:($[-11h=type dict`tts;get;]dict[`tts])[;tgt;dict`sz]tab:feats#tb 0;
+  tts:($[-11h=type dict`tts;get;]dict[`tts])[;tgt;dict`sz]tab:feats#tb;
   // Centralizing the table to matrix conversion makes it easier to avoid
   // repetition of this task which can be computationally expensive
   xtrn:flip value flip tts`xtrain;xtst:flip value flip tts`xtest;
@@ -49,38 +54,45 @@ run:{[tb;tgt;ftype;ptype;p]
   // Run all appropriate models on the training set
   // Set numpy random seed if multiple prcoesses
   if[0<abs[system "s"];.p.import[`numpy][`:random.seed][dict`seed]];
+  // Run cross validated search across all possible models
   bm:proc.runmodels[xtrn;ytrn;mdls;cols tts`xtrain;dict;dtdict;spaths];
+  // Extract the appropriate scoring function from the dataset
   fn:i.scfn[dict;mdls];
   // Do not run grid search on deterministic models returning score on the test set and model
-  if[a:bm[1]in i.excludelist;
+  if[a:bm[`best_score]in i.excludelist;
     data:(xtrn;ytrn;xtst;ytst);
-    funcnm:string first exec fnc from mdls where model=bm[1];
-    -1 i.runout`ex;r:i.scorepred[data;bm[1];expmdl:last bm;fn;funcnm];
-    score:r 0;pred:r 1];
+    funcnm:string first exec fnc from mdls where model=bm`best_score;
+    -1 i.runout`ex;spred:i.scorepred[data;bm`best_score;expmdl:bm`best_mdl;fn;funcnm];
+    score:spred`score;pred:spred`pred];
   // Run grid search on the best model for the parameter sets defined in hyperparams.txt
   if[b:not a;
     -1 i.runout`gs;
-    prms:proc.gs.psearch[xtrn;ytrn;xtst;ytst;bm 1;dict;ptype;mdls];
-    score:prms 0;expmdl:prms 2;pred:prms 3];
+    prms:proc.gs.psearch[xtrn;ytrn;xtst;ytst;bm`best_score;dict;ptype;mdls];
+    score:prms`gs_score;expmdl:prms`gs_bmdl;pred:prms`gs_pred];
   -1 i.runout[`sco],string[score],"\n";
   // Print confusion matrix for classification problems
   if[ptype~`class;
     -1 i.runout[`cnf];show .ml.conftab[pred;tts`ytest];
-    if[dict[`saveopt]in 1 2;post.i.displayCM[value .ml.confmat[pred;tts`ytest];`$string asc distinct pred,tts`ytest;"";();bm 1;spaths]]];
+    if[dict[`saveopt]in 1 2;
+      post.i.displayCM[value .ml.confmat[pred;tts`ytest];
+                       `$string asc distinct pred,tts`ytest;"";();bm`best_score;spaths]]];
   // Save down a pdf report summarizing the running of the pipeline
   if[2=dict`saveopt;
     -1 i.runout[`save],i.ssrsv[spaths[1]`report];
-    report_param:post.i.reportdict[ctb;bm;tb;path;(prms 1;score;dict`xv;dict`gs);spaths;dscrb];
+    report_param:post.i.reportdict[ctb;bm;feattime;path;
+                                   (prms`gs_hyp;score;dict`xv;dict`gs);spaths;dscrb];
     if[ptype=`class;ptype:$[2<count distinct tgt;`multi_classification;`binary_classification]];
     post.report[report_param;dtdict;spaths[0]`report;ptype]];
   if[dict[`saveopt]in 1 2;
     // Extract the Python library from which the best model was derived, used for model rerun
-    pylib:?[mdls;enlist(=;`model;enlist bm 1);();`lib];
+    pylib:?[mdls;enlist(=;`model;enlist bm`best_score);();`lib];
     // additional metadata information to be saved to disk
-    hp:$[b;enlist[`hyper_parameters]!enlist prms 1;()!()];
-    exmeta:`features`test_score`best_model`symencode`pylib!(feats;score;bm 1;encoding;pylib 0);
+    hp:$[b;enlist[`hyper_parameters]!enlist prms`gs_hyp;()!()];
+    exmeta_nms:`features`test_score`best_model`symencode`tgtencode`pylib;
+    exmeta_vals:(feats;score;bm`best_score;symencode;tgtencode;pylib 0);
+    exmeta:exmeta_nms!exmeta_vals;
     metadict:dict,hp,exmeta;
-    i.savemdl[bm 1;expmdl;mdls;spaths];
+    i.savemdl[bm`best_score;expmdl;mdls;spaths];
     i.savemeta[metadict;dtdict;spaths]];
   // return (date;time) for .automl.new
   value dtdict
@@ -109,7 +121,7 @@ new:{[t;dt;tm]
     i.freshproc[t;metadata];
     '`$"This form of operation is not currently supported"
     ];
-  $[(mp:metadata[`pylib])in `sklearn`keras;
+  i.enctgt[;metadata`tgtencode]$[(mp:metadata[`pylib])in `sklearn`keras;
     // Apply the relevant saved down model to new data
     [fp_upd:i.ssrwin[path,"/outputs/",fp,"/models/",string metadata[`best_model]];
      if[bool:(mdl:metadata[`best_model])in i.keraslist;fp_upd,:".h5"];
@@ -124,7 +136,7 @@ new:{[t;dt;tm]
 // Saves down flatfile of default dict
 /* fn    = filename as string, symbol or hsym
 /* ftype = type of feature extraction, e.g. `fresh or `normal
-/. r     > flatfile of dictionary parameters
+/. r     > flatfile of representing default dictionary saved to code/models
 savedefault:{[fn;ftype]
   // Check type of filename and convert to string
   fn:$[10h~typf:type fn;fn;
