@@ -44,7 +44,7 @@ run:{[tb;tgt;ftype;ptype;p]
   ytrn:tts`ytrain;ytst:tts`ytest;
   mdls:i.kerascheck[mdls;tts;tgt];
   // Check if Tensorflow/Keras not available for use, NN models removed
-  if[1~checkimport[];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
+  if[1~checkimport[0];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
   -1 i.runout`sig;-1 i.runout`slct;-1 i.runout[`tot],string[ctb:count cols tab];
   // Run all appropriate models on the training set
   // Set numpy random seed if multiple prcoesses
@@ -99,7 +99,9 @@ new:{[t;dt;tm]
   fp:dt_tm[0],"/run_",dt_tm 1;
   // Relevant python functionality for loading of models
   skload:.p.import[`joblib][`:load];
-  if[0~checkimport[];krload:.p.import[`keras.models][`:load_model]];
+  // If possible to do so load appropriate Keras & PyTorch functionality 
+  if[0~checkimport[0];krload:.p.import[`keras.models][`:load_model]];
+  if[0~checkimport[1];trchload:torch[`:load]];
   // Retrieve the metadata from a file path based on the run date/time
   metadata:i.getmeta[i.ssrwin[path,"/outputs/",fp,"/config/metadata"]];
   typ:metadata`typ;
@@ -109,14 +111,18 @@ new:{[t;dt;tm]
     i.freshproc[t;metadata];
     '`$"This form of operation is not currently supported"
     ];
-  $[(mp:metadata[`pylib])in `sklearn`keras;
+  $[(mp:metadata[`pylib])in `sklearn`keras`pytorch;
     // Apply the relevant saved down model to new data
     [fp_upd:i.ssrwin[path,"/outputs/",fp,"/models/",string metadata[`best_model]];
-     if[bool:(mdl:metadata[`best_model])in i.keraslist;fp_upd,:".h5"];
-     model:$[mp~`sklearn;skload;krload]fp_upd;
-     $[bool;
-       [fnm:neg[5]_string lower mdl;get[".automl.",fnm,"predict"][(0n;(data;0n));model]];
-       model[`:predict;<]data]];
+      if[bool:(mdl:metadata[`best_model])in i.keraslist;fp_upd,:".h5"];
+      // Load and initialize the model as appropriate to the problem being solved
+      model:$[mp~`sklearn;skload;mp~`keras;krload;trchload]fp_upd;
+      if[trch:mdl in i.torchlist;model[`:eval][]];
+      // If PyTorch/Keras model then use the defined prediction function
+      $[bool|trch;
+        [fnm:neg[5]_string lower mdl;
+         get[".automl.",fnm,"predict"][(0n;(data;0n));model]];
+        model[`:predict;<]data]];
     '`$"The current model type you are attempting to apply is not currently supported"]
   }
 
