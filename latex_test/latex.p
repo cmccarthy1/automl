@@ -17,7 +17,7 @@ def createImage(doc,img,caption):
      images.add_image(img,width = NoEscape(r'0.75\textwidth'))
      images.add_caption(caption)
 
-def test_doc(dict,tb,scr):
+def test_doc(dict,tb,scr,ptype,exclude,grid):
   geometry_options = {"margin": "2.5cm"}
   doc = Document('testing_doc',  geometry_options=geometry_options)
   doc.preamble.append(Command('title', 'kdb+/q Automate Machine Learning Generated Report'))
@@ -36,20 +36,35 @@ def test_doc(dict,tb,scr):
 
   with doc.create(Section('Pre-processing Breakdown')):
     doc.append('Following the extraction of features a total of ' + dict['num_feat'] + ' features were produced\n')
-    doc.append('Feature extraction took a total time of ' + dict['feat_time'] + '.\n\n')
-
-  doc.append(NewPage())
+    doc.append('Feature extraction took a total time of ' + dict['feat_time'] + '.\n')
 
   with doc.create(Section('Initial Scores')):
     doc.append(dict['xv_folds']+'-fold cross validation was performed on the training set using ' + dict['xv_func'])
-    createImage(doc,'test.png','This image shows how the data is split into training, testing and validation sets')
+    createImage(doc,'images/test.png','This image shows how the data is split into training, testing and validation sets')
     doc.append('The total time that was required to complete selection of the best model based on the training set was ' + dict['xvtime'])
     doc.append('\n\nThe metric that is being used for scoring and optimising the models was ' + dict['metric'] + '\n\n')
+    doc.append('The following table outlines the scores achieved for each of the models tested \n')
     createTable(doc,scr,'cc')
-    createImage(doc,'test.png','This is the feature impact for a number of the most significant features as determined on the training set')
-
+    createImage(doc,'images/test.png','This is the feature impact for a number of the most significant features as determined on the training set')
+  
   with doc.create(Section('Model selection summary')):
     doc.append('Best scoring model = ' + dict['best_model'] + '\n\n')
     doc.append('The score on the validation set for this model was = ' + dict['best_val_score'] + '\n\n')
     doc.append('The total time to complete the running of this model on the validation set was: ' + dict['val_score'])
-  doc.generate_pdf(clean_tex=False)
+
+  if(not dict['best_model'] in exclude):
+    with doc.create(Section('Grid search for a ' + dict['best_model'] + ' model.')):
+      if(dict['gs_func'] in ['mcsplit','pcsplit']):
+        doc.append('The grid search was completed using ' + dict['gs_func']+ ' with a split of ' + dict['gs_folds'] + 'of training data used for validation.\n')
+      else:
+        doc.append('A ' + dict['gs_folds'] + '-fold grid search was performed on the training set to find the best model using ' + dict['gs_func'] + '.\n')
+      doc.append('The following are the hyperparameters which have been deemed optimal for the model.\n')
+      createTable(doc,grid,'cc')
+      doc.append('The score for the best model fit on the entire training set and scored on the testing set was = ' + dict['score'])
+  
+  if(ptype=="class"):
+    with doc.create(Section('Classification summary')):
+      doc.append('The following displays the performance of the classification model on the testing set\n\n')
+      createImage(doc,'images/test.png','This is a confusion matrix produced for predictions made on the testing set')
+
+  doc.generate_pdf(clean_tex=False, compiler='pdflatex')
