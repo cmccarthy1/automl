@@ -15,7 +15,7 @@ proc.i.files:`class`reg`score!("classmodels.txt";"regmodels.txt";"scoring.txt")
 /* fnc = function name if keras or module from which model is derived for keras
 /. r   > the appropriate function or projection in the case of sklearn
 proc.i.mdlfunc:{[lib;fnc;mdl]
-  $[`keras~lib;
+  $[lib in `keras`pytorch;
     // retrieve keras model from the .automl namespace eg '.automl.regfitscore'
     get` sv``automl,`fitscore;
     // construct the projection used for sklearn models eg '.p.import[`sklearn.svm][`:SVC]'

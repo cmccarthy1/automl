@@ -1,4 +1,4 @@
-\d .automl
+\a .automl
 
 // The following aspects of the naming parameter naming are used throughout this file
 /* t   = data as table
@@ -35,7 +35,7 @@ i.updparam:{[t;p;typ]
                          d[`aggcols]t;
                          11h~abs typagg;d`aggcols;
                          '`$"aggcols must be passed function or list of columns"];
-	   d,enlist[`tf]!enlist 1~checkimport[]}[t;p];
+	   d,enlist[`tf]!enlist 1~checkimport[0]}[t;p];
       typ=`normal;
       {[t;p]d:i.normaldefault[];
        d:$[(ty:type p)in 10 -11 99h;
@@ -46,7 +46,7 @@ i.updparam:{[t;p;typ]
            p~(::);d;
 	   '`$"p must be passed the identity `(::)`, a filepath to a parameter flatfile",
               " or a dictionary with appropriate key/value pairs"];
-	   d,enlist[`tf]!enlist 1~checkimport[]}[t;p];
+	   d,enlist[`tf]!enlist 1~checkimport[0]}[t;p];
       typ=`tseries;
       '`$"This will need to be added once the time-series recipe is in place";
     '`$"Incorrect input type"]}
@@ -93,7 +93,7 @@ i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
 /* fnm  = name of the base representation of the function to be applied (reg/multi/bin)
 /. r    > score for the model based on the predictions on test data
 i.scorepred:{[data;bmn;mdl;scf;fnm]
-  pred:$[bmn in i.keraslist;
+  pred:$[bmn in i.nnlist;
          // Formatting of first param is a result of previous implementation choices
          get[".automl.",fnm,"predict"][(0n;(data 2;0n));mdl];
          mdl[`:predict][data 2]`];
@@ -112,6 +112,8 @@ i.savemdl:{[bmn;bmo;mdls;nms]
       (joblib[`:dump][bmo;fname,"/",string[bmn]];-1"Saving down ",string[bmn]," model to ",mo);
     (`keras=?[mdls;enlist(=;`model;bmn,());();`lib])0;
       (bmo[`:save][fname,"/",string[bmn],".h5"];-1"Saving down ",string[bmn]," model to ",mo);
+    (`pytorch=?[mdls;enlist(=;`model;bmn,());();`lib])0;
+      (torch[`:save][bmo;fname,"/",string[bmn]];-1"Saving down ",string[bmn]," model to ",mo);
     -1"Saving of non keras/sklearn models types is not currently supported"];
   }
 
@@ -142,11 +144,13 @@ i.updmodels:{[mdls;tgt]
     -1"No longer running neural nets or svms\n";
     select from mdls where(lib<>`keras),not fnc in`neural_network`svm];mdls]}
 
-// These are a list of models which are deterministic and thus which do not need to be grid-searched
-// at present this should include the Keras models as a sufficient tuning method
-// has yet to be implemented
-if[1~checkimport[];i.keraslist:`null];
-i.excludelist:i.keraslist,`GaussianNB`LinearRegression;
+// The following lines define all the models that should not undergo a grid search at this time
+// this may be a result of the models being deterministic or in the case of PyTorch and Keras adequate
+// structures still to be added to create a method of hyperparameter searching
+if[1~checkimport[0];i.keraslist:`null];
+if[1~checkimport[1];i.torchlist:`null];
+i.nnlist:i.keraslist,i.torchlist;
+i.excludelist:i.nnlist,`GaussianNB`LinearRegression;
 
 // Dictionary with mappings for console printing to reduce clutter in .automl.runexample
 i.runout:`col`pre`sig`slct`tot`ex`gs`sco`cnf`save!
