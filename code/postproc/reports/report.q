@@ -17,7 +17,7 @@ post.report:{[dict;dt;fname;ptype]
  f:title[pdf;775;0;"kdb+/q AutoML model generated report"];
 
  font[pdf;"Helvetica";11];
- fline1:"This report outlines the results for a ",ssr[string ptype;"_";" "]," problem achieved through the running ";
+ fline1:"This report outlines the results for a ",ssr[$[ptype=`class;"Classification";string ptype];"_";" "]," problem achieved through the running ";
  f:cell[pdf;f;40;fline1];
 
  fline2:"of kdb+/q autoML. This run started at ",string[dt`stdate]," at ",string[dt`sttime],".";

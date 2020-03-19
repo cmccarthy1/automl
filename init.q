@@ -23,7 +23,11 @@ $[0~checkimport[1];
    loadfile`:code/models/lib_support/torch.p];
   [-1"Requirements for deep PyTorch models not satisfied, these will not be supported.";]]
 loadfile`:code/postproc/plots.q
-loadfile`:code/postproc/report.q
+loadfile`:code/postproc/reports/report.q
 loadfile`:code/postproc/utils.q
 loadfile`:code/utils.q
 loadfile`:code/aml.q
+$[0~checkimport[2];
+ [loadfile`:code/postproc/reports/latex.p;
+  loadfile`:code/postproc/reports/latex.q];
+ [-1"Requirements for latex report generation are not satisfied, report will use reportlab.";]]

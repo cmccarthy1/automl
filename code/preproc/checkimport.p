@@ -11,5 +11,10 @@ p)def< checkimport(x):
       import torch;return(0)
     except:
       return(1)
+  elif(x==2):
+    try:
+      import pylatex;return(0)
+    except:
+      return(1)
   else:
     return(0)

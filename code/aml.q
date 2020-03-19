@@ -66,13 +66,21 @@ run:{[tb;tgt;ftype;ptype;p]
   // Print confusion matrix for classification problems
   if[ptype~`class;
     -1 i.runout[`cnf];show .ml.conftab[pred;tts`ytest];
-    if[dict[`saveopt]in 1 2;post.i.displayCM[value .ml.confmat[pred;tts`ytest];`$string asc distinct pred,tts`ytest;"";();bm 1;spaths]]];
+    if[dict[`saveopt]in 1 2;
+      post.i.displayCM[value .ml.confmat[pred;tts`ytest];`$string asc distinct pred,tts`ytest;"";();bm 1;spaths]]];
   // Save down a pdf report summarizing the running of the pipeline
   if[2=dict`saveopt;
     -1 i.runout[`save],i.ssrsv[spaths[1]`report];
     report_param:post.i.reportdict[ctb;bm;tb;path;(prms 1;score;dict`xv;dict`gs);spaths;dscrb];
-    if[ptype=`class;ptype:$[2<count distinct tgt;`multi_classification;`binary_classification]];
-    post.report[report_param;dtdict;spaths[0]`report;ptype]];
+    // Attempt to default to latex generation, if not installed or if generation fails use reportlab
+    $[0~checkimport[2];
+      // error trap generation of latex models
+      @[{latexgen . x};
+        (report_param,enlist[`best_model]!enlist bm 1;dtdict;spaths[0]`report;ptype);
+        // Highlight failure and run default report generation
+        {[params;err] -1"The following error occurred when attempting to run latex report generation";-1 err,"\n";
+          post.report . params;}[(report_param;dtdict;spaths[0]`report;ptype)]];
+      post.report[report_param;dtdict;spaths[0]`report;ptype]]];
   if[dict[`saveopt]in 1 2;
     // Extract the Python library from which the best model was derived, used for model rerun
     pylib:?[mdls;enlist(=;`model;enlist bm 1);();`lib];

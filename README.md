@@ -38,7 +38,13 @@ or via conda:
 conda install --file requirements.txt
 ```
 
-**Note**: Tensorflow and Keras are required for the application of the deep learning models within this platform. However given the large memory requirements of tensorflow the platform will operate without tensorflow by not running the deep learning models. In order to access the full functionality of the interface keras and tensorflow will need to be installed separately by a user.
+**Note**: 
+
+The following are optional additions packages which a user can install in order to allow for a larger range of functionality but which are **not** necessarily required
+
+1. Tensorflow and Keras are required for the application of the some default deep learning models within this platform. Given the large memory requirements of tensorflow the platform will operate without tensorflow by not running the deep learning models. Installing Tensorflow and Keras will allow these models and custom keras models to be run.
+2. PyTorch from v0.2.0 it is possible for a user to define their own PyTorch models. PyTorch is however not a necessary requirement for any other functionality within the framework and thus is not explicitly required.
+3. From v0.2.0 the default report generation mechanism will use Latex through pylatex. This should be installed separately by a user as it also requires the installation of MikTex and modifications to a users PATH. Failure of this report generation or the lack of the appropriate Python package will result in the report generation defaulting to the v0.1.0 report generation method `reportlab` 
 
 ## Installation
 
