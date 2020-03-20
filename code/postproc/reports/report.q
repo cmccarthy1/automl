@@ -8,7 +8,7 @@ np:.p.import`numpy
 /* dict  = dictionary with needed with values for the pdf
 /* dt    = dictionary denoting the start and end time of an automl run
 /* fname = This is a file path which denotes a save location for the generated report.
-/. r     > a pdf report saved to disk
+/. r     > returns a null with an associated pdf report saved to disk
 post.report:{[dict;dt;fname;ptype]
 
  pdf:canvas[`:Canvas][fname,"q_automl_report_",ssr[sv["_";string(first[key[dict`dict]];dt`sttime)],".pdf";":";"."]];
@@ -17,7 +17,7 @@ post.report:{[dict;dt;fname;ptype]
  f:title[pdf;775;0;"kdb+/q AutoML model generated report"];
 
  font[pdf;"Helvetica";11];
- fline1:"This report outlines the results for a ",ssr[string ptype;"_";" "]," problem achieved through the running ";
+ fline1:"This report outlines the results for a ",ssr[$[ptype=`class;"Classification";string ptype];"_";" "]," problem achieved through the running ";
  f:cell[pdf;f;40;fline1];
 
  fline2:"of kdb+/q autoML. This run started at ",string[dt`stdate]," at ",string[dt`sttime],".";

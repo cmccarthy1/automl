@@ -15,7 +15,7 @@ proc.i.files:`class`reg`score!("classmodels.txt";"regmodels.txt";"scoring.txt")
 /* fnc = function name if keras or module from which model is derived for keras
 /. r   > the appropriate function or projection in the case of sklearn
 proc.i.mdlfunc:{[lib;fnc;mdl]
-  $[`keras~lib;
+  $[lib in `keras`pytorch;
     // retrieve keras model from the .automl namespace eg '.automl.regfitscore'
     get` sv``automl,`fitscore;
     // construct the projection used for sklearn models eg '.p.import[`sklearn.svm][`:SVC]'
@@ -49,6 +49,7 @@ proc.i.extractdict:proc.i.edict["hyperparams.txt";"/code/models/";]
 
 // Extraction of an appropriately valued dictionary from a non complex flat file
 /* sn = name mapping to appropriate text file in, as a symbol
+/. r  > dictionary parsed from an appropriate flat file
 proc.i.txtparse:{[sn;fp]{key(!).("S=;")0:x}each(!).("S*";"|")0:hsym`$path,fp,proc.i.files sn}
 
 // Extract the appropriate ordering of output scores to allow the best model to be chosen
