@@ -65,6 +65,7 @@ run:{[tb;tgt;ftype;ptype;p]
   -1 i.runout[`sco],string[score],"\n";
   // Print confusion matrix for classification problems
   if[ptype~`class;
+    if[not type[pred]~type[tts`ytest];pred:`long$pred;tts[`ytest]:`long$tts[`ytest]];
     -1 i.runout[`cnf];show .ml.conftab[pred;tts`ytest];
     if[dict[`saveopt]in 1 2;post.i.displayCM[value .ml.confmat[pred;tts`ytest];`$string asc distinct pred,tts`ytest;"";();bm 1;spaths]]];
   // Save down a pdf report summarizing the running of the pipeline
@@ -76,9 +77,10 @@ run:{[tb;tgt;ftype;ptype;p]
   if[dict[`saveopt]in 1 2;
     // Extract the Python library from which the best model was derived, used for model rerun
     pylib:?[mdls;enlist(=;`model;enlist bm 1);();`lib];
+    mtyp:?[mdls;enlist(=;`model;enlist bm 1);();`typ];
     // additional metadata information to be saved to disk
     hp:$[b;enlist[`hyper_parameters]!enlist prms 1;()!()];
-    exmeta:`features`test_score`best_model`symencode`pylib!(feats;score;bm 1;encoding;pylib 0);
+    exmeta:`features`test_score`best_model`symencode`pylib`mtyp!(feats;score;bm 1;encoding;pylib 0;mtyp 0);
     metadict:dict,hp,exmeta;
     i.savemdl[bm 1;expmdl;mdls;spaths];
     i.savemeta[metadict;dtdict;spaths]];
@@ -120,7 +122,7 @@ new:{[t;dt;tm]
       if[trch:mdl in i.torchlist;model[`:eval][]];
       // If PyTorch/Keras model then use the defined prediction function
       $[bool|trch;
-        [fnm:neg[5]_string lower mdl;
+        [fnm:string metadata`mtyp;
          get[".automl.",fnm,"predict"][(0n;(data;0n));model]];
         model[`:predict;<]data]];
     '`$"The current model type you are attempting to apply is not currently supported"]
