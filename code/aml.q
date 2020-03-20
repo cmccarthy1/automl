@@ -44,7 +44,7 @@ run:{[tb;tgt;ftype;ptype;p]
   ytrn:tts`ytrain;ytst:tts`ytest;
   mdls:i.kerascheck[mdls;tts;tgt];
   // Check if Tensorflow/Keras not available for use, NN models removed
-  if[1~checkimport[];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
+  if[1~checkimport[0];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
   -1 i.runout`sig;-1 i.runout`slct;-1 i.runout[`tot],string[ctb:count cols tab];
   // Run all appropriate models on the training set
   // Set numpy random seed if multiple prcoesses
@@ -65,6 +65,7 @@ run:{[tb;tgt;ftype;ptype;p]
   -1 i.runout[`sco],string[score],"\n";
   // Print confusion matrix for classification problems
   if[ptype~`class;
+    if[not type[pred]~type[tts`ytest];pred:`long$pred;tts[`ytest]:`long$tts[`ytest]];
     -1 i.runout[`cnf];show .ml.conftab[pred;tts`ytest];
     if[dict[`saveopt]in 1 2;post.i.displayCM[value .ml.confmat[pred;tts`ytest];`$string asc distinct pred,tts`ytest;"";();bm 1;spaths]]];
   // Save down a pdf report summarizing the running of the pipeline
@@ -76,9 +77,10 @@ run:{[tb;tgt;ftype;ptype;p]
   if[dict[`saveopt]in 1 2;
     // Extract the Python library from which the best model was derived, used for model rerun
     pylib:?[mdls;enlist(=;`model;enlist bm 1);();`lib];
+    mtyp:?[mdls;enlist(=;`model;enlist bm 1);();`typ];
     // additional metadata information to be saved to disk
     hp:$[b;enlist[`hyper_parameters]!enlist prms 1;()!()];
-    exmeta:`features`test_score`best_model`symencode`pylib!(feats;score;bm 1;encoding;pylib 0);
+    exmeta:`features`test_score`best_model`symencode`pylib`mtyp!(feats;score;bm 1;encoding;pylib 0;mtyp 0);
     metadict:dict,hp,exmeta;
     i.savemdl[bm 1;expmdl;mdls;spaths];
     i.savemeta[metadict;dtdict;spaths]];
@@ -99,7 +101,9 @@ new:{[t;dt;tm]
   fp:dt_tm[0],"/run_",dt_tm 1;
   // Relevant python functionality for loading of models
   skload:.p.import[`joblib][`:load];
-  if[0~checkimport[];krload:.p.import[`keras.models][`:load_model]];
+  // If possible to do so load appropriate Keras & PyTorch functionality 
+  if[0~checkimport[0];krload:.p.import[`keras.models][`:load_model]];
+  if[0~checkimport[1];trchload:torch[`:load]];
   // Retrieve the metadata from a file path based on the run date/time
   metadata:i.getmeta[i.ssrwin[path,"/outputs/",fp,"/config/metadata"]];
   typ:metadata`typ;
@@ -109,14 +113,18 @@ new:{[t;dt;tm]
     i.freshproc[t;metadata];
     '`$"This form of operation is not currently supported"
     ];
-  $[(mp:metadata[`pylib])in `sklearn`keras;
+  $[(mp:metadata[`pylib])in `sklearn`keras`pytorch;
     // Apply the relevant saved down model to new data
     [fp_upd:i.ssrwin[path,"/outputs/",fp,"/models/",string metadata[`best_model]];
-     if[bool:(mdl:metadata[`best_model])in i.keraslist;fp_upd,:".h5"];
-     model:$[mp~`sklearn;skload;krload]fp_upd;
-     $[bool;
-       [fnm:neg[5]_string lower mdl;get[".automl.",fnm,"predict"][(0n;(data;0n));model]];
-       model[`:predict;<]data]];
+      if[bool:(mdl:metadata[`best_model])in i.keraslist;fp_upd,:".h5"];
+      // Load and initialize the model as appropriate to the problem being solved
+      model:$[mp~`sklearn;skload;mp~`keras;krload;trchload]fp_upd;
+      if[trch:mdl in i.torchlist;model[`:eval][]];
+      // If PyTorch/Keras model then use the defined prediction function
+      $[bool|trch;
+        [fnm:string metadata`mtyp;
+         get[".automl.",fnm,"predict"][(0n;(data;0n));model]];
+        model[`:predict;<]data]];
     '`$"The current model type you are attempting to apply is not currently supported"]
   }
 

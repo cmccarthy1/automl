@@ -14,9 +14,14 @@ loadfile`:code/preproc/featextract.q
 loadfile`:code/proc/utils.q
 loadfile`:code/proc/proc.q
 loadfile`:code/proc/xvgs.q
-$[0~checkimport[];
-  loadfile`:code/models/kerasmdls.q;
+$[0~checkimport[0];
+  [loadfile`:code/models/lib_support/keras.q;
+   loadfile`:code/models/lib_support/keras.p];
   [-1"Requirements for deep learning models not available, these will not be run";]]
+$[0~checkimport[1];
+  [loadfile`:code/models/lib_support/torch.q;
+   loadfile`:code/models/lib_support/torch.p];
+  [-1"Requirements for deep PyTorch models not satisfied, these will not be supported.";]]
 loadfile`:code/postproc/plots.q
 loadfile`:code/postproc/report.q
 loadfile`:code/postproc/utils.q
