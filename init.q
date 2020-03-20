@@ -17,7 +17,7 @@ loadfile`:code/proc/xvgs.q
 $[0~checkimport[0];
   [loadfile`:code/models/lib_support/keras.q;
    loadfile`:code/models/lib_support/keras.p];
-  [-1"Requirements for deep learning models not available, these will not be run";]]
+  [-1"Requirements for deep learning models not available, these will not be supported.";]]
 $[0~checkimport[1];
   [loadfile`:code/models/lib_support/torch.q;
    loadfile`:code/models/lib_support/torch.p];
