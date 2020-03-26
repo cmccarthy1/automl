@@ -42,11 +42,11 @@ conda install --file requirements.txt
 
 The following may be required for windows users within a conda environment:
 
-- The following error may occur as a result of running matplotlib within a conda environment:
+- Users may incur the below error as a result of running matplotlib within a conda environment:
 	```
 	This application failed to start because it could not find or load the Qt platform plugin "windows" in "". Reinstalling the application may fix this problem.
 	```
-	To avoid this error occurring, Windows users should add the following to their environment variables:
+	To avoid this error occurring, windows users should add the following to their environment variables:
 	```
 	'QT_QPA_PLATFORM_PLUGIN_PATH' = '/path/to/Anaconda3/Library/plugins/platforms'
 	```
