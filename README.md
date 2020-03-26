@@ -38,16 +38,22 @@ or via conda:
 conda install --file requirements.txt
 ```
 
-**Note**: Tensorflow and Keras are required for the application of the deep learning models within this platform. However given the large memory requirements of tensorflow the platform will operate without tensorflow by not running the deep learning models. In order to access the full functionality of the interface keras and tensorflow will need to be installed separately.
+**Note**:
 
-**Note**: Windows users with a conda environment may incur the following error as a result of running matplotlib within a conda environment:
-```
-This application failed to start because it could not find or load the Qt platform plugin "windows" in "". Reinstalling the application may fix this problem.
-```
-To avoid this error occurring, Windows users should add the following to their environment variables:
-```
-'QT_QPA_PLATFORM_PLUGIN_PATH' = '/path/to/Anaconda3/Library/plugins/platforms'
-```
+The following may be required for windows users within a conda environment:
+
+- The following error may occur as a result of running matplotlib within a conda environment:
+	```
+	This application failed to start because it could not find or load the Qt platform plugin "windows" in "". Reinstalling the application may fix this problem.
+	```
+	To avoid this error occurring, Windows users should add the following to their environment variables:
+	```
+	'QT_QPA_PLATFORM_PLUGIN_PATH' = '/path/to/Anaconda3/Library/plugins/platforms'
+	```
+
+The following are optional additional packages which users can install to allow for a larger range of functionality, but which are not necessarily required:
+
+- Tensorflow and Keras are required for the application of the some default deep learning models within this platform. Given the large memory requirements of Tensorflow the platform will operate without Tensorflow by not running the deep learning models. Installing Tensorflow and Keras will allow these models, along with custom Keras models, to be run.
 
 ## Installation
 
