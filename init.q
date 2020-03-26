@@ -16,7 +16,7 @@ loadfile`:code/proc/proc.q
 loadfile`:code/proc/xvgs.q
 $[0~checkimport[];
   loadfile`:code/models/kerasmdls.q;
-  [-1"Requirements for deep learning models not available, these will not be supported.";]]
+  [-1"Requirements for Keras models not satisfied. Keras models will be excluded from model evaluation.";]]
 loadfile`:code/postproc/plots.q
 loadfile`:code/postproc/report.q
 loadfile`:code/postproc/utils.q
