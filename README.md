@@ -40,6 +40,15 @@ conda install --file requirements.txt
 
 **Note**: Tensorflow and Keras are required for the application of the deep learning models within this platform. However given the large memory requirements of tensorflow the platform will operate without tensorflow by not running the deep learning models. In order to access the full functionality of the interface keras and tensorflow will need to be installed separately.
 
+**Note**: Windows users with a conda environment may incur the following error as a result of running matplotlib within a conda environment:
+```
+This application failed to start because it could not find or load the Qt platform plugin "windows" in "". Reinstalling the application may fix this problem.
+```
+To avoid this error occurring, Windows users should add the following to their environment variables:
+```
+'QT_QPA_PLATFORM_PLUGIN_PATH' = '/path/to/Anaconda3/Library/plugins/platforms'
+```
+
 ## Installation
 
 Place the library file in `$QHOME` and load into a q instance using `automl/automl.q`
