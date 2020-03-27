@@ -43,13 +43,13 @@ def python_latex(dict,dt,paths,ptype,dscrb,score,grid,exclude):
   geometry_options = {"margin": "2.5cm"}
   filepath = paths['fpath']
   doc = Document(filepath, geometry_options=geometry_options)
-  doc.preamble.append(Command('title', 'kdb+/q Automate Machine Learning Generated Report'))
+  doc.preamble.append(Command('title', 'kdb+/q Automated Machine Learning - Generated Report'))
   doc.preamble.append(Command('author', 'KxSystems'))
   doc.preamble.append(Command('date', 'Date: ' + dt['stdate']))
   doc.append(NoEscape(r'\maketitle'))
 
   with doc.create(Section('Introduction')):
-    doc.append('This report outlines the results achieved through the running') 
+    doc.append('This report outlines the results achieved through the running ') 
     doc.append('of the kdb+/q automated machine learning framework.\n')
     doc.append('This run started on ' + dt['stdate'] + ' at ' + dt['sttime'])
 
@@ -69,7 +69,7 @@ def python_latex(dict,dt,paths,ptype,dscrb,score,grid,exclude):
       doc.append(dict['xv'][1] + '-fold cross validation was performed on the training set using ' + dict['xv'][0] + '.\n')
     createImage(doc,paths['path'] + '/code/postproc/images/train_test_validate.png','This image shows a general representation of how the data is split into training, testing and validation sets')
     doc.append('The total time that was required to complete selection of the best model based on the training set was ' + dict['xvtime'])
-    doc.append('\n\nThe metric that is being used for scoring and optimising the models was ' + dict['metric'] + '\n\n')
+    doc.append('\n\nThe metric that is being used for scoring and optimizing the models was ' + dict['metric'] + '\n\n')
     doc.append('The following table outlines the scores achieved for each of the models tested \n')
     createTable(doc,score,'cc')
     createImage(doc,''.join(dict['impact']),'This is the feature impact for a number of the most significant features as determined on the training set')
@@ -86,7 +86,7 @@ def python_latex(dict,dt,paths,ptype,dscrb,score,grid,exclude):
         doc.append('The grid search was completed using ' + dict['gscfg'][0] + ' with a split of ' + dict['gscfg'][1] + ' of training data used for validation.\n')
       else:
         doc.append('A ' + dict['gscfg'][1] + '-fold grid search was performed on the training set to find the best model using ' + dict['gscfg'][0] + '.\n')
-      doc.append('The following are the hyperparameters which have been deemed optimal for the model.\n')
+      doc.append('The following are the hyper parameters which have been deemed optimal for the model.\n')
       createTable(doc,grid,'cc')
       doc.append('The score for the best model fit on the entire training set and scored on the testing set was = ' + dict['score'])
   
