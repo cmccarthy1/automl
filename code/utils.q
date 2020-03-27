@@ -1,4 +1,4 @@
-\a .automl
+\d .automl
 
 // The following aspects of the naming parameter naming are used throughout this file
 /* t   = data as table
