@@ -38,13 +38,24 @@ or via conda:
 conda install --file requirements.txt
 ```
 
-**Note**: 
+**Note**:
 
-The following are optional additions packages which a user can install in order to allow for a larger range of functionality but which are **not** necessarily required
+The following may be required for windows users within a conda environment:
+
+1. Users may incur the below error as a result of running matplotlib within a conda environment:
+	```
+	This application failed to start because it could not find or load the Qt platform plugin "windows" in "". Reinstalling the application may fix this problem.
+	```
+	To avoid this error occurring, windows users should add the following to their environment variables:
+	```
+	'QT_QPA_PLATFORM_PLUGIN_PATH' = '/path/to/Anaconda3/Library/plugins/platforms'
+	```
+
+The following are optional additional packages which users can install to allow for a larger range of functionality, but which are not necessarily required:
 
 1. Tensorflow and Keras are required for the application of the some default deep learning models within this platform. Given the large memory requirements of tensorflow the platform will operate without tensorflow by not running the deep learning models. Installing Tensorflow and Keras will allow these models and custom keras models to be run.
 2. PyTorch from v0.2.0 it is possible for a user to define their own PyTorch models. PyTorch is however not a necessary requirement for any other functionality within the framework and thus is not explicitly required.
-3. From v0.2.0 the default report generation mechanism will use Latex through pylatex. This should be installed separately by a user as it also requires the installation of MikTex and modifications to a users PATH. Failure of this report generation or the lack of the appropriate Python package will result in the report generation defaulting to the v0.1.0 report generation method `reportlab` 
+3. From v0.2.0 the default report generation mechanism will use Latex through pylatex. This should be installed separately by a user as it also requires the installation of MikTex and modifications to a users PATH. Failure of this report generation or the lack of the appropriate Python package will result in the report generation defaulting to the v0.1.0 report generation method `reportlab`
 
 ## Installation
 
