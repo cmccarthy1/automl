@@ -51,3 +51,5 @@ i.inftyp:{
   typ:("5";"8";"9";"6";"7";"12";"16";"17";"18");
   rep:(0N -32767 32767;0N -0w 0w;0n -0w 0w),6#enlist 0N -0W 0W;
   typ!rep}
+
+dropconstant:{$[1<count x;y[x];x]}[;.ml.dropconstant]
