@@ -17,7 +17,7 @@ prep.freshcreate:{[t;p]
   t:"f"$prep.i.nullencode[value .ml.fresh.createfeatures[t;agg;cols2use;prm];med];
   fe_end:.z.T-fe_start;
   t:.ml.infreplace t;
-  (0^.ml.dropconstant t;fe_end)}
+  `preptab`preptime!(0^.ml.dropconstant t;fe_end)}
 
 
 // In all cases feature significance currently returns the top 25% of important features
@@ -43,5 +43,5 @@ prep.normalcreate:{[t;p]
   // Apply the transform of time specific columns as appropriate
   if[0<count tcols;tb^:.ml.timesplit[tcols#t;::]];
   fe_end:.z.T-fe_start;
-  (tb;fe_end)}
+  `preptab`preptime!(tb;fe_end)}
 

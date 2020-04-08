@@ -58,7 +58,7 @@ def python_latex(dict,dt,paths,ptype,dscrb,score,grid,exclude):
     createTable(doc,dscrb,'cccccccc')
 
   with doc.create(Section('Pre-processing Breakdown')):
-    doc.append('Following the extraction of features a total of ' + dict['feats'] + ' features were produced\n')
+    doc.append('Following the extraction of features a total of ' + dict['cnt_feats'] + ' features were produced\n')
     doc.append('Feature extraction took a total time of ' + dict['feat_time'] + '.\n')
 
   with doc.create(Section('Initial Scores')):
@@ -68,33 +68,33 @@ def python_latex(dict,dt,paths,ptype,dscrb,score,grid,exclude):
     else:
       doc.append(dict['xv'][1] + '-fold cross validation was performed on the training set using ' + dict['xv'][0] + '.\n')
     createImage(doc,paths['path'] + '/code/postproc/images/train_test_validate.png','This image shows a general representation of how the data is split into training, testing and validation sets')
-    doc.append('The total time that was required to complete selection of the best model based on the training set was ' + dict['xvtime'])
+    doc.append('The total time that was required to complete selection of the best model based on the training set was ' + dict['xval_time'])
     doc.append('\n\nThe metric that is being used for scoring and optimizing the models was ' + dict['metric'] + '\n\n')
     doc.append('The following table outlines the scores achieved for each of the models tested \n')
     createTable(doc,score,'cc')
-    createImage(doc,''.join(dict['impact']),'This is the feature impact for a number of the most significant features as determined on the training set')
+    createImage(doc,''.join(dict['impact_plot']),'This is the feature impact for a number of the most significant features as determined on the training set')
   
   with doc.create(Section('Model selection summary')):
-    doc.append('Best scoring model = ' + dict['best_model'] + '\n\n')
+    doc.append('Best scoring model = ' + dict['best_scoring_name'] + '\n\n')
     doc.append('The score on the validation set for this model was = ' + dict['holdout'] + '\n\n')
-    doc.append('The total time to complete the running of this model on the validation set was: ' + dict['bmtime'])
+    doc.append('The total time to complete the running of this model on the validation set was: ' + dict['val_time'])
 
   # If appropriate return the output from a completed grid search
-  if(not dict['best_model'] in exclude):
-    with doc.create(Section('Grid search for a ' + dict['best_model'] + ' model.')):
-      if(dict['gscfg'][0] in ['.ml.gs.mcsplit','.ml.gs.pcsplit']):
-        doc.append('The grid search was completed using ' + dict['gscfg'][0] + ' with a split of ' + dict['gscfg'][1] + ' of training data used for validation.\n')
+  if(not dict['best_scoring_name'] in exclude):
+    with doc.create(Section('Grid search for a ' + dict['best_scoring_name'] + ' model.')):
+      if(dict['gs'][0] in ['.ml.gs.mcsplit','.ml.gs.pcsplit']):
+        doc.append('The grid search was completed using ' + dict['gs'][0] + ' with a split of ' + dict['gs'][1] + ' of training data used for validation.\n')
       else:
-        doc.append('A ' + dict['gscfg'][1] + '-fold grid search was performed on the training set to find the best model using ' + dict['gscfg'][0] + '.\n')
+        doc.append('A ' + dict['gs'][1] + '-fold grid search was performed on the training set to find the best model using ' + dict['gs'][0] + '.\n')
       doc.append('The following are the hyper parameters which have been deemed optimal for the model.\n')
       createTable(doc,grid,'cc')
-      doc.append('The score for the best model fit on the entire training set and scored on the testing set was = ' + dict['score'])
+      doc.append('The score for the best model fit on the entire training set and scored on the testing set was = ' + dict['test_score'])
   
   # If the problem is classification then display the appropriate confusion matrix
   if(ptype=="class"):
     with doc.create(Section('Classification summary')):
       doc.append('The following displays the performance of the classification model on the testing set\n\n')
-      createImage(doc,''.join(dict['confmat']),'This is a confusion matrix produced for predictions made on the testing set')
+      createImage(doc,''.join(dict['conf_plot']),'This is a confusion matrix produced for predictions made on the testing set')
 
   # Generate the pdf using the pdflatex compiler (this compiler flag may change depending on final choice of install instructions)
   doc.generate_pdf(clean_tex=False, compiler='pdflatex')

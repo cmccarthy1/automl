@@ -50,4 +50,6 @@ proc.runmodels:{[data;tgt;mdls;cnms;p;dt;fpath]
   if[2=p[`saveopt];post.featureimpact[bs;(bm;mdls);value tt;cnms;scf;dt;fpath;p]];
   // Outputs from run models. These are used in the generation of a pdf report
   // or are used within later sections of the pipeline.
-  (s1;bs;s2;xv_tend;bm_tend;scf;bm)}
+  key_vals:`model_scores`best_scoring_name`holdout`xval_time`val_time`metric`best_model;
+  out_vals:(s1;bs;s2;xv_tend;bm_tend;scf;bm);
+  key_vals!out_vals}

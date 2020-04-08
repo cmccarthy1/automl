@@ -27,17 +27,22 @@ run:{[tb;tgt;ftype;ptype;p]
   // This provides an encoding map which can be used in reruns of automl even
   // if the data is no longer in the appropriate format for symbol encoding
   encoding:prep.i.symencode[tb;10;1;dict;::];
-  prep:preproc[tb;tgt;ftype;dict];tb:prep 0;dscrb:prep 1;-1 i.runout`pre;
+  // Preprocess the dataset and provide insights into the initial data structure
+  prep:preproc[tb;tgt;ftype;dict];
+  tb:prep`table;dscrb:prep`describe;
+  -1 i.runout`pre;
   tb:$[ftype=`fresh;prep.freshcreate[tb;dict];
        ftype=`normal;prep.normalcreate[tb;dict];
        '`$"Feature extraction type is not currently supported"];
-  feats:get[dict[`sigfeats]][tb 0;tgt];
+  // assign the returned values from the feature extraction phase
+  feat_tab:tb`preptab;feat_time:tb`preptime;
+  sigfeats:get[dict[`sigfeats]][feat_tab;tgt];
   // Encode target data if target is a symbol vector
   if[11h~type tgt;tgt:.ml.labelencode tgt];
   // Apply the appropriate train/test split to the data
   // the following currently runs differently if the parameters are defined
   // in a file or through the more traditional dictionary/(::) format
-  tts:($[-11h=type dict`tts;get;]dict[`tts])[;tgt;dict`sz]tab:feats#tb 0;
+  tts:($[-11h=type dict`tts;get;]dict[`tts])[;tgt;dict`sz]tab:sigfeats#feat_tab;
   // Centralizing the table to matrix conversion makes it easier to avoid
   // repetition of this task which can be computationally expensive
   xtrn:flip value flip tts`xtrain;xtst:flip value flip tts`xtest;
@@ -46,52 +51,43 @@ run:{[tb;tgt;ftype;ptype;p]
   // Check if Tensorflow/Keras not available for use, NN models removed
   if[1~checkimport[0];mdls:?[mdls;enlist(<>;`lib;enlist `keras);0b;()]];
   -1 i.runout`sig;-1 i.runout`slct;-1 i.runout[`tot],string[ctb:count cols tab];
-  // Run all appropriate models on the training set
   // Set numpy random seed if multiple prcoesses
   if[0<abs[system "s"];.p.import[`numpy][`:random.seed][dict`seed]];
+  // Run the initial model selection process extracting appropriate information
   bm:proc.runmodels[xtrn;ytrn;mdls;cols tts`xtrain;dict;dtdict;spaths];
+  // extract information to be used in this function
+  mdl_name:bm`best_scoring_name;best_mdl:bm`best_model;
   fn:i.scfn[dict;mdls];
   // Do not run grid search on deterministic models returning score on the test set and model
-  if[a:bm[1]in i.excludelist;
+  if[a:mdl_name in i.excludelist;
     data:(xtrn;ytrn;xtst;ytst);
-    funcnm:string first exec fnc from mdls where model=bm[1];
-    -1 i.runout`ex;r:i.scorepred[data;bm[1];expmdl:last bm;fn;funcnm];
-    score:r 0;pred:r 1];
+    funcnm:string first exec fnc from mdls where model=mdl_name;
+    -1 i.runout`ex;evals:i.scorepred[data;mdl_name;best_mdl;fn;funcnm];
+    score:evals`score;pred:evals`preds];
   // Run grid search on the best model for the parameter sets defined in hyperparams.txt
   if[b:not a;
     -1 i.runout`gs;
-    prms:proc.gs.psearch[xtrn;ytrn;xtst;ytst;bm 1;dict;ptype;mdls];
-    score:prms 0;expmdl:prms 2;pred:prms 3];
+    prms:proc.gs.psearch[xtrn;ytrn;xtst;ytst;mdl_name;dict;ptype;mdls];
+    score:prms`score;best_mdl:prms`best_model;pred:prms`preds];
   -1 i.runout[`sco],string[score],"\n";
   // Print confusion matrix for classification problems
   if[ptype~`class;
     if[not type[pred]~type[tts`ytest];pred:`long$pred;tts[`ytest]:`long$tts[`ytest]];
     -1 i.runout[`cnf];show .ml.conftab[pred;tts`ytest];
     if[dict[`saveopt]in 1 2;
-      post.i.displayCM[value .ml.confmat[pred;tts`ytest];`$string asc distinct pred,tts`ytest;"";();bm 1;spaths]]];
-  // Save down a pdf report summarizing the running of the pipeline
-  if[2=dict`saveopt;
-    -1 i.runout[`save],i.ssrsv[spaths[1]`report];
-    report_param:post.i.reportdict[ctb;bm;tb;path;(prms 1;score;dict`xv;dict`gs);spaths;dscrb];
-    // Attempt to default to latex generation, if not installed or if generation fails use reportlab
-    $[0~checkimport[2];
-      // error trap generation of latex models
-      @[{latexgen . x};
-        (report_param,enlist[`best_model]!enlist bm 1;dtdict;spaths[0]`report;ptype);
-        // Highlight failure and run default report generation
-        {[params;err] -1"The following error occurred when attempting to run latex report generation";-1 err,"\n";
-          post.report . params;}[(report_param;dtdict;spaths[0]`report;ptype)]];
-      post.report[report_param;dtdict;spaths[0]`report;ptype]]];
-  if[dict[`saveopt]in 1 2;
-    // Extract the Python library from which the best model was derived, used for model rerun
-    pylib:?[mdls;enlist(=;`model;enlist bm 1);();`lib];
-    mtyp:?[mdls;enlist(=;`model;enlist bm 1);();`typ];
-    // additional metadata information to be saved to disk
-    hp:$[b;enlist[`hyper_parameters]!enlist prms 1;()!()];
-    exmeta:`features`test_score`best_model`symencode`pylib`mtyp!(feats;score;bm 1;encoding;pylib 0;mtyp 0);
-    metadict:dict,hp,exmeta;
-    i.savemdl[bm 1;expmdl;mdls;spaths];
-    i.savemeta[metadict;dtdict;spaths]];
+      conf_mat:value .ml.confmat[pred;tts`ytest];
+      post.i.displayCM[conf_mat;`$string asc distinct pred,tts`ytest;"";();mdl_name;spaths]
+      ]
+    ];
+  / Set up required information for saving and save as appropriate
+  hp:$[b;enlist[`hyper_params]!enlist prms`hyper_params;()!()];
+  exmeta_keys:`best_scoring_name`cnt_feats`features`test_score`symencode`feat_time`describe;
+  exmeta_vals:(mdl_name;ctb;sigfeats;score;encoding;feat_time;dscrb);
+  exmeta:exmeta_keys!exmeta_vals;
+  dict:exmeta,hp,dict;
+  report_param:post.i.reportdict[dict;bm;spaths];
+  if[dict[`saveopt] = 2  ;post.save_report[report_param;spaths;ptype;dtdict]];
+  if[dict[`saveopt]in 1 2;post.save_info[mdls;dict;mdl_name;best_mdl;spaths;dtdict]];
   // return (date;time) for .automl.new
   value dtdict
   }
@@ -123,8 +119,8 @@ new:{[t;dt;tm]
     ];
   $[(mp:metadata[`pylib])in `sklearn`keras`pytorch;
     // Apply the relevant saved down model to new data
-    [fp_upd:i.ssrwin[path,"/outputs/",fp,"/models/",string metadata[`best_model]];
-      if[bool:(mdl:metadata[`best_model])in i.keraslist;fp_upd,:".h5"];
+    [fp_upd:i.ssrwin[path,"/outputs/",fp,"/models/",string metadata[`best_scoring_name]];
+      if[bool:(mdl:metadata[`best_scoring_name])in i.keraslist;fp_upd,:".h5"];
       // Load and initialize the model as appropriate to the problem being solved
       model:$[mp~`sklearn;skload;mp~`keras;krload;trchload]fp_upd;
       if[trch:mdl in i.torchlist;model[`:eval][]];

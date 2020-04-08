@@ -91,13 +91,13 @@ i.normaldefault:{`xv`gs`funcs`prf`scf`seed`saveopt`hld`tts`sz`sigfeats!
 /* bmn  = best model name (symbol)
 /* scf  = scoring function which determines best model
 /* fnm  = name of the base representation of the function to be applied (reg/multi/bin)
-/. r    > score for the model based on the predictions on test data
+/. r    > score for the model based on the predictions on test data and predictions
 i.scorepred:{[data;bmn;mdl;scf;fnm]
   pred:$[bmn in i.nnlist;
          // Formatting of first param is a result of previous implementation choices
          get[".automl.",fnm,"predict"][(0n;(data 2;0n));mdl];
          mdl[`:predict][data 2]`];
-  (scf[;data 3]pred;pred)
+  `score`preds!(scf[;data 3]pred;pred)
   }
 
 /  save down the best model
@@ -197,7 +197,7 @@ i.normalproc:{[t;p]
   t:prep.i.symencode[t;10;0;p;p`symencode];
   t:prep.i.nullencode[t;med];
   t:.ml.infreplace[t];
-  t:first prep.normalcreate[t;p];
+  t:prep.normalcreate[t;p]`preptab;
   pfeat:p`features;
   if[not all ftc:pfeat in cols t;
      newcols:pfeat where not ftc;

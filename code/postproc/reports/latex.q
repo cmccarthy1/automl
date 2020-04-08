@@ -16,16 +16,16 @@ reportgen:.p.get[`python_latex]
 /.         a report will be saved to the file fname on successful execution
 latexgen:{[dict;dt;fname;ptype]
   // Create appropriately named file
-  fname,:"q_automl_report_",ssr[sv["_";string(first[key[dict`dict]];dt`sttime)];":";"."];
+  fname,:"q_automl_report_",ssr[sv["_";string(first[key[dict`model_scores]];dt`sttime)];":";"."];
   // convert the description table description to a pandas df
   descrip:(flip enlist[`column]!enlist key[k]),'value k:dict`describe;
   descrip:.ml.tab2df[descrip][`:round][3];
   // convert achieved scores to a pandas df
-  score:flip `model`score!flip key[d],'value d:dict`dict;
+  score:flip `model`score!flip key[d],'value d:dict`model_scores;
   score:.ml.tab2df[score][`:round][3];
   // convert grid search parameters to pandas df if appropriate
-  if[99h=type dict`gs;
-    grid:flip `param`val!flip key[vals],'value vals:dict`gs;
+  if[99h=type dict`hyper_params;
+    grid:flip `param`val!flip key[vals],'value vals:dict`hyper_params;
     grid:.ml.tab2df[grid][`:round][3];];
   dict:string each dict;
   dt:string each dt;
