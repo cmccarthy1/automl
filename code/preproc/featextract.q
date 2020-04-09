@@ -6,6 +6,15 @@
 /* p   = parameter dictionary passed as default or modified by user
 /* tgt = target data
 
+// Call feature creation procedures based on feature extraction type
+/* typ = feature creation type (`normal;`fresh)
+/. r   > dictionary `preptab`preptime!(tab with creation completed;time taken to complete creation)
+prep.create:{[t;p;typ]
+  $[typ=`fresh;prep.freshcreate[t;p];
+    typ=`normal;prep.normalcreate[t;p];
+    '`$"Feature extraction type is not currently supported"]
+  }
+
 // Create features using the FRESH algorithm
 /. r > table of fresh created features and the time taken to complete extraction as a mixed list
 prep.freshcreate:{[t;p]

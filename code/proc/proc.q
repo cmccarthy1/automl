@@ -53,3 +53,13 @@ proc.runmodels:{[data;tgt;mdls;cnms;p;dt;fpath]
   key_vals:`model_scores`best_scoring_name`holdout`xval_time`val_time`metric`best_model;
   out_vals:(s1;bs;s2;xv_tend;bm_tend;scf;bm);
   key_vals!out_vals}
+
+proc.optimize:{[data;dict;ptype;mdls;mdl_name;best_mdl]
+  fn:i.scfn[dict;mdls];
+  $[mdl_name in i.excludelist;
+    [funcnm:string first exec fnc from mdls where model=mdl_name;
+     -1 i.runout`ex;
+     i.scorepred[data;mdl_name;best_mdl;fn;funcnm],enlist[`best_model]!enlist best_mdl];
+    [-1 i.runout`gs;proc.gs.psearch[;;;;mdl_name;dict;ptype;mdls]. data]
+   ]
+  }

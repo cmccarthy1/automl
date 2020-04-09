@@ -31,9 +31,7 @@ run:{[tb;tgt;ftype;ptype;p]
   prep:preproc[tb;tgt;ftype;dict];
   tb:prep`table;dscrb:prep`describe;
   -1 i.runout`pre;
-  tb:$[ftype=`fresh;prep.freshcreate[tb;dict];
-       ftype=`normal;prep.normalcreate[tb;dict];
-       '`$"Feature extraction type is not currently supported"];
+  tb:prep.create[tb;dict;ftype];
   // assign the returned values from the feature extraction phase
   feat_tab:tb`preptab;feat_time:tb`preptime;
   sigfeats:get[dict[`sigfeats]][feat_tab;tgt];
@@ -57,30 +55,15 @@ run:{[tb;tgt;ftype;ptype;p]
   bm:proc.runmodels[xtrn;ytrn;mdls;cols tts`xtrain;dict;dtdict;spaths];
   // extract information to be used in this function
   mdl_name:bm`best_scoring_name;best_mdl:bm`best_model;
-  fn:i.scfn[dict;mdls];
-  // Do not run grid search on deterministic models returning score on the test set and model
-  if[a:mdl_name in i.excludelist;
-    data:(xtrn;ytrn;xtst;ytst);
-    funcnm:string first exec fnc from mdls where model=mdl_name;
-    -1 i.runout`ex;evals:i.scorepred[data;mdl_name;best_mdl;fn;funcnm];
-    score:evals`score;pred:evals`preds];
-  // Run grid search on the best model for the parameter sets defined in hyperparams.txt
-  if[b:not a;
-    -1 i.runout`gs;
-    prms:proc.gs.psearch[xtrn;ytrn;xtst;ytst;mdl_name;dict;ptype;mdls];
-    score:prms`score;best_mdl:prms`best_model;pred:prms`preds];
+  data:(xtrn;ytrn;xtst;ytst);
+  // Run optimization procedure or finalize models in case of deterministic models
+  optim:proc.optimize[data;dict;ptype;mdls;mdl_name;best_mdl];
+  best_mdl:optim`best_model;score:optim`score;pred:optim`preds;
   -1 i.runout[`sco],string[score],"\n";
   // Print confusion matrix for classification problems
-  if[ptype~`class;
-    if[not type[pred]~type[tts`ytest];pred:`long$pred;tts[`ytest]:`long$tts[`ytest]];
-    -1 i.runout[`cnf];show .ml.conftab[pred;tts`ytest];
-    if[dict[`saveopt]in 1 2;
-      conf_mat:value .ml.confmat[pred;tts`ytest];
-      post.i.displayCM[conf_mat;`$string asc distinct pred,tts`ytest;"";();mdl_name;spaths]
-      ]
-    ];
+  if[(ptype~`class);post.confmat[pred;ytst;mdl_name;spaths;dict]];
   / Set up required information for saving and save as appropriate
-  hp:$[b;enlist[`hyper_params]!enlist prms`hyper_params;()!()];
+  hp:$[mdl_name in i.excludelist;()!();enlist[`hyper_params]!enlist optim`hyper_params];
   exmeta_keys:`best_scoring_name`cnt_feats`features`test_score`symencode`feat_time`describe;
   exmeta_vals:(mdl_name;ctb;sigfeats;score;encoding;feat_time;dscrb);
   exmeta:exmeta_keys!exmeta_vals;
